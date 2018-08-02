@@ -1,8 +1,12 @@
 import logging
-
+import quandl
+import numpy
+from datetime import datetime
+from datetime import date
+from datetime import timedelta
+from dateutil import parser
 import api
 from model import DataObject
-import quandl
 
 _logger = logging.getLogger("data_parser")
 
@@ -103,3 +107,23 @@ def get_turnover(data=None):
             value = i.turnover
             turnover.append(value)
     return turnover
+
+
+# Required when data is in UNIX timestamp
+def timestamp_utc(timestamp=""):
+    current = date.fromtimestamp(float(timestamp))
+    # date1 = date(year=2018, month=1, day=15)
+    delta = timedelta(days=30)
+    old = current - delta
+    # test = date(year=2018, month=7, day=15)
+    # print(date2 < test < date1)
+
+
+# This only required for quandl data
+def date_format(date_array=[]):
+    result = []
+    x = numpy.datetime_as_string(date_array)
+    for i in x:
+        i = parser.parse(i).date()
+        result.append(i)
+    return result
