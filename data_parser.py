@@ -7,13 +7,14 @@ import quandl
 _logger = logging.getLogger("data_parser")
 
 
-def get_ohlc(symbol="NSE/CNX_NIFTY", start_date="03-07-1990", end_date=""):
+def get_date_ohlc(symbol="NSE/CNX_NIFTY", start_date="03-07-1990", end_date=""):
     data = get_data(symbol=symbol, start_date=start_date, end_date=end_date)
+    date = get_date(data)
     open = get_open(data)
     high = get_high(data)
     low = get_low(data)
     close = get_close(data)
-    ohlc = {"open": open, "high": high, "low": low, "close": close}
+    ohlc = {"date": date, "open": open, "high": high, "low": low, "close": close}
     return ohlc
 
 

@@ -147,7 +147,8 @@ def bollinger_bands(array=None, timeperiod=5, nbdevup=2, nbdevdn=2, matype=MA_Ty
     return result
 
 
-# # Pivot Points
+# Pivot Points
+# Monthly Pivot only
 # Pivot Point(PP) = (High+low+close)/3
 # R1 = 2*PP - low
 # S1 = 2*PP - high
@@ -155,15 +156,30 @@ def bollinger_bands(array=None, timeperiod=5, nbdevup=2, nbdevdn=2, matype=MA_Ty
 # S2 = PP - high-low
 # R3 = high + 2*(PP-low)
 # S3 = low - 2*(high-PP)
-def pivot(high=None, low=None, close=None, period=10):
-    result = []
-    if _check_array(high) | _check_array(low) | _check_array(close):
+def pivot(date=None, high=None, low=None, close=None, period=10):
+    result = {}
+    if _check_array(date) | _check_array(high) | _check_array(low) | _check_array(close):
         _logger.warning("Invalid Input")
-    elif (len(high) != len(low)) | (len(high) != len(close)):
+    elif (len(high) != len(date)) | (len(high) != len(low)) | (len(high) != len(close)):
         _logger.warning("Data length differs")
     else:
         if len(high) < period:
             _logger.warning("Period greater than length of input. Unexpected behaviour may occur")
-        result = 4
-    _logger.debug(' output: %s' % result)
+        result = _calc_pivot_points(high=high, low=low, close=close)
+    _logger.debug('Pivot output: %s' % result)
+    return result
+
+
+def _calc_pivot_points(high, low, close):
+    highest_high = numpy.max(high)
+    lowest_low = numpy.min(low)
+    last_close = close[len(close) - 1]
+    pp = (highest_high + lowest_low + last_close) / 3
+    r1 = 2 * pp - lowest_low
+    s1 = 2 * pp - highest_high
+    r2 = pp + highest_high - lowest_low
+    s2 = pp - highest_high - lowest_low
+    r3 = highest_high + 2 * (pp - lowest_low)
+    s3 = lowest_low - 2 * (highest_high - pp)
+    result = {"pp": pp, "r1": r1, "r2": r2, "r3": r3, "s1": s1, "s2": s2, "s3": s3}
     return result

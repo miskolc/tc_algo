@@ -23,5 +23,5 @@ if __name__ == '__main__':
     # indicators.ema(close, 20)
     # indicators.macd(close)
     # indicators.bollinger_bands(close)
-    var = data_parser.get_ohlc(start_date="01/01/2018")
-    print(var)
+    var = data_parser.get_date_ohlc(start_date="01/01/2018")
+    indicators.pivot(date=var['date'], high=var['high'], low=var["low"], close=var['close'])

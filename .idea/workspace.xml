@@ -1,14 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="e8e6d9ca-4800-4a51-9684-12e5ec5cd86c" name="Default" comment="added TODO">
-      <change afterPath="$PROJECT_DIR$/.idea/dictionaries/sb.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/api.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data_parser.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/model.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/strategy.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
+    <list default="true" id="e8e6d9ca-4800-4a51-9684-12e5ec5cd86c" name="Default" comment="Add: Quandl data fetch, indicators, data model">
+      <change beforePath="$PROJECT_DIR$/.idea/dictionaries/sb.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dictionaries/sb.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data_parser.py" beforeDir="false" afterPath="$PROJECT_DIR$/data_parser.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/indicators.py" beforeDir="false" afterPath="$PROJECT_DIR$/indicators.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
@@ -22,19 +18,20 @@
     <session id="-1799413582">
       <usages-collector id="statistics.lifecycle.project">
         <counts>
-          <entry key="project.closed" value="5" />
+          <entry key="project.closed" value="6" />
           <entry key="project.open.time.17" value="2" />
+          <entry key="project.open.time.20" value="1" />
           <entry key="project.open.time.22" value="1" />
           <entry key="project.open.time.3" value="1" />
           <entry key="project.open.time.5" value="1" />
           <entry key="project.open.time.69" value="1" />
-          <entry key="project.opened" value="6" />
+          <entry key="project.opened" value="7" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
         <counts>
-          <entry key="ipynb" value="5" />
-          <entry key="py" value="27" />
+          <entry key="ipynb" value="6" />
+          <entry key="py" value="29" />
           <entry key="strategy" value="1" />
         </counts>
       </usages-collector>
@@ -42,20 +39,20 @@
         <counts>
           <entry key="Python Console" value="12" />
           <entry key="dummy" value="4" />
-          <entry key="py" value="7190" />
-          <entry key="txt" value="12" />
+          <entry key="py" value="7809" />
+          <entry key="txt" value="64" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="PLAIN_TEXT" value="16" />
-          <entry key="Python" value="7202" />
+          <entry key="PLAIN_TEXT" value="68" />
+          <entry key="Python" value="7821" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.open">
         <counts>
-          <entry key="IPNB" value="5" />
-          <entry key="Python" value="28" />
+          <entry key="IPNB" value="6" />
+          <entry key="Python" value="30" />
         </counts>
       </usages-collector>
     </session>
@@ -65,44 +62,28 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/main.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="246">
-              <caret line="25" column="55" lean-forward="true" selection-start-line="25" selection-start-column="55" selection-end-line="25" selection-end-column="55" />
-              <folding>
-                <marker date="1533121310500" expanded="true" signature="86:227" ph="..." />
-              </folding>
+            <state relative-caret-position="136">
+              <caret line="14" column="44" lean-forward="true" selection-start-line="14" selection-start-column="44" selection-end-line="14" selection-end-column="44" />
             </state>
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/data_parser.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="223">
-              <caret line="18" selection-start-line="18" selection-end-line="18" />
-              <folding>
-                <element signature="e#0#14#0" expanded="true" />
-                <marker date="1533121286278" expanded="true" signature="191:459" ph="..." />
-                <marker date="1533121286278" expanded="true" signature="1286:1287" ph="..." />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/indicators.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1292">
-              <caret line="90" column="44" selection-start-line="90" selection-start-column="44" selection-end-line="90" selection-end-column="44" />
+            <state relative-caret-position="424">
+              <caret line="174" column="31" lean-forward="true" selection-start-line="174" selection-start-column="31" selection-end-line="174" selection-end-column="31" />
               <folding>
                 <element signature="e#0#14#0" expanded="true" />
-                <marker date="1533110732456" expanded="true" signature="462:812" ph="..." />
-                <marker date="1533110732456" expanded="true" signature="766:812" ph="..." />
-                <marker date="1533110732456" expanded="true" signature="881:2648" ph="..." />
-                <marker date="1533110732456" expanded="true" signature="2602:2648" ph="..." />
-                <marker date="1533110732456" expanded="true" signature="2679:2684" ph="..." />
+                <marker date="1533194470199" expanded="true" signature="462:812" ph="..." />
+                <marker date="1533194470199" expanded="true" signature="766:812" ph="..." />
+                <marker date="1533194470199" expanded="true" signature="881:2648" ph="..." />
+                <marker date="1533194470199" expanded="true" signature="2602:2648" ph="..." />
+                <marker date="1533194470199" expanded="true" signature="2679:2684" ph="..." />
+                <marker date="1533194470199" expanded="true" signature="6417:6418" ph="..." />
               </folding>
             </state>
           </provider>
@@ -113,8 +94,8 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="Jupyter Notebook" />
         <option value="Python Script" />
+        <option value="Jupyter Notebook" />
       </list>
     </option>
   </component>
@@ -132,12 +113,13 @@
       <list>
         <option value="$PROJECT_DIR$/abid.ipynb" />
         <option value="$PROJECT_DIR$/hello.ipynb" />
-        <option value="$PROJECT_DIR$/indicators.py" />
         <option value="$PROJECT_DIR$/strategy.py" />
         <option value="$PROJECT_DIR$/api.py" />
         <option value="$PROJECT_DIR$/model.py" />
         <option value="$PROJECT_DIR$/data_parser.py" />
         <option value="$PROJECT_DIR$/main.py" />
+        <option value="$PROJECT_DIR$/indicators.py" />
+        <option value="$PROJECT_DIR$/one.ipynb" />
       </list>
     </option>
   </component>
@@ -153,7 +135,6 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -165,6 +146,7 @@
           <select />
         </subPane>
       </pane>
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -295,26 +277,33 @@
       <option name="project" value="LOCAL" />
       <updated>1533044753138</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="Add: Quandl data fetch, indicators, data model">
+      <created>1533121444448</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1533121444448</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1382" height="744" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.49636805" visible="true" weight="0.21279761" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.49636805" visible="true" weight="0.21279761" />
       <window_info id="Favorites" order="1" sideWeight="0.5011338" side_tool="true" weight="0.24304539" />
       <window_info id="Structure" order="2" sideWeight="0.50363195" weight="0.23586309" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32993197" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" sideWeight="0.49925596" visible="true" weight="0.29761904" />
+      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.4985119" weight="0.29761904" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
       <window_info anchor="bottom" id="Version Control" order="7" weight="0.32993197" />
       <window_info anchor="bottom" id="Terminal" order="8" sideWeight="0.4985119" weight="0.32993197" />
-      <window_info anchor="bottom" id="Event Log" order="9" sideWeight="0.5014881" side_tool="true" weight="0.32993197" />
+      <window_info anchor="bottom" id="Event Log" order="9" sideWeight="0.5014881" side_tool="true" weight="0.29761904" />
       <window_info anchor="bottom" id="Python Console" order="10" weight="0.3282313" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
@@ -352,7 +341,8 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="added TODO" />
-    <option name="LAST_COMMIT_MESSAGE" value="added TODO" />
+    <MESSAGE value="Add: Quandl data fetch, indicators, data model" />
+    <option name="LAST_COMMIT_MESSAGE" value="Add: Quandl data fetch, indicators, data model" />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
   </component>
   <component name="editorHistoryManager">
@@ -407,9 +397,7 @@
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/hello.ipynb" />
-    <entry file="file://$PROJECT_DIR$/strategy">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
+    <entry file="file://$PROJECT_DIR$/strategy" />
     <entry file="file://$USER_HOME$/env/Lib/site-packages/talib/__init__.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="17">
@@ -424,61 +412,61 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/api.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret column="7" selection-start-column="7" selection-end-column="7" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/strategy.py">
       <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/indicators.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1292">
-          <caret line="90" column="44" selection-start-line="90" selection-start-column="44" selection-end-line="90" selection-end-column="44" />
-          <folding>
-            <element signature="e#0#14#0" expanded="true" />
-            <marker date="1533110732456" expanded="true" signature="462:812" ph="..." />
-            <marker date="1533110732456" expanded="true" signature="766:812" ph="..." />
-            <marker date="1533110732456" expanded="true" signature="881:2648" ph="..." />
-            <marker date="1533110732456" expanded="true" signature="2602:2648" ph="..." />
-            <marker date="1533110732456" expanded="true" signature="2679:2684" ph="..." />
-          </folding>
-        </state>
-      </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/model.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="187">
           <caret line="11" column="31" selection-start-line="11" selection-start-column="31" selection-end-line="11" selection-end-column="31" />
-          <folding>
-            <marker date="1533120256686" expanded="true" signature="32:33" ph="..." />
-            <marker date="1533120256686" expanded="true" signature="32:37" ph="..." />
-            <marker date="1533120256686" expanded="true" signature="80:84" ph="..." />
-          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/data_parser.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="223">
-          <caret line="18" selection-start-line="18" selection-end-line="18" />
+        <state relative-caret-position="272">
+          <caret line="16" column="26" selection-start-line="16" selection-start-column="26" selection-end-line="16" selection-end-column="26" />
           <folding>
             <element signature="e#0#14#0" expanded="true" />
-            <marker date="1533121286278" expanded="true" signature="191:459" ph="..." />
-            <marker date="1533121286278" expanded="true" signature="1286:1287" ph="..." />
+            <marker date="1533189331552" expanded="true" signature="196:504" ph="..." />
+            <marker date="1533189331552" expanded="true" signature="1331:1332" ph="..." />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/api.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <caret column="4" lean-forward="true" selection-start-column="4" selection-end-column="4" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/one.ipynb">
+      <provider selected="true" editor-type-id="ipnb-editor">
+        <state>
+          <selected id="0" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/main.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="246">
-          <caret line="25" column="55" lean-forward="true" selection-start-line="25" selection-start-column="55" selection-end-line="25" selection-end-column="55" />
+        <state relative-caret-position="136">
+          <caret line="14" column="44" lean-forward="true" selection-start-line="14" selection-start-column="44" selection-end-line="14" selection-end-column="44" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/indicators.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="424">
+          <caret line="174" column="31" lean-forward="true" selection-start-line="174" selection-start-column="31" selection-end-line="174" selection-end-column="31" />
           <folding>
-            <marker date="1533121310500" expanded="true" signature="86:227" ph="..." />
+            <element signature="e#0#14#0" expanded="true" />
+            <marker date="1533194470199" expanded="true" signature="462:812" ph="..." />
+            <marker date="1533194470199" expanded="true" signature="766:812" ph="..." />
+            <marker date="1533194470199" expanded="true" signature="881:2648" ph="..." />
+            <marker date="1533194470199" expanded="true" signature="2602:2648" ph="..." />
+            <marker date="1533194470199" expanded="true" signature="2679:2684" ph="..." />
+            <marker date="1533194470199" expanded="true" signature="6417:6418" ph="..." />
           </folding>
         </state>
       </provider>
