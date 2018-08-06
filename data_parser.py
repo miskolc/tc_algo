@@ -4,21 +4,22 @@ import numpy
 from datetime import datetime
 from datetime import date
 from datetime import timedelta
+from dateutil import relativedelta
 from dateutil import parser
 import api
-from model import DataObject
+from model import *
 
 _logger = logging.getLogger("data_parser")
 
 
 def get_date_ohlc(symbol="NSE/CNX_NIFTY", start_date="03-07-1990", end_date=""):
     data = get_data(symbol=symbol, start_date=start_date, end_date=end_date)
-    date = get_date(data)
+    date_values = get_date(data)
     open = get_open(data)
     high = get_high(data)
     low = get_low(data)
     close = get_close(data)
-    ohlc = {"date": date, "open": open, "high": high, "low": low, "close": close}
+    ohlc = {"date": date_values, "open": open, "high": high, "low": low, "close": close}
     return ohlc
 
 
@@ -29,18 +30,21 @@ def get_data(symbol="NSE/CNX_NIFTY", start_date="03-07-1990", end_date=""):
     for i in range(len(response)):
         item = response[i]
         data.append(DataObject(item))
+    # _logger.debug("%s" % data)
     return data
 
 
+# Input should be of List[DataObject]
 def get_date(data=None):
-    date = []
+    date_arr = []
     if (data is None) | (data == []):
         _logger.warning("Invalid data")
     else:
         for i in data:
             value = i.date
-            date.append(value)
-    return date
+            date_arr.append(value)
+    date_arr = date_format(date_arr)
+    return date_arr
 
 
 def get_open(data=None):
@@ -110,18 +114,21 @@ def get_turnover(data=None):
 
 
 # Required when data is in UNIX timestamp
-def timestamp_utc(timestamp=""):
+def current_month(timestamp=""):
     current = date.fromtimestamp(float(timestamp))
     # date1 = date(year=2018, month=1, day=15)
-    delta = timedelta(days=30)
-    old = current - delta
+    # delta = relativedelta.relativedelta(month=1)
+    # old = current - delta
     # test = date(year=2018, month=7, day=15)
     # print(date2 < test < date1)
+    return current.month
 
 
-# This only required for quandl data
-def date_format(date_array=[]):
+# This only required for quandl data where date is in ISO format
+def date_format(date_array=None):
     result = []
+    if date_array is None:
+        date_array = []
     x = numpy.datetime_as_string(date_array)
     for i in x:
         i = parser.parse(i).date()
