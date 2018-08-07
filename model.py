@@ -13,7 +13,7 @@ class DataObject:
         self.turnover = item[6]
 
     def __str__(self) -> str:
-        return "Date: %s \n Open: %s \n High: %s \n Low: %s \n Close: %s \n Volume: %s \n TurnOver: %s" % (
+        return "Date: %s \nOpen: %s \nHigh: %s \nLow: %s \nClose: %s \nVolume: %s \nTurnOver: %s" % (
             self.date, self.open, self.high, self.low, self.close, self.volume, self.turnover)
 
 
@@ -39,5 +39,5 @@ class PivotObject:
         self.s3 = s3
 
     def __str__(self) -> str:
-        return "PP = %s \n R1 = %s \n S1 = %s \n R2 = %s \n S2 = %s \n R3 = %s \n S3 = %s" % (
+        return "PP = %s \nR1 = %s \nS1 = %s \nR2 = %s \nS2 = %s \nR3 = %s \nS3 = %s" % (
             self.pp, self.r1, self.s1, self.r2, self.s2, self.r3, self.s3)
