@@ -3,6 +3,7 @@ import numpy
 import quandl
 from talib import MA_Type
 
+import charting
 import indicators
 import data_parser
 
@@ -33,6 +34,7 @@ if __name__ == '__main__':
     # data_parser.timestamp_utc("1533203511")
     data = data_parser.get_data(start_date="01/01/2018")
     logging.debug(data)
+    charting.get_candlestick_chart(data)
     # pivots = indicators.pivot(data)
     # for i in range(len(pivots['date'])):
     #     print(pivots['date'][i])
