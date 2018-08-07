@@ -161,67 +161,68 @@ def bollinger_bands(array=None, timeperiod=5, nbdevup=2, nbdevdn=2, matype=MA_Ty
 # S2 = PP - high-low
 # R3 = high + 2*(PP-low)
 # S3 = low - 2*(high-PP)
-def pivot(data=None, period=10) -> dict:
+# For this indicator data needs to be a List[DataObject]
+def pivot(data=None):
+    period = 30
     if data is None:
-        data = {}
+        data = []
     pivots = []
-    date_list = data['date']
-    if _check_array(date_list):
+    if _check_array(data):
         _logger.warning("Invalid Input")
     else:
-        if len(date_list) < period:
+        if len(data) < period:
             _logger.warning("Period greater than length of input. Unexpected behaviour may occur")
-        ranges = _get_ranges(date_list[0], date_list[len(date_list) - 1], data=data)
+        ranges = _get_ranges(data[0].date, data[len(data) - 1].date, data=data)
         for i in ranges:
             pivots += _pivot_data(i['pivot_min'], i['pivot_max'], data=data)
-    _logger.debug('Actual data is: %s' % data)
-    final = {"date": data['date'], 'pivot': pivots}
-    _logger.debug('Pivot output: %s' % final)
-    return final
+    # _logg|er.debug('Pivot output: %s' % pivots)
+    # _logger.debug(len(data))
+    # _logger.debug(len(pivots))
+    return pivots
 
 
 # This function defines the range for which pivot is to be found
-def _get_ranges(min_date, max_date, data=dict):
+def _get_ranges(min_date, max_date, data):
     diff = max_date - min_date
-    result = []
+    ranges = []
     if diff < month_delta:
         _logger.warning("Pivots can't be found for current data")
     else:
-        while max_date > min_date:
-            date_range = _pivot_date_range(max_date)
-            # result.append(_pivot_data(date_range['pivot_min'], date_range['pivot_max'], data))
-            result.append(date_range)
-            max_date = date_range['pivot_max']
-    return result
+        while min_date < max_date:
+            current_range = _pivot_range(min_date)
+            ranges += current_range
+            min_date = min_date + month_delta
+    return ranges
 
 
 # current_date should be in datetime.date format
-def _pivot_date_range(current_date):
-    previous = current_date - month_delta
-    first_date = date(year=previous.year, month=previous.month, day=1)
-    first_day_current = date(year=current_date.year, month=current_date.month, day=1)
+def _pivot_range(current_date):
     time_delta = timedelta(days=1)
-    last_date = first_day_current - time_delta
-    return {"pivot_min": first_date, "pivot_max": last_date}
+    previous_month = current_date - month_delta
+    data_min = date(year=previous_month.year, month=previous_month.month, day=1)
+    first_pivot_date = date(year=current_date.year, month=current_date.month, day=1)
+    last_pivot_date = date(year=current_date.year, month=current_date.month + 1, day=1) - time_delta
+    data_max = first_pivot_date - time_delta
+    date_range = {"data_min": data_min, "data_max": data_max, "pivot_min": first_pivot_date,
+                  "pivot_max": last_pivot_date}
+    _logger.debug(date_range)
+    return date_range
 
 
 # This returns pivot for a range of dates
 def _pivot_data(pivot_min, pivot_max, data):
     high, low, close = [], [], []
-    for i in range(len(data['date'])):
-        input_date = data['date'][i]
+    for i in range(len(data)):
+        input_date = data[i].date
         if pivot_min <= input_date <= pivot_max:
-            high.append(data['high'][i])
-            low.append(data['low'][i])
-            close.append(data['close'][i])
+            high.append(data[i].high)
+            low.append(data[i].low)
+            close.append(data[i].close)
     length = len(high)
     pivot = _calc_pivot_points(high, low, close)
     # _logger.debug("%s" % pivot)
-    pivot_arr = []
-    for i in range(length):
-        pivot_arr.append(pivot)
     # _logger.debug(pivot_arr)
-    return pivot_arr
+    return pivot
 
 
 def _calc_pivot_points(high, low, close):

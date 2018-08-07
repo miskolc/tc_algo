@@ -32,8 +32,5 @@ if __name__ == '__main__':
     # indicators.pivot(date=var['date'], high=var['high'], low=var["low"], close=var['close'])
     # data_parser.timestamp_utc("1533203511")
     data = data_parser.get_data(start_date="01/01/2018")
-    logging.debug(data)
-    # pivots = indicators.pivot(data)
-    # for i in range(len(pivots['date'])):
-    #     print(pivots['date'][i])
-    #     print(pivots['pivot'][i])
+    pivots = indicators.pivot(data)
+    print("%s" % pivots)

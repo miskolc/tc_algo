@@ -1,8 +1,8 @@
 import logging
-import quandl
-import numpy
 from datetime import *
 from dateutil import parser
+
+import quandl
 
 import api
 from model import *
