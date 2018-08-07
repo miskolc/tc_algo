@@ -1,15 +1,20 @@
 import numpy
+import data_parser
 
 
 class DataObject:
     def __init__(self, item=numpy.record):
-        self.date = item[0]
+        self.date = data_parser.date_format([item[0]])[0]
         self.open = item[1]
         self.high = item[2]
         self.low = item[3]
         self.close = item[4]
         self.volume = item[5]
         self.turnover = item[6]
+
+    def __str__(self) -> str:
+        return "Date: %s \n Open: %s \n High: %s \n Low: %s \n Close: %s \n Volume: %s \n TurnOver: %s" % (
+            self.date, self.open, self.high, self.low, self.close, self.volume, self.turnover)
 
 
 # class DataObject:

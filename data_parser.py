@@ -1,18 +1,16 @@
 import logging
 import quandl
 import numpy
-from datetime import datetime
-from datetime import date
-from datetime import timedelta
-from dateutil import relativedelta
+from datetime import *
 from dateutil import parser
+
 import api
 from model import *
 
 _logger = logging.getLogger("data_parser")
 
 
-def get_date_ohlc(symbol="NSE/CNX_NIFTY", start_date="03-07-1990", end_date=""):
+def get_date_ohlc(symbol=api.nifty50, start_date=api.start_date, end_date=""):
     data = get_data(symbol=symbol, start_date=start_date, end_date=end_date)
     date_values = get_date(data)
     open = get_open(data)
@@ -23,7 +21,7 @@ def get_date_ohlc(symbol="NSE/CNX_NIFTY", start_date="03-07-1990", end_date=""):
     return ohlc
 
 
-def get_data(symbol="NSE/CNX_NIFTY", start_date="03-07-1990", end_date=""):
+def get_data(symbol=api.nifty50, start_date=api.start_date, end_date=""):
     data = []
     quandl.ApiConfig.api_key = api.quandl_api_key
     response = quandl.get(symbol, returns="numpy", start_date=start_date, end_date=end_date)
@@ -43,7 +41,7 @@ def get_date(data=None):
         for i in data:
             value = i.date
             date_arr.append(value)
-    date_arr = date_format(date_arr)
+    # date_arr = date_format(date_arr)
     return date_arr
 
 
