@@ -33,15 +33,16 @@ def _check_array(array):
     return (array is None) | (array == [])
 
 
-# Simple moving average. Default period = 30
+# Simple moving average. Default period = 30. Used with rsi, ema, sma
 def _remove_nan(result):
     where_are_nan = numpy.isnan(result)
-    result[where_are_nan] = 0
+    result[where_are_nan] = None
+    result = result.tolist()
     return result
 
 
 # Relative Strength Index. Default period = 14
-def rsi(array=None, period=14):
+def rsi(array=None, period=14) -> list:
     result = []
     indicator_info("RSI")
     if _check_array(array):
@@ -51,6 +52,7 @@ def rsi(array=None, period=14):
     else:
         if len(array) < period:
             _logger.warning("Period greater than length of input. Unexpected behaviour may occur")
+        array = numpy.asarray(array)
         result = talib.RSI(array, period)
         result = _remove_nan(result)
     _logger.debug('RSI output: %s' % result)
@@ -58,7 +60,7 @@ def rsi(array=None, period=14):
 
 
 # Stochastic Oscillator. Default Moving Average is SMA.
-def stoch(high=None, low=None, close=None, fastk_period=5, fastd_period=3, fastd_matype=MA_Type.SMA):
+def stoch(high=None, low=None, close=None, fastk_period=5, fastd_period=3, fastd_matype=MA_Type.SMA) -> dict:
     fastk, fastd = [], []
     indicator_info("STOCH")
     if _check_array(high) | _check_array(low) | _check_array(close):
@@ -70,17 +72,22 @@ def stoch(high=None, low=None, close=None, fastk_period=5, fastd_period=3, fastd
     else:
         if len(high) < fastk_period:
             _logger.warning("Period greater than length of input. Unexpected behaviour may occur")
+        high = numpy.asarray(high)
+        low = numpy.asarray(low)
+        close = numpy.asarray(close)
         fastk, fastd = talib.STOCHF(high, low, close, fastk_period=fastk_period, fastd_period=fastd_period,
                                     fastd_matype=fastd_matype)
     # _logger.debug('STOCH output slowk: %s ' % slowk)
     # _logger.debug('STOCH output slowd: %s ' % slowd)
+    fastk = _remove_nan(fastk)
+    fastd = _remove_nan(fastd)
     result = {"fastk": fastk, "fastd": fastd}
     _logger.debug("STOCH output: %s" % result)
     return result
 
 
 # Simple Moving Average. Default period = 30
-def sma(array=None, period=30):
+def sma(array=None, period=30) -> list:
     result = []
     indicator_info("SMA")
     if _check_array(array):
@@ -90,14 +97,15 @@ def sma(array=None, period=30):
     else:
         if len(array) < period:
             _logger.warning("Period greater than length of input. Unexpected behaviour may occur")
-        result = talib.SMA(array, period)
+        array = numpy.asarray(array)
+        result = talib.SMA(array, timeperiod=period)
         result = _remove_nan(result)
     _logger.debug('SMA output: %s' % result)
     return result
 
 
 # Exponential Moving Average. Default period = 30
-def ema(array=None, period=30):
+def ema(array=None, period=30) -> list:
     result = []
     indicator_info("EMA")
     if _check_array(array):
@@ -107,6 +115,7 @@ def ema(array=None, period=30):
     else:
         if len(array) < period:
             _logger.warning("Period greater than length of input. Unexpected behaviour may occur")
+        array = numpy.asarray(array)
         result = talib.EMA(array, period)
         result = _remove_nan(result)
     _logger.debug('EMA output: %s' % result)
@@ -114,7 +123,7 @@ def ema(array=None, period=30):
 
 
 # Moving Average Convergence/Divergence
-def macd(array=None, fastperiod=12, slowperiod=26, signalperiod=9):
+def macd(array=None, fastperiod=12, slowperiod=26, signalperiod=9) -> dict:
     macd_value, macdsignal, macdhist = [], [], []
     indicator_info("MACD")
     if _check_array(array):
@@ -124,15 +133,20 @@ def macd(array=None, fastperiod=12, slowperiod=26, signalperiod=9):
     else:
         if len(array) < fastperiod:
             _logger.warning("Period greater than length of input. Unexpected behaviour may occur")
+        array = numpy.asarray(array)
         macd_value, macdsignal, macdhist = talib.MACD(array, fastperiod=fastperiod, slowperiod=slowperiod,
                                                       signalperiod=signalperiod)
+    macd_value = _remove_nan(macd_value)
+    macdsignal = _remove_nan(macdsignal)
+    macdhist = _remove_nan(macdhist)
     result = {"macd": macd_value, "macdsignal": macdsignal, "macdhist": macdhist}
-    _logger.debug('MACD output: %s' % result)
+    _logger.debug('MACD output: \n      macd: %s \n      macdsignal: %s \n      macdhist: %s' % (
+        macd_value, macdsignal, macdhist))
     return result
 
 
 # Bollinger Bands. Default Moving Average is SMA
-def bollinger_bands(array=None, timeperiod=5, nbdevup=2, nbdevdn=2, matype=MA_Type.SMA):
+def bollinger_bands(array=None, timeperiod=5, nbdevup=2, nbdevdn=2, matype=MA_Type.SMA) -> dict:
     upperband, middleband, lowerband = [], [], []
     indicator_info("BBANDS")
     if (array is None) | (array == []):
@@ -144,10 +158,16 @@ def bollinger_bands(array=None, timeperiod=5, nbdevup=2, nbdevdn=2, matype=MA_Ty
             _logger.warning("Deviation is negative")
         if len(array) < timeperiod:
             _logger.warning("Period greater than length of input. Unexpected behaviour may occur")
+        array = numpy.asarray(array)
         upperband, middleband, lowerband = talib.BBANDS(array, timeperiod=timeperiod, nbdevup=nbdevup, nbdevdn=nbdevdn,
                                                         matype=matype)
+    upperband = _remove_nan(upperband)
+    middleband = _remove_nan(middleband)
+    lowerband = _remove_nan(lowerband)
     result = {"upperband": upperband, "middleband": middleband, "lowerband": lowerband}
-    _logger.debug('Bollinger Bands output: %s' % result)
+    _logger.debug(
+        'Bollinger Bands output: \n      UpperBand: %s \n      MiddleBand: %s \n      LowerBand: %s' % (
+            upperband, middleband, lowerband))
     return result
 
 
@@ -161,7 +181,7 @@ def bollinger_bands(array=None, timeperiod=5, nbdevup=2, nbdevdn=2, matype=MA_Ty
 # R3 = high + 2*(PP-low)
 # S3 = low - 2*(high-PP)
 # For this indicator data needs to be a List[DataObject]
-def pivot(data=None):
+def pivot(data=None) -> list:
     period = 30
     if data is None:
         data = []
