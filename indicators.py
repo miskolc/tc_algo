@@ -13,12 +13,11 @@ _logger = logging.getLogger('indicator')
 month_delta = timedelta(days=31)
 
 
-# TODO: List of Indicators:
-# TODO: 1. Momentum - RSI, Stochastic Oscillator
-# TODO: 2. Trend - SMA,EMA,MACD
-# TODO: 3. Volatility - Bollinger Bands
-# TODO: 4. Support and Resistance - Pivot Points
-# Declaration, info, check, result
+# List of Indicators:
+# 1. Momentum - RSI, Stochastic Oscillator
+# 2. Trend - SMA,EMA,MACD
+# 3. Volatility - Bollinger Bands
+# 4. Support and Resistance - Pivot Points
 
 # Get info for the required function in ta-lib
 def indicator_info(indicator=""):
@@ -172,31 +171,30 @@ def pivot(data=None):
     else:
         if len(data) < period:
             _logger.warning("Period greater than length of input. Unexpected behaviour may occur")
-        ranges = _get_ranges(data[0].date, data[len(data) - 1].date, data=data)
-        for i in ranges:
-            pivots += _pivot_data(i['pivot_min'], i['pivot_max'], data=data)
-    # _logg|er.debug('Pivot output: %s' % pivots)
-    # _logger.debug(len(data))
-    # _logger.debug(len(pivots))
+        ranges = _get_ranges(data[0].date, data[len(data) - 1].date)
+        pivots = _pivot_data(ranges, data=data)
     return pivots
 
 
 # This function defines the range for which pivot is to be found
-def _get_ranges(min_date, max_date, data):
+def _get_ranges(min_date, max_date):
     diff = max_date - min_date
     ranges = []
     if diff < month_delta:
         _logger.warning("Pivots can't be found for current data")
     else:
-        while min_date < max_date:
-            current_range = _pivot_range(min_date)
-            ranges += current_range
+        while min_date <= max_date:
+            current_range = _date_ranges(min_date)
+            ranges.append(current_range)
             min_date = min_date + month_delta
+        if max_date < min_date:
+            month_range = _date_ranges(max_date)
+            ranges.append(month_range)
     return ranges
 
 
 # current_date should be in datetime.date format
-def _pivot_range(current_date):
+def _date_ranges(current_date):
     time_delta = timedelta(days=1)
     previous_month = current_date - month_delta
     data_min = date(year=previous_month.year, month=previous_month.month, day=1)
@@ -205,38 +203,53 @@ def _pivot_range(current_date):
     data_max = first_pivot_date - time_delta
     date_range = {"data_min": data_min, "data_max": data_max, "pivot_min": first_pivot_date,
                   "pivot_max": last_pivot_date}
-    _logger.debug(date_range)
+    # _logger.debug(date_range)
     return date_range
 
 
 # This returns pivot for a range of dates
-def _pivot_data(pivot_min, pivot_max, data):
+def _pivot_data(date_range, data):
+    data_pivot = []
+    for kRange in date_range:
+        _logger.debug("Pivot values for the range %s and %s" % (kRange['pivot_min'], kRange['pivot_max']))
+        pivot_values = get_pivot_for_range(kRange['data_min'], kRange['data_max'], data)
+        _logger.debug(pivot_values)
+        for i in range(len(data)):
+            current_date = data[i].date
+            if kRange['pivot_min'] <= current_date <= kRange['pivot_max']:
+                data_and_pivot = [data[i], pivot_values]
+                data_pivot.append(data_and_pivot)
+    _logger.debug(data_pivot)
+    return data_pivot
+
+
+def get_pivot_for_range(min_date, max_date, data):
     high, low, close = [], [], []
     for i in range(len(data)):
-        input_date = data[i].date
-        if pivot_min <= input_date <= pivot_max:
+        current_date = data[i].date
+        if min_date <= current_date <= max_date:
             high.append(data[i].high)
             low.append(data[i].low)
             close.append(data[i].close)
-    length = len(high)
-    pivot = _calc_pivot_points(high, low, close)
-    # _logger.debug("%s" % pivot)
-    # _logger.debug(pivot_arr)
-    return pivot
+    pivot_values = _calc_pivot_points(high, low, close)
+    return pivot_values
 
 
 def _calc_pivot_points(high, low, close):
-    result = PivotObject()
+    result = None
     if (high != []) & (low != []) & (close != []):
         highest_high = max(high)
         lowest_low = min(low)
         last_close = close[len(close) - 1]
+        _logger.debug("High for period: %s" % highest_high)
+        _logger.debug("Low for period: %s" % lowest_low)
+        _logger.debug("Close for the period: %s" % last_close)
         pp = (highest_high + lowest_low + last_close) / 3
-        r1 = 2 * pp - lowest_low
-        s1 = 2 * pp - highest_high
+        r1 = (2 * pp) - lowest_low
+        s1 = (2 * pp) - highest_high
         r2 = pp + (highest_high - lowest_low)
         s2 = pp - (highest_high - lowest_low)
-        r3 = highest_high + 2 * (pp - lowest_low)
-        s3 = lowest_low - 2 * (highest_high - pp)
+        r3 = highest_high + (2 * (pp - lowest_low))
+        s3 = lowest_low - (2 * (highest_high - pp))
         result = PivotObject(pp=pp, r1=r1, r2=r2, r3=r3, s1=s1, s2=s2, s3=s3)
     return result

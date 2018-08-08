@@ -29,7 +29,7 @@ class DataObject:
 
 
 class PivotObject:
-    def __init__(self, pp=0, r1=0, r2=0, r3=0, s1=0, s2=0, s3=0):
+    def __init__(self, pp, r1, r2, r3, s1, s2, s3):
         self.pp = pp
         self.r1 = r1
         self.r2 = r2
@@ -39,5 +39,5 @@ class PivotObject:
         self.s3 = s3
 
     def __str__(self) -> str:
-        return "PP = %s \nR1 = %s \nS1 = %s \nR2 = %s \nS2 = %s \nR3 = %s \nS3 = %s" % (
+        return "Pivot values are: \nPP = %s \nR1 = %s \nS1 = %s \nR2 = %s \nS2 = %s \nR3 = %s \nS3 = %s" % (
             self.pp, self.r1, self.s1, self.r2, self.s2, self.r3, self.s3)
