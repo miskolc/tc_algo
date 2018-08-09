@@ -1,7 +1,7 @@
 import logging
 from datetime import *
-from dateutil import parser
 
+import numpy
 import quandl
 
 import api
@@ -122,13 +122,40 @@ def current_month(timestamp=""):
     return current.month
 
 
-# This only required for quandl data where date is in ISO format
-def date_format(date_array=None):
+def data_builder(data, **kwargs):
+    father = _append_data(data)
+    indicators = []
+    _logger.debug(kwargs.keys())
+    values = kwargs.values()
+    for item in values:
+        if type(item) == list:
+            # _logger.info("list")
+            indicators.append(item)
+        elif type(item) == dict:
+            # _logger.info('dict')
+            dict_values = item.values()
+            for child in dict_values:
+                indicators.append(child)
+        else:
+            _logger.warning("Unknown data format or type")
+            break
+    father = _append_indicators(indicators, father)
+    _logger.debug(father)
+    return father
+
+
+def _append_data(data):
     result = []
-    if date_array is None:
-        date_array = []
-    x = numpy.datetime_as_string(date_array)
-    for i in x:
-        i = parser.parse(i).date()
-        result.append(i)
+    for child in data:
+        grand_child = [child.date, child.open, child.high, child.low, child.close, child.volume]
+        result.append(grand_child)
     return result
+
+
+def _append_indicators(indicators, father):
+    for item in indicators:
+        _logger.debug(len(father))
+        _logger.debug(len(item))
+        for i in range(len(father)):
+            father[i].append(item[i])
+    return father

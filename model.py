@@ -1,10 +1,9 @@
 import numpy
-import data_parser
-
+from dateutil import parser
 
 class DataObject:
     def __init__(self, item=numpy.record):
-        self.date = data_parser.date_format([item[0]])[0]
+        self.date = date_format([item[0]])[0]
         self.open = item[1]
         self.high = item[2]
         self.low = item[3]
@@ -17,19 +16,8 @@ class DataObject:
             self.date, self.open, self.high, self.low, self.close, self.volume, self.turnover)
 
 
-# class DataObject:
-#     def __init__(self, date, open, high, low, close, volume, turnover):
-#         self.date = date
-#         self.open = open
-#         self.high = high
-#         self.low = low
-#         self.close = close
-#         self.volume = volume
-#         self.turnover = turnover
-
-
 class PivotObject:
-    def __init__(self, pp, r1, r2, r3, s1, s2, s3):
+    def __init__(self, pp=None, r1=None, r2=None, r3=None, s1=None, s2=None, s3=None):
         self.pp = pp
         self.r1 = r1
         self.r2 = r2
@@ -41,3 +29,15 @@ class PivotObject:
     def __str__(self) -> str:
         return "Pivot values are: \nPP = %s \nR1 = %s \nS1 = %s \nR2 = %s \nS2 = %s \nR3 = %s \nS3 = %s" % (
             self.pp, self.r1, self.s1, self.r2, self.s2, self.r3, self.s3)
+
+
+# This only required for quandl data where date is in ISO format
+def date_format(date_array=None):
+    result = []
+    if date_array is None:
+        date_array = []
+    x = numpy.datetime_as_string(date_array)
+    for i in x:
+        i = parser.parse(i).date()
+        result.append(i)
+    return result
