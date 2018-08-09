@@ -154,8 +154,13 @@ def _append_data(data):
 
 def _append_indicators(indicators, father):
     for item in indicators:
-        _logger.debug(len(father))
-        _logger.debug(len(item))
+        # _logger.debug(len(father))
+        # _logger.debug(len(item))
         for i in range(len(father)):
-            father[i].append(item[i])
+            if type(item[i]) == PivotObject:
+                pv = item[i]
+                item[i] = [pv.pp, pv.r1, pv.r2, pv.r3, pv.s1, pv.s2, pv.s3]
+                father[i] += item[i]
+            else:
+                father[i].append(item[i])
     return father

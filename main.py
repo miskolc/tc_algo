@@ -1,9 +1,5 @@
 import logging
-import numpy
-import quandl
-from talib import MA_Type
 
-import charting
 import indicators
 import data_parser
 
@@ -36,8 +32,6 @@ if __name__ == '__main__':
     pivot = indicators.pivot(var)
     data_with_indicators = data_parser.data_builder(var, rsi=rsi, stoch=stoch, sma=sma50, sma1=sma200, ema=ema,
                                                     macd=macd, bbands=bbands, pivot=pivot)
-    # logging.debug(len(var))
-    # logging.debug(len(pivot))
     logging.info(data_with_indicators)
     # data_parser.timestamp_utc("1533203511")
     # data = data_parser.get_date_ohlc(start_date="01/01/2018")
