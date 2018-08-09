@@ -33,7 +33,7 @@ if __name__ == '__main__':
     pivot = indicators.pivot(var)
     data_with_indicators = data_parser.data_builder(var, rsi=rsi, stoch=stoch, sma=sma50, sma1=sma200, ema=ema,
                                                     macd=macd, bbands=bbands, pivot=pivot)
-    logging.info(data_with_indicators)
+    logging.info(data_with_indicators[0])
     # data_parser.timestamp_utc("1533203511")
     # data = data_parser.get_date_ohlc(start_date="01/01/2018")
     # logging.debug(data)
@@ -43,5 +43,5 @@ if __name__ == '__main__':
     # sma200 = indicators.sma(close, period=200)
     # logging.debug(type(sma200))
     # strategy.ma(close, sma1=sma50, sma2=sma200)
-    data = data_parser.get_date_ohlc()
-    charting.get_candlestick_chart(data)
+    # data = data_parser.get_date_ohlc()
+    # charting.get_candlestick_chart(data)

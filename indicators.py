@@ -35,7 +35,7 @@ def indicator_info(indicator=""):
         _logger.info("For complete list visit http://mrjbq7.github.io/ta-lib/funcs.html")
     else:
         info = Function(indicator).info
-        _logger.info(info)
+        _logger.debug(info)
 
 
 def _check_array(array):
@@ -240,7 +240,7 @@ def bollinger_bands(array=None, timeperiod=5, nbdevup=2, nbdevdn=2, matype=MA_Ty
     return result
 
 
-def pivot(data=None) -> list:
+def pivot(data=None, charts=True):
     """
     Calculates monthly pivot for the given range of data list.
     Formula used is:
@@ -251,10 +251,16 @@ def pivot(data=None) -> list:
     S2 = PP - high-low
     R3 = high + 2*(PP-low)
     S3 = low - 2*(high-PP)
+    :param charts: Boolean
+                Whether data is required for the charts. If false data is returned in list[PivotObject]
     :param data: list
             [model.DataObject]
-    :return: list
-            [model.PivotObject]
+    :return: dict
+            dict(pp=list[double], r1=list[double], r2=list[double], r3=list[double],
+                                        s1=list[double], s2=list[double], s3=list[double])
+                or
+            list[PivotObject]
+
     """
     period = 30
     if data is None:
@@ -267,10 +273,22 @@ def pivot(data=None) -> list:
             _logger.warning("Period greater than length of input. Unexpected behaviour may occur")
         ranges = _get_ranges(data[0].date, data[len(data) - 1].date)
         pivots = _pivot_data(ranges, data=data)
-    return pivots
+    pp, r1, r2, r3, s1, s2, s3 = [], [], [], [], [], [], []
+    for item in pivots:
+        pp.append(item.pp)
+        r1.append(item.r1)
+        r2.append(item.r2)
+        r3.append(item.r3)
+        s1.append(item.s1)
+        s2.append(item.s2)
+        s3.append(item.s3)
+    result = dict(pp=pp, r1=r1, r2=r2, r3=r3, s1=s1, s2=s2, s3=s3)
+    if charts:
+        return result
+    else:
+        return pivots
 
 
-# This function defines the range for which pivot is to be found
 def _get_ranges(min_date, max_date):
     """
     This method finds the different ranges for the pivot calculations

@@ -123,25 +123,37 @@ def current_month(timestamp=""):
 
 
 def data_builder(data, **kwargs):
+    father = []
+    params = ["date", "open", "high", "low", "close", "volume"]
+    keys_index = 0
+    keys = []
+    for key, value in kwargs.items():
+        keys.append(key)
     father = _append_data(data)
     indicators = []
-    _logger.debug(kwargs.keys())
     values = kwargs.values()
     for item in values:
         if type(item) == list:
-            # _logger.info("list")
-            indicators.append(item)
+            _logger.debug("list")
+            # indicators.append(item)
+            params.append(keys[keys_index])
+            keys_index += 1
         elif type(item) == dict:
-            # _logger.info('dict')
+            _logger.debug('dict')
+            for key, value in item.items():
+                params.append(keys[keys_index] + "_" + key)
             dict_values = item.values()
             for child in dict_values:
                 indicators.append(child)
+            keys_index += 1
         else:
             _logger.warning("Unknown data format or type")
-            break
     father = _append_indicators(indicators, father)
-    _logger.debug(father)
-    return father
+    _logger.debug("Params are: %s" % params)
+    result = [params]
+    for item in father:
+        result.append(item)
+    return result
 
 
 def _append_data(data):
@@ -157,10 +169,10 @@ def _append_indicators(indicators, father):
         # _logger.debug(len(father))
         # _logger.debug(len(item))
         for i in range(len(father)):
-            if type(item[i]) == PivotObject:
-                pv = item[i]
-                item[i] = [pv.pp, pv.r1, pv.r2, pv.r3, pv.s1, pv.s2, pv.s3]
-                father[i] += item[i]
-            else:
-                father[i].append(item[i])
+            # if type(item[i]) == PivotObject:
+            #     pv = item[i]
+            #     item[i] = [pv.pp, pv.r1, pv.r2, pv.r3, pv.s1, pv.s2, pv.s3]
+            #     father[i] += item[i]
+            # else:
+            father[i].append(item[i])
     return father
