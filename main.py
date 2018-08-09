@@ -1,5 +1,6 @@
 import logging
 
+import charting
 import indicators
 import data_parser
 
@@ -42,3 +43,5 @@ if __name__ == '__main__':
     # sma200 = indicators.sma(close, period=200)
     # logging.debug(type(sma200))
     # strategy.ma(close, sma1=sma50, sma2=sma200)
+    data = data_parser.get_date_ohlc()
+    charting.get_candlestick_chart(data)
