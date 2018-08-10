@@ -1,5 +1,7 @@
 import numpy
 from dateutil import parser
+from enum import Enum
+
 
 class DataObject:
     def __init__(self, item=numpy.record):
@@ -41,3 +43,23 @@ def date_format(date_array=None):
         i = parser.parse(i).date()
         result.append(i)
     return result
+
+
+class Condition:
+    def __init__(self, data1=None, data2=None, buy=Enum, sell=Enum):
+        self.data1 = data1
+        self.data2 = data2
+        self.buy = buy
+        self.sell = sell
+
+
+class Compare(Enum):
+    EQUAL = "="
+    GREATER_THAN_EQUAL = ">="
+    LESS_THAN_EQUAL = "<="
+    GREATER = ">"
+    LESS = "<"
+    CROSSOVER = "CROSSOVER"
+    CROSSUNDER = "CROSSUNDER"
+    AND = "&"
+    OR = "|"

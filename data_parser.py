@@ -123,7 +123,6 @@ def current_month(timestamp=""):
 
 
 def data_builder(data, **kwargs):
-    father = []
     params = ["date", "open", "high", "low", "close", "volume"]
     keys_index = 0
     keys = []
@@ -135,7 +134,7 @@ def data_builder(data, **kwargs):
     for item in values:
         if type(item) == list:
             _logger.debug("list")
-            # indicators.append(item)
+            indicators.append(item)
             params.append(keys[keys_index])
             keys_index += 1
         elif type(item) == dict:

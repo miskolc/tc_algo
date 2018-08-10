@@ -210,7 +210,9 @@ def bollinger_bands(array=None, timeperiod=5, nbdevup=2, nbdevdn=2, matype=MA_Ty
     :param array: list[numeric]
     :param timeperiod: int
     :param nbdevup: int
+            Upper deviation
     :param nbdevdn: int
+            Lower deviation
     :param matype: int
             Moving Average type. Default Moving Average is SMA.
     :return: dict
