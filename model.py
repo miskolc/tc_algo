@@ -59,11 +59,6 @@ class Operation(Enum):
         return self.value
 
 
-class Logical(Enum):
-    AND = "&"
-    OR = "|"
-
-
 class Condition:
     data1 = None
     data2 = None
@@ -73,3 +68,21 @@ class Condition:
         self.data1 = data1
         self.data2 = data2
         self.operation = operation
+
+    def __str__(self) -> str:
+        return "data1 %s data2" % self.operation
+
+
+class Logical(Enum):
+    AND = "&"
+    OR = "|"
+
+    def __str__(self):
+        return self.value
+
+
+class ConditionsLogic:
+    def __init__(self, condition1=Condition, condition2=Condition, logical=Logical):
+        self.cond1 = condition1
+        self.cond2 = condition2
+        self.logic = logical

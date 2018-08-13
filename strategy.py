@@ -4,13 +4,55 @@
 # TODO: For any reference contact or see cond.js
 import logging
 
+import data_parser
 import indicators
 from model import *
 
 _logger = logging.getLogger("strategy")
+BUY = "buy"
+SELL = "sell"
 
 
-def condition_evaluator(condition=Condition):
+def strategy_builder(data=list, buy=list, sell=list, strategy=str, **kwargs):
+    master = data_parser.data_builder(data, **kwargs)
+    init_order = strategy
+    pending_order = False
+    buy_condition = []
+    sell_condition = []
+    profit, sl = [], []
+
+    buy_signals = _evaluate_conditions(buy_condition)
+    sell_signals = _evaluate_conditions(sell_condition)
+
+
+def _evaluate_order_conditions(order) -> list:
+    result = []
+    if type(order) == Condition:
+        order_condition = [order]
+    elif type(order) == ConditionsLogic:
+        order_condition = _evaluate_conditions_logic(order)
+    elif type(order) == list:
+        order_condition = order
+    else:
+        _logger.warning("Incorrect condition in Order")
+    return result
+
+
+def _evaluate_conditions_logic(order):
+    result = []
+    return result
+
+
+def _evaluate_conditions(conditions=list):
+    result = []
+    cond_values = []
+    for item in conditions:
+        cond_values.append(_condition_evaluator(item))
+    print(len(cond_values))
+    return result
+
+
+def _condition_evaluator(condition=Condition):
     result = []
     offset = 0
     if condition.data2 is not None:

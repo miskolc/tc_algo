@@ -17,7 +17,9 @@ def get_date_ohlc(symbol=api.nifty50, start_date=api.start_date, end_date=""):
     high = get_high(data)
     low = get_low(data)
     close = get_close(data)
-    ohlc = {"symbol": symbol, "date": date_values, "open": open, "high": high, "low": low, "close": close}
+    volume = get_volume(data)
+    ohlc = {"symbol": symbol, "date": date_values, "open": open, "high": high, "low": low, "close": close,
+            "volume": volume}
     return ohlc
 
 
@@ -165,8 +167,8 @@ def _append_data(data):
 
 def _append_indicators(indicators, father):
     for item in indicators:
-        # _logger.debug(len(father))
-        # _logger.debug(len(item))
+        _logger.debug("Item: %s " % len(item))
+        _logger.debug("Father: %s" % len(father))
         for i in range(len(father)):
             # if type(item[i]) == PivotObject:
             #     pv = item[i]

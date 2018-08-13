@@ -313,9 +313,9 @@ def _get_ranges(min_date, max_date):
             current_range = _date_ranges(min_date)
             ranges.append(current_range)
             min_date = min_date + month_delta
-        # if max_date < min_date:
-        #     month_range = _date_ranges(max_date)
-        #     ranges.append(month_range)
+        if max_date < min_date:
+            month_range = _date_ranges(max_date)
+            ranges.append(month_range)
     return ranges
 
 
