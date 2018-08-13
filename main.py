@@ -5,7 +5,7 @@ import api
 import charting
 import indicators
 import data_parser
-from model import Condition, Compare
+from model import Condition, Operation
 
 # TODO: Follow the below order:
 # TODO: 1. Make all Indicators - Done
@@ -48,10 +48,7 @@ if __name__ == '__main__':
     # indicators.indicator_info("STOCH")
     # rsi = indicators.rsi(close)
     # stoch = indicators.stoch(high, low, close)
-    sma50 = indicators.sma(close, 50)
-    sma200 = indicators.sma(close, 200)
-    condition1 = Condition(data1=sma50, data2=sma200, )
-    strategy.ma()
+    # sma = indicators.sma(close, 30)
     # ema = indicators.ema(close, 20)
     # macd = indicators.macd(close)
     # bbands = indicators.bollinger_bands(close)
@@ -62,11 +59,15 @@ if __name__ == '__main__':
     # data_parser.timestamp_utc("1533203511")
     # data = data_parser.get_date_ohlc(start_date="01/01/2018")
     # logging.debug(data)
+    rsi = indicators.rsi(close)
+    condition1 = Condition(data1=rsi, data2=80, operation=Operation.RANGE_EQUAL)
+    result_cond1 = strategy.condition_evaluator(condition=condition1)
+    print(result_cond1)
+    sma50 = indicators.sma(close, 50)
+    sma200 = indicators.sma(close, 200)
+    condition2 = Condition(data1=sma50, data2=sma200, operation=Operation.CROSSOVER)
+    result_cond2 = strategy.condition_evaluator(condition=condition2)
+    print(result_cond2)
     # charting.get_candlestick_chart(data)
-    # sma50 = indicators.sma(close, period=50)
-    # logging.debug(type(sma50))
-    # sma200 = indicators.sma(close, period=200)
-    # logging.debug(type(sma200))
-    # strategy.ma(close, sma1=sma50, sma2=sma200)
     # data = data_parser.get_date_ohlc()
     # charting.get_candlestick_chart(data)

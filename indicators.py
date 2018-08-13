@@ -1,5 +1,6 @@
 import logging
 import calendar
+import math
 from datetime import *
 from dateutil import relativedelta
 
@@ -15,6 +16,7 @@ data_min = "data_min"
 data_max = "data_max"
 pivot_min = "pivot_min"
 pivot_max = "pivot_max"
+default = 1234567890.0
 
 """
 List of Indicators:
@@ -50,12 +52,12 @@ def _check_array(array):
 def _remove_nan(result):
     """
     Replaces numpy.nan with None value and returns a list.
-    Used with rsi, ema, sma, macd, bollinger_bands, stoch
+    Used with rsi, ema, sma, macd, bollinger_bands, stoch (talib functions)
     :param result: numpy.ndarray
     :return: list
     """
     where_are_nan = numpy.isnan(result)
-    result[where_are_nan] = None
+    result[where_are_nan] = default
     result = result.tolist()
     return result
 

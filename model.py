@@ -45,15 +45,7 @@ def date_format(date_array=None):
     return result
 
 
-class Condition:
-    def __init__(self, data1=None, data2=None, buy=Enum, sell=Enum):
-        self.data1 = data1
-        self.data2 = data2
-        self.buy = buy
-        self.sell = sell
-
-
-class Compare(Enum):
+class Operation(Enum):
     EQUAL = "="
     GREATER_THAN_EQUAL = ">="
     LESS_THAN_EQUAL = "<="
@@ -61,5 +53,23 @@ class Compare(Enum):
     LESS = "<"
     CROSSOVER = "CROSSOVER"
     CROSSUNDER = "CROSSUNDER"
+    RANGE_EQUAL = "<=  <="
+
+    def __str__(self):
+        return self.value
+
+
+class Logical(Enum):
     AND = "&"
     OR = "|"
+
+
+class Condition:
+    data1 = None
+    data2 = None
+    operation = None
+
+    def __init__(self, data1=list, data2=list, operation=Operation):
+        self.data1 = data1
+        self.data2 = data2
+        self.operation = operation
