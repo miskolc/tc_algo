@@ -1,7 +1,4 @@
 # TODO: Operation for building conditions and Logical for logic with conditions
-# TODO: Done - Condition class for evaluating data based on Operation(Enum)
-# TODO: Done - Create function for Crossover, Crossunder and ><= . Use eval() type of function
-# TODO: Done - Condition for a constant and Range Equal
 # TODO: Create a Condition function with params: HistoryData, indicator1, indicator2, operation/operator
 # TODO: If the operation results in success then place a [Date,True] value
 # TODO: For any reference contact or see cond.js
@@ -32,10 +29,14 @@ def condition_evaluator(condition=Condition):
                             offset = 1
                             result.append(False)
                         elif offset == 1:
+                            data_m_1 = condition.data1[i - 1]
+                            data_n_1 = condition.data2[i - 1]
                             if condition.operation == Operation.CROSSOVER:
-                                result.append(_cross_over(data_m=data_m, data_n=data_n))
+                                result.append(
+                                    _cross_over(data_m_1=data_m_1, data_n_1=data_n_1, data_m=data_m, data_n=data_n))
                             elif condition.operation == Operation.CROSSUNDER:
-                                result.append(_cross_under(data_m=data_m, data_n=data_n))
+                                result.append(
+                                    _cross_under(data_m_1=data_m_1, data_n_1=data_n_1, data_m=data_m, data_n=data_n))
                             else:
                                 result.append(False)
                     elif condition.operation == Operation.RANGE_EQUAL:
@@ -70,15 +71,15 @@ def _check_number(data):
         return False
 
 
-def _cross_over(data_m, data_n):
-    if data_m > data_n:
+def _cross_over(data_m_1, data_m, data_n_1, data_n):
+    if (data_m_1 < data_n_1) & (data_m > data_n):
         return True
     else:
         return False
 
 
-def _cross_under(data_m, data_n):
-    if data_m < data_n:
+def _cross_under(data_m_1, data_m, data_n_1, data_n):
+    if (data_m_1 > data_n_1) & (data_m < data_n):
         return True
     else:
         return False
