@@ -75,4 +75,5 @@ if __name__ == '__main__':
     reqd_indicators = dict(rsi=rsi, stoch=stoch, sma=sma, ema=ema, macd=macd, bbands=bbands, pivot=pivot)
     buy = [logic, condition3]
     sell = [condition4, condition5]
-    strategy.strategy_builder(data=var, strategy=strategy.BUY, buy=buy, sell=sell, indicator=reqd_indicators)
+    strategy.strategy_builder(data_list=var, strategy=strategy.BUY, buy=buy, sell=sell, indicator=reqd_indicators,
+                              profit=3, sl=1)

@@ -14,10 +14,105 @@ SELL = "sell"
 auto_op = Logical.AND
 
 
-def strategy_builder(data=list, indicator=dict, buy=Condition, sell=Condition, strategy=str):
-    master = data_parser.data_builder(data, **indicator)
+def strategy_builder(data_list=list, indicator=dict, buy=Condition, sell=Condition, profit=None,
+                     sl=None, strategy=str):
+    # noinspection PyArgumentList
+    master = data_parser.data_builder(data_list, **indicator)
     buy_condition = _evaluate_order_conditions(buy)
     sell_condition = _evaluate_order_conditions(sell)
+
+    profit_condition = _check_book_conditions(profit)
+    sl_condition = _check_book_conditions(sl)
+    target = None
+    sl = None
+    pending_order = False
+
+    # Master index for data will be one ahead of the buy and sell conditions
+    for i in range(len(buy_condition)):
+        buy_signal = buy_condition[i]
+        sell_signal = sell_condition[i]
+        date = master[i + 1][0]
+        # open = master[i + 1][1]
+        # high = master[i + 1][2]
+        # low = master[i + 1][3]
+        close = master[i + 1][4]
+        # If order is pending book profit or sl
+        if pending_order:
+            if (profit_condition is not None) & (type(profit_condition) == list):
+                target = profit_condition[i]
+            if (sl_condition is not None) & (type(sl_condition) == list):
+                sl = sl_condition[i]
+            if strategy == BUY:
+                if close == target:
+                    _logger.info("Target hit on %s" % date)
+                    pending_order = False
+                elif close == sl:
+                    _logger.info("SL hit on %s" % date)
+                    pending_order = False
+                elif sell_signal is True:
+                    _logger.info("Date: %s Price: %s" % (date, close))
+                    _logger.info(SELL)
+                    pending_order = False
+
+                    if (profit_condition is not None) & (type(profit_condition) == float):
+                        order_target = close - close * profit_condition
+                        target = order_target
+                    if (sl_condition is not None) & (type(sl_condition) == float):
+                        order_sl = close + close * sl_condition
+                        sl = order_sl
+                    _logger.info("Date: %s Price: %s" % (date, close))
+                    _logger.info("Placed a %s order with target %s and sl %s" % (SELL, order_target, order_sl))
+                    pending_order = True
+
+            if strategy == SELL:
+                if buy_signal is True:
+                    if close == target:
+                        _logger.info("Target hit on %s" % date)
+                        pending_order = False
+                    elif close == sl:
+                        _logger.info("SL hit on %s" % date)
+                        pending_order = False
+                    elif sell_signal is True:
+                        _logger.info("Date: %s Price: %s" % (date, close))
+                        _logger.info(BUY)
+                        pending_order = False
+
+                        if (profit_condition is not None) & (type(profit_condition) == float):
+                            order_target = close + close * profit_condition
+                            target = order_target
+                        if (sl_condition is not None) & (type(sl_condition) == float):
+                            order_sl = close - close * sl_condition
+                            sl = order_sl
+                        _logger.info("Date: %s Price: %s" % (date, close))
+                        _logger.info("Placed a %s order with target %s and sl %s" % (BUY, order_target, order_sl))
+                        pending_order = True
+
+        # If there is no pending order then place order according to the strategy
+        else:
+            order_target = None
+            order_sl = None
+            if strategy == BUY:
+                if buy_signal is True:
+                    if (profit_condition is not None) & (type(profit_condition) == float):
+                        order_target = close + close * profit_condition
+                        target = order_target
+                    if (sl_condition is not None) & (type(sl_condition) == float):
+                        order_sl = close - close * sl_condition
+                        sl = order_sl
+                    _logger.info("Date: %s Price: %s" % (date, close))
+                    _logger.info("Placed a %s order with target %s and sl %s" % (BUY, order_target, order_sl))
+                    pending_order = True
+            if strategy == SELL:
+                if sell_signal is True:
+                    if (profit_condition is not None) & (type(profit_condition) == float):
+                        order_target = close - close * profit_condition
+                        target = order_target
+                    if (sl_condition is not None) & (type(sl_condition) == float):
+                        order_sl = close + close * sl_condition
+                        sl = order_sl
+                    _logger.info("Date: %s Price: %s" % (date, close))
+                    _logger.info("Placed a %s order with target %s and sl %s" % (SELL, order_target, order_sl))
+                    pending_order = True
 
 
 def _evaluate_order_conditions(order) -> list:
@@ -26,28 +121,29 @@ def _evaluate_order_conditions(order) -> list:
     if type(order) == list:
         for item in order:
             if type(item) == Condition:
-                order_evaluator.append(_condition_evaluator(item))
+                order_evaluator.append(_calc_condition(item))
             elif type(item) == ConditionsLogic:
-                order_evaluator.append(_evaluate_conditions_logic(item))
+                order_evaluator.append(_calc_conditions_logic(item))
             else:
                 _logger.warning("Incorrect condition in Order")
         if len(order_evaluator) == 1:
             result = (order_evaluator[0])
         elif len(order_evaluator) > 1:
             while len(order_evaluator) == 1:
+                # noinspection PyTypeChecker
                 order_evaluator[0] = _logic_evaluator(order_evaluator[0], order_evaluator[1], operation=auto_op)
                 order_evaluator.pop(1)
             result = (order_evaluator[0])
     elif type(order) == Condition:
-        result = (_condition_evaluator(order))
+        result = (_calc_condition(order))
     elif type(order) == ConditionsLogic:
-        result = (_evaluate_conditions_logic(order))
+        result = (_calc_conditions_logic(order))
     else:
         _logger.warning("Incorrect condition in Order or no Condition specified")
     return result
 
 
-def _evaluate_conditions_logic(cond_logic=ConditionsLogic):
+def _calc_conditions_logic(cond_logic=ConditionsLogic):
     temp = []
     cond1 = cond_logic.cond1
     cond2 = cond_logic.cond2
@@ -61,9 +157,9 @@ def _evaluate_conditions_logic(cond_logic=ConditionsLogic):
 
 def _evaluate_logical_element(logic_element):
     if type(logic_element) == Condition:
-        return _condition_evaluator(logic_element)
+        return _calc_condition(logic_element)
     elif type(logic_element) == ConditionsLogic:
-        return _evaluate_conditions_logic(logic_element)
+        return _calc_conditions_logic(logic_element)
     else:
         _logger.warning("Unable to evaluate condition in ConditionsLogic element")
         return None
@@ -78,7 +174,7 @@ def _logic_evaluator(arr1, arr2, operation=Logical):
     return result
 
 
-def _condition_evaluator(condition=Condition) -> list:
+def _calc_condition(condition=Condition) -> list:
     result = []
     offset = 0
     if condition.data2 is not None:
@@ -116,6 +212,19 @@ def _condition_evaluator(condition=Condition) -> list:
             else:
                 _logger.warning("No operation specified in %s" % condition)
     return result
+
+
+def _check_book_conditions(order):
+    if order is None:
+        _logger.warning("No condition specified in profit/sl")
+        return None
+    elif _check_number(order):
+        _logger.debug("Book value in percentage: %s" % order)
+        return (float(order)) / 100.0
+    else:
+        _logger.debug("Book value not in percentage")
+        result = _evaluate_order_conditions(order)
+        return result
 
 
 def _check_data(data):
