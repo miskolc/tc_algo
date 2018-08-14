@@ -11,48 +11,74 @@ from model import *
 _logger = logging.getLogger("strategy")
 BUY = "buy"
 SELL = "sell"
+auto_op = Logical.AND
 
 
-def strategy_builder(data=list, buy=list, sell=list, strategy=str, **kwargs):
-    master = data_parser.data_builder(data, **kwargs)
-    init_order = strategy
-    pending_order = False
-    buy_condition = []
-    sell_condition = []
-    profit, sl = [], []
-
-    buy_signals = _evaluate_conditions(buy_condition)
-    sell_signals = _evaluate_conditions(sell_condition)
+def strategy_builder(data=list, indicator=dict, buy=Condition, sell=Condition, strategy=str):
+    master = data_parser.data_builder(data, **indicator)
+    buy_condition = _evaluate_order_conditions(buy)
+    sell_condition = _evaluate_order_conditions(sell)
 
 
 def _evaluate_order_conditions(order) -> list:
     result = []
-    if type(order) == Condition:
-        order_condition = [order]
+    order_evaluator = []
+    if type(order) == list:
+        for item in order:
+            if type(item) == Condition:
+                order_evaluator.append(_condition_evaluator(item))
+            elif type(item) == ConditionsLogic:
+                order_evaluator.append(_evaluate_conditions_logic(item))
+            else:
+                _logger.warning("Incorrect condition in Order")
+        if len(order_evaluator) == 1:
+            result = (order_evaluator[0])
+        elif len(order_evaluator) > 1:
+            while len(order_evaluator) == 1:
+                order_evaluator[0] = _logic_evaluator(order_evaluator[0], order_evaluator[1], operation=auto_op)
+                order_evaluator.pop(1)
+            result = (order_evaluator[0])
+    elif type(order) == Condition:
+        result = (_condition_evaluator(order))
     elif type(order) == ConditionsLogic:
-        order_condition = _evaluate_conditions_logic(order)
-    elif type(order) == list:
-        order_condition = order
+        result = (_evaluate_conditions_logic(order))
     else:
-        _logger.warning("Incorrect condition in Order")
+        _logger.warning("Incorrect condition in Order or no Condition specified")
     return result
 
 
-def _evaluate_conditions_logic(order):
+def _evaluate_conditions_logic(cond_logic=ConditionsLogic):
+    temp = []
+    cond1 = cond_logic.cond1
+    cond2 = cond_logic.cond2
+    op = cond_logic.logic
+    temp.append(_evaluate_logical_element(cond1))
+    temp.append(_evaluate_logical_element(cond2))
+    result = (_logic_evaluator(temp[0], temp[1], operation=op))
+    # _logger.warning("Incorrect data type specified in ConditionLogic Object")
+    return result
+
+
+def _evaluate_logical_element(logic_element):
+    if type(logic_element) == Condition:
+        return _condition_evaluator(logic_element)
+    elif type(logic_element) == ConditionsLogic:
+        return _evaluate_conditions_logic(logic_element)
+    else:
+        _logger.warning("Unable to evaluate condition in ConditionsLogic element")
+        return None
+
+
+def _logic_evaluator(arr1, arr2, operation=Logical):
     result = []
+    exp = 'item1 %s item2' % operation
+    for i in range(len(arr1)):
+        data = {"item1": arr1[i], "item2": arr2[i]}
+        result.append(eval(exp, data))
     return result
 
 
-def _evaluate_conditions(conditions=list):
-    result = []
-    cond_values = []
-    for item in conditions:
-        cond_values.append(_condition_evaluator(item))
-    print(len(cond_values))
-    return result
-
-
-def _condition_evaluator(condition=Condition):
+def _condition_evaluator(condition=Condition) -> list:
     result = []
     offset = 0
     if condition.data2 is not None:

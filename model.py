@@ -82,6 +82,10 @@ class Logical(Enum):
 
 
 class ConditionsLogic:
+    logic = None
+    cond1 = None
+    cond2 = None
+
     def __init__(self, condition1=Condition, condition2=Condition, logical=Logical):
         self.cond1 = condition1
         self.cond2 = condition2

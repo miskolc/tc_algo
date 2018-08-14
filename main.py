@@ -72,5 +72,7 @@ if __name__ == '__main__':
     condition4 = Condition(data1=sma, data2=ema, operation=Operation.CROSSUNDER)
     condition5 = Condition(data1=rsi, data2=80, operation=Operation.GREATER)
     logic = ConditionsLogic(condition1=condition1, condition2=condition2, logical=Logical.OR)
-    strategy.strategy_builder(data=var, strategy=strategy.BUY, buy=[logic, condition3], sell=[condition4, condition5],
-                              rsi=rsi, stoch=stoch, sma=sma, ema=ema, macd=macd, bbands=bbands, pivot=pivot)
+    reqd_indicators = dict(rsi=rsi, stoch=stoch, sma=sma, ema=ema, macd=macd, bbands=bbands, pivot=pivot)
+    buy = [logic, condition3]
+    sell = [condition4, condition5]
+    strategy.strategy_builder(data=var, strategy=strategy.BUY, buy=buy, sell=sell, indicator=reqd_indicators)
