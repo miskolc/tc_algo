@@ -1,6 +1,3 @@
-# TODO: Operation for building conditions and Logical for logic with conditions
-# TODO: Create a Condition function with params: HistoryData, indicator1, indicator2, operation/operator
-# TODO: If the operation results in success then place a [Date,True] value
 # TODO: For any reference contact or see cond.js
 import logging
 
@@ -11,21 +8,30 @@ from model import *
 _logger = logging.getLogger("strategy")
 BUY = "buy"
 SELL = "sell"
+TARGET = "target"
+SL = "sl"
 auto_op = Logical.AND
 
 
-def strategy_builder(data_list=list, indicator=dict, buy=Condition, sell=Condition, profit=None,
-                     sl=None, strategy=str):
+def strategy_builder(data_list=list, indicator=dict, buy=Condition, sell=Condition, target=None,
+                     sl=None, strategy=str, qty=1):
     # noinspection PyArgumentList
     master = data_parser.data_builder(data_list, **indicator)
     buy_condition = _evaluate_order_conditions(buy)
     sell_condition = _evaluate_order_conditions(sell)
 
-    profit_condition = _check_book_conditions(profit)
+    profit_condition = _check_book_conditions(target)
     sl_condition = _check_book_conditions(sl)
-    target = None
-    sl = None
+    order_target = None
+    order_sl = None
     pending_order = False
+
+    bt_date = []
+    bt_signal = []
+    bt_qty = []
+    bt_price = []
+    bt_pl = []
+    bt_cum_pl = []
 
     # Master index for data will be one ahead of the buy and sell conditions
     for i in range(len(buy_condition)):
@@ -36,83 +42,109 @@ def strategy_builder(data_list=list, indicator=dict, buy=Condition, sell=Conditi
         # high = master[i + 1][2]
         # low = master[i + 1][3]
         close = master[i + 1][4]
+
+        def bt_add_order(signal, pl=None, cum_pl=None):
+            bt_date.append(date)
+            bt_signal.append(signal)
+            bt_qty.append(qty)
+            bt_price.append(close)
+            bt_pl.append(pl)
+            bt_cum_pl.append(cum_pl)
+
+        def buy_order():
+            global order_target, order_sl, pending_order
+            if (profit_condition is not None) & (type(profit_condition) == float):
+                order_target = close + close * profit_condition
+            if (sl_condition is not None) & (type(sl_condition) == float):
+                order_sl = close - close * sl_condition
+            # if (profit_condition is not None) & (type(profit_condition) == list):
+            #     order_target = profit_condition[i]
+            # if (sl_condition is not None) & (type(sl_condition) == list):
+            #     order_sl = sl_condition[i]
+            _logger.debug("Date: %s Price: %s" % (date, close))
+            # _logger.debug("Placed a %s order with target %s and sl %s" % (BUY, order_target, order_sl))
+            bt_add_order(signal=BUY)
+
+        def sell_order():
+            global order_target, order_sl, pending_order
+            if (profit_condition is not None) & (type(profit_condition) == float):
+                order_target = close - close * profit_condition
+            if (sl_condition is not None) & (type(sl_condition) == float):
+                order_sl = close + close * sl_condition
+            # if (profit_condition is not None) & (type(profit_condition) == list):
+            #     order_target = profit_condition[i]
+            # if (sl_condition is not None) & (type(sl_condition) == list):
+            #     order_sl = sl_condition[i]
+            _logger.debug("Date: %s Price: %s" % (date, close))
+            # _logger.debug("Placed a %s order with target %s and sl %s" % (SELL, order_target, order_sl))
+            bt_add_order(signal=SELL)
+
         # If order is pending book profit or sl
         if pending_order:
             if (profit_condition is not None) & (type(profit_condition) == list):
-                target = profit_condition[i]
+                order_target = profit_condition[i]
             if (sl_condition is not None) & (type(sl_condition) == list):
-                sl = sl_condition[i]
-            if strategy == BUY:
-                if close == target:
-                    _logger.info("Target hit on %s" % date)
-                    pending_order = False
-                elif close == sl:
-                    _logger.info("SL hit on %s" % date)
-                    pending_order = False
-                elif sell_signal is True:
-                    _logger.info("Date: %s Price: %s" % (date, close))
-                    _logger.info(SELL)
-                    pending_order = False
+                order_sl = sl_condition[i]
 
-                    if (profit_condition is not None) & (type(profit_condition) == float):
-                        order_target = close - close * profit_condition
-                        target = order_target
-                    if (sl_condition is not None) & (type(sl_condition) == float):
-                        order_sl = close + close * sl_condition
-                        sl = order_sl
-                    _logger.info("Date: %s Price: %s" % (date, close))
-                    _logger.info("Placed a %s order with target %s and sl %s" % (SELL, order_target, order_sl))
+            if strategy == BUY:
+                if (order_target is True) | (order_target == close):
+                    _logger.debug("Target hit on %s" % date)
+                    pending_order = False
+                    bt_add_order(signal=TARGET + " " + SELL)
+                elif (order_sl is True) | (order_sl == close):
+                    _logger.debug("SL hit on %s" % date)
+                    pending_order = False
+                    bt_add_order(signal=SL + " " + SELL)
+
+                if sell_signal is True:
+                    if pending_order:
+                        _logger.debug("Date: %s Price: %s" % (date, close))
+                        _logger.debug(SELL)
+                        pending_order = False
+                        bt_add_order(signal=SELL)
+                    sell_order()
                     pending_order = True
+                    strategy = SELL
 
             if strategy == SELL:
+                if (order_target is True) | (order_target == close):
+                    _logger.debug("Target hit on %s" % date)
+                    pending_order = False
+                    bt_add_order(signal=TARGET + " " + BUY)
+                elif (order_sl is True) | (order_sl == close):
+                    _logger.debug("SL hit on %s" % date)
+                    pending_order = False
+                    bt_add_order(signal=SL + " " + BUY)
+
                 if buy_signal is True:
-                    if close == target:
-                        _logger.info("Target hit on %s" % date)
+                    if pending_order:
+                        _logger.debug("Date: %s Price: %s" % (date, close))
+                        _logger.debug(BUY)
                         pending_order = False
-                    elif close == sl:
-                        _logger.info("SL hit on %s" % date)
-                        pending_order = False
-                    elif sell_signal is True:
-                        _logger.info("Date: %s Price: %s" % (date, close))
-                        _logger.info(BUY)
-                        pending_order = False
-
-                        if (profit_condition is not None) & (type(profit_condition) == float):
-                            order_target = close + close * profit_condition
-                            target = order_target
-                        if (sl_condition is not None) & (type(sl_condition) == float):
-                            order_sl = close - close * sl_condition
-                            sl = order_sl
-                        _logger.info("Date: %s Price: %s" % (date, close))
-                        _logger.info("Placed a %s order with target %s and sl %s" % (BUY, order_target, order_sl))
-                        pending_order = True
-
+                        bt_add_order(signal=BUY)
+                    buy_order()
+                    pending_order = True
+                    strategy = BUY
         # If there is no pending order then place order according to the strategy
         else:
-            order_target = None
-            order_sl = None
             if strategy == BUY:
                 if buy_signal is True:
-                    if (profit_condition is not None) & (type(profit_condition) == float):
-                        order_target = close + close * profit_condition
-                        target = order_target
-                    if (sl_condition is not None) & (type(sl_condition) == float):
-                        order_sl = close - close * sl_condition
-                        sl = order_sl
-                    _logger.info("Date: %s Price: %s" % (date, close))
-                    _logger.info("Placed a %s order with target %s and sl %s" % (BUY, order_target, order_sl))
+                    buy_order()
                     pending_order = True
             if strategy == SELL:
                 if sell_signal is True:
-                    if (profit_condition is not None) & (type(profit_condition) == float):
-                        order_target = close - close * profit_condition
-                        target = order_target
-                    if (sl_condition is not None) & (type(sl_condition) == float):
-                        order_sl = close + close * sl_condition
-                        sl = order_sl
-                    _logger.info("Date: %s Price: %s" % (date, close))
-                    _logger.info("Placed a %s order with target %s and sl %s" % (SELL, order_target, order_sl))
+                    sell_order()
                     pending_order = True
+
+    result = dict(
+        Date=bt_date,
+        Signal=bt_signal,
+        QTY=bt_qty,
+        Price=bt_price,
+        P_L=bt_pl,
+        CUM_P_L=bt_cum_pl
+    )
+    return result
 
 
 def _evaluate_order_conditions(order) -> list:

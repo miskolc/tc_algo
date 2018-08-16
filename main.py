@@ -1,6 +1,8 @@
 import logging
 from argparse import ArgumentParser
 from datetime import *
+import plotly.plotly
+import plotly.graph_objs as go
 import api
 import charting
 import indicators
@@ -11,7 +13,8 @@ from model import *
 # TODO: 1. Make all Indicators - Done
 # TODO: 2. Work on OHLC data - Done
 # TODO: 3. Build Strategies
-# TODO: 4. Add command line interface
+# TODO: 4. Back Testing
+# TODO: 5. Add command line interface
 import strategy
 
 if __name__ == '__main__':
@@ -38,9 +41,9 @@ if __name__ == '__main__':
     # close = numpy.random.random(105) * 20
     # high = numpy.random.random(105) * 20
     # low = numpy.random.random(105) * 20
-    var = data_parser.get_data(start_date="14/08/2017")
+    var = data_parser.get_data(start_date="17/08/2017")
     # logging.debug(var)
-    # date = data_parser.get_date(var)
+    date = data_parser.get_date(var)
     # open = data_parser.get_open(var)
     high = data_parser.get_high(var)
     low = data_parser.get_low(var)
@@ -67,13 +70,38 @@ if __name__ == '__main__':
     #     if result_cond[i] is True:
     #         print("Date: %s, Close: %s" % (date[i], close[i]))
     condition1 = Condition(data1=sma, data2=ema, operation=Operation.CROSSOVER)
-    condition2 = Condition(data1=rsi, data2=20, operation=Operation.LESS)
+    condition2 = Condition(data1=rsi, data2=40, operation=Operation.LESS_THAN)
     condition3 = Condition(data1=ema9, data2=ema18, operation=Operation.CROSSOVER)
     condition4 = Condition(data1=sma, data2=ema, operation=Operation.CROSSUNDER)
-    condition5 = Condition(data1=rsi, data2=80, operation=Operation.GREATER)
+    condition5 = Condition(data1=rsi, data2=70, operation=Operation.GREATER_THAN)
     logic = ConditionsLogic(condition1=condition1, condition2=condition2, logical=Logical.OR)
     reqd_indicators = dict(rsi=rsi, stoch=stoch, sma=sma, ema=ema, macd=macd, bbands=bbands, pivot=pivot)
     buy = [logic, condition3]
     sell = [condition4, condition5]
-    strategy.strategy_builder(data_list=var, strategy=strategy.BUY, buy=buy, sell=sell, indicator=reqd_indicators,
-                              profit=3, sl=1)
+    result = strategy.strategy_builder(data_list=var, strategy=strategy.BUY, buy=condition1, sell=condition4,
+                                       indicator=reqd_indicators, target=condition5, sl=condition2)
+
+    keys = []
+    values = []
+    for key, value in result.items():
+        keys.append(key)
+        values.append(value)
+    # for i in range(len(var)):
+    #     if var[i].date == date(2018, 8, 13):
+    #         print(rsi[i])
+    #         print(var[i].close)
+
+    trace = go.Table(
+        header=dict(values=keys,
+                    line=dict(color='#7D7F80'),
+                    fill=dict(color='#a1c3d1'),
+                    align=['left'] * 5),
+        cells=dict(values=values,
+                   line=dict(color='#7D7F80'),
+                   fill=dict(color='#EDFAFF'),
+                   align=['left'] * 5))
+
+    layout = dict(width=700, height=700)
+    data = [trace]
+    fig = dict(data=data)
+    plotly.offline.plot(fig, filename='table.html', )
