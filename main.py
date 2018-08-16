@@ -1,8 +1,6 @@
 import logging
 from argparse import ArgumentParser
 from datetime import *
-import plotly.plotly
-import plotly.graph_objs as go
 import api
 import charting
 import indicators
@@ -41,7 +39,7 @@ if __name__ == '__main__':
     # close = numpy.random.random(105) * 20
     # high = numpy.random.random(105) * 20
     # low = numpy.random.random(105) * 20
-    var = data_parser.get_data(start_date="17/08/2017")
+    var = data_parser.get_data()
     # logging.debug(var)
     date = data_parser.get_date(var)
     # open = data_parser.get_open(var)
@@ -81,27 +79,5 @@ if __name__ == '__main__':
     result = strategy.strategy_builder(data_list=var, strategy=strategy.BUY, buy=condition1, sell=condition4,
                                        indicator=reqd_indicators, target=condition5, sl=condition2)
 
-    keys = []
-    values = []
-    for key, value in result.items():
-        keys.append(key)
-        values.append(value)
-    # for i in range(len(var)):
-    #     if var[i].date == date(2018, 8, 13):
-    #         print(rsi[i])
-    #         print(var[i].close)
-
-    trace = go.Table(
-        header=dict(values=keys,
-                    line=dict(color='#7D7F80'),
-                    fill=dict(color='#a1c3d1'),
-                    align=['left'] * 5),
-        cells=dict(values=values,
-                   line=dict(color='#7D7F80'),
-                   fill=dict(color='#EDFAFF'),
-                   align=['left'] * 5))
-
-    layout = dict(width=700, height=700)
-    data = [trace]
-    fig = dict(data=data)
-    plotly.offline.plot(fig, filename='table.html', )
+    # strategy.show_results(result)
+    strategy.Strategies.macd(var)

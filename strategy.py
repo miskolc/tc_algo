@@ -1,6 +1,9 @@
 # TODO: For any reference contact or see cond.js
 import logging
 
+import plotly.plotly
+import plotly.graph_objs as go
+
 import data_parser
 import indicators
 from model import *
@@ -13,8 +16,41 @@ SL = "sl"
 auto_op = Logical.AND
 
 
-def strategy_builder(data_list=list, indicator=dict, buy=Condition, sell=Condition, target=None,
-                     sl=None, strategy=str, qty=1):
+class Strategies:
+
+    @staticmethod
+    def ma(data: list, ma_type: int = 0):
+        close = data_parser.get_close(data)
+        if ma_type == 1:
+            ma50 = indicators.ema(close, period=50)
+            ma200 = indicators.ema(close, period=200)
+        else:
+            ma50 = indicators.sma(close, period=50)
+            ma200 = indicators.sma(close, period=200)
+        buy = Condition(data1=ma50, data2=ma200, operation=Operation.CROSSOVER)
+        sell = Condition(data1=ma50, data2=ma200, operation=Operation.CROSSUNDER)
+        indicator = dict(ma50=ma50, ma200=ma200)
+        result = strategy_builder(data_list=data, strategy=BUY, buy=buy, sell=sell,
+                                  indicator=indicator)
+        show_results(result)
+
+    @staticmethod
+    def macd(data: list, ma_type: int = 0):
+        close = data_parser.get_close(data)
+        macd = indicators.macd(close)
+        macd_series = macd['macd']
+        macd_signal = macd['macdsignal']
+        buy = Condition(data1=macd_series, data2=macd_signal, operation=Operation.CROSSOVER)
+        sell = Condition(data1=macd_series, data2=macd_signal, operation=Operation.CROSSUNDER)
+        indicator = {"macd": macd['macd'], "macdsignal": macd['macdsignal'], "macdhist": macd['macdhist']}
+        result = strategy_builder(data_list=data, strategy=BUY, buy=buy, sell=sell,
+                                  indicator=indicator)
+        show_results(result)
+
+
+def strategy_builder(data_list: list, indicator: dict = None, buy: Condition = None, sell: Condition = None,
+                     target: Condition = None,
+                     sl: Condition = None, strategy: str = BUY, qty: int = 1):
     # noinspection PyArgumentList
     master = data_parser.data_builder(data_list, **indicator)
     buy_condition = _evaluate_order_conditions(buy)
@@ -311,3 +347,31 @@ def _evaluate_op(data_m, data_n, operation):
     data = {"var1": data_m, "var2": data_n}
     value = eval(exp, data)
     return value
+
+
+def show_results(result: dict):
+    keys = []
+    values = []
+    for key, value in result.items():
+        keys.append(key)
+        values.append(value)
+    # for i in range(len(var)):
+    #     if var[i].date == date(2018, 8, 13):
+    #         print(rsi[i])
+    #         print(var[i].close)
+
+    trace = go.Table(
+        header=dict(values=keys,
+                    line=dict(color='#7D7F80'),
+                    fill=dict(color='#a1c3d1'),
+                    align=['left'] * 5),
+        cells=dict(values=values,
+                   line=dict(color='#7D7F80'),
+                   fill=dict(color='#EDFAFF'),
+                   align=['left'] * 5))
+
+    # layout = dict(width=700, height=700)
+    data = [trace]
+    # fig = dict(data=data, layout=layout)
+    fig = dict(data=data)
+    plotly.offline.plot(fig, filename='result_table.html', )
