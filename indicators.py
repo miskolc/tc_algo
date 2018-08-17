@@ -309,13 +309,14 @@ def _get_ranges(min_date, max_date):
     if diff < delta:
         _logger.warning("Pivots can't be found for current data")
     else:
+
         while min_date <= max_date:
             current_range = _date_ranges(min_date)
             ranges.append(current_range)
             min_date = min_date + month_delta
-        if max_date < min_date:
-            month_range = _date_ranges(max_date)
-            ranges.append(month_range)
+        # if max_date < min_date:
+        #     month_range = _date_ranges(max_date)
+        #     ranges.append(month_range)
     return ranges
 
 
@@ -405,12 +406,12 @@ def _calc_pivot_points(high, low, close):
         _logger.debug("High for period: %s" % highest_high)
         _logger.debug("Low for period: %s" % lowest_low)
         _logger.debug("Close for the period: %s" % last_close)
-        pp = (highest_high + lowest_low + last_close) / 3
-        r1 = (2 * pp) - lowest_low
-        s1 = (2 * pp) - highest_high
-        r2 = pp + (highest_high - lowest_low)
-        s2 = pp - (highest_high - lowest_low)
-        r3 = highest_high + (2 * (pp - lowest_low))
-        s3 = lowest_low - (2 * (highest_high - pp))
+        pp = float((highest_high + lowest_low + last_close) / 3.0)
+        r1 = float((2.0 * pp) - lowest_low)
+        s1 = float((2.0 * pp) - highest_high)
+        r2 = float(pp + (highest_high - lowest_low))
+        s2 = float(pp - (highest_high - lowest_low))
+        r3 = float(highest_high + (2.0 * (pp - lowest_low)))
+        s3 = float(lowest_low - (2.0 * (highest_high - pp)))
         result = PivotObject(pp=pp, r1=r1, r2=r2, r3=r3, s1=s1, s2=s2, s3=s3)
     return result

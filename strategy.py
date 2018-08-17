@@ -35,7 +35,7 @@ class Strategies:
         show_results(result)
 
     @staticmethod
-    def macd(data: list, ma_type: int = 0):
+    def macd(data: list):
         close = data_parser.get_close(data)
         macd = indicators.macd(close)
         macd_series = macd['macd']
@@ -47,15 +47,78 @@ class Strategies:
                                   indicator=indicator)
         show_results(result)
 
+    @staticmethod
+    def rsi(data: list):
+        close = data_parser.get_close(data)
+        rsi = indicators.rsi(close)
+        buy = Condition(data1=rsi, data2=20, operation=Operation.LESS_THAN)
+        sell = Condition(data1=rsi, data2=80, operation=Operation.GREATER_THAN)
+        indicator = dict(rsi=rsi)
+        result = strategy_builder(data_list=data, strategy=BUY, buy=buy, sell=sell,
+                                  indicator=indicator)
+        show_results(result)
+
+    @staticmethod
+    def stoch(data: list):
+        high = data_parser.get_high(data)
+        low = data_parser.get_low(data)
+        close = data_parser.get_close(data)
+        stoch = indicators.stoch(high, low, close)
+        fastk = stoch['fastk']
+        fastd = stoch['fastd']
+        buy = Condition(data1=fastk, data2=fastd, operation=Operation.CROSSOVER)
+        sell = Condition(data1=fastk, data2=fastd, operation=Operation.CROSSUNDER)
+        indicator = {"fastk": stoch['fastk'], "fastd": stoch['fastd']}
+        result = strategy_builder(data_list=data, strategy=BUY, buy=buy, sell=sell,
+                                  indicator=indicator)
+        show_results(result)
+
+    @staticmethod
+    def bbands(data: list):
+        close = data_parser.get_close(data)
+        bbands = indicators.bollinger_bands(close, timeperiod=20)
+        upperband = bbands['upperband']
+        middleband = bbands['middleband']
+        lowerband = bbands['lowerband']
+        buy = Condition(data1=close, data2=middleband, operation=Operation.LESS_THAN)
+        sell = Condition(data1=close, data2=middleband, operation=Operation.GREATER_THAN)
+        indicator = {"upperband": bbands['upperband'], "middleband": bbands['middleband'],
+                     "lowerband": bbands['lowerband']}
+        result = strategy_builder(data_list=data, strategy=SELL, buy=buy, sell=sell,
+                                  indicator=indicator, target=lowerband, sl=upperband)
+        show_results(result)
+
+    @staticmethod
+    def pivot(data: list):
+        close = data_parser.get_close(data)
+        pivot = indicators.pivot(data)
+        pp = pivot['pp']
+        r1 = pivot['r1']
+        s1 = pivot['s1']
+        buy = Condition(data1=close, data2=pp, operation=Operation.GREATER_THAN)
+        sell = Condition(data1=close, data2=pp, operation=Operation.LESS_THAN)
+        indicator = {'pp': pp}
+        result = strategy_builder(data_list=data, strategy=BUY, buy=buy, sell=sell,
+                                  indicator=indicator, target=r1, sl=s1)
+        show_results(result)
+
 
 def strategy_builder(data_list: list, indicator: dict = None, buy: Condition = None, sell: Condition = None,
-                     target: Condition = None,
-                     sl: Condition = None, strategy: str = BUY, qty: int = 1):
+                     target: Condition = None, sl: Condition = None, strategy: str = BUY, qty: int = 1):
     # noinspection PyArgumentList
     master = data_parser.data_builder(data_list, **indicator)
-    buy_condition = _evaluate_order_conditions(buy)
-    sell_condition = _evaluate_order_conditions(sell)
-
+    length = 0
+    buy_condition, sell_condition = [], []
+    if buy is not None:
+        buy_condition = _evaluate_order_conditions(buy)
+        length = len(buy_condition)
+    if sell is not None:
+        sell_condition = _evaluate_order_conditions(sell)
+        length = len(sell_condition)
+    if buy is None:
+        buy_condition = [False] * length
+    if sell is None:
+        sell_condition = [False] * length
     profit_condition = _check_book_conditions(target)
     sl_condition = _check_book_conditions(sl)
     order_target = None
@@ -70,7 +133,7 @@ def strategy_builder(data_list: list, indicator: dict = None, buy: Condition = N
     bt_cum_pl = []
 
     # Master index for data will be one ahead of the buy and sell conditions
-    for i in range(len(buy_condition)):
+    for i in range(length):
         buy_signal = buy_condition[i]
         sell_signal = sell_condition[i]
         date = master[i + 1][0]
@@ -84,6 +147,10 @@ def strategy_builder(data_list: list, indicator: dict = None, buy: Condition = N
             bt_signal.append(signal)
             bt_qty.append(qty)
             bt_price.append(close)
+            if signal.__contains__(BUY):
+                pass
+            if signal.__contains__(SELL):
+                pass
             bt_pl.append(pl)
             bt_cum_pl.append(cum_pl)
 
@@ -132,7 +199,7 @@ def strategy_builder(data_list: list, indicator: dict = None, buy: Condition = N
                     pending_order = False
                     bt_add_order(signal=SL + " " + SELL)
 
-                if sell_signal is True:
+                if sell_signal:
                     if pending_order:
                         _logger.debug("Date: %s Price: %s" % (date, close))
                         _logger.debug(SELL)
@@ -152,7 +219,7 @@ def strategy_builder(data_list: list, indicator: dict = None, buy: Condition = N
                     pending_order = False
                     bt_add_order(signal=SL + " " + BUY)
 
-                if buy_signal is True:
+                if buy_signal:
                     if pending_order:
                         _logger.debug("Date: %s Price: %s" % (date, close))
                         _logger.debug(BUY)
@@ -164,11 +231,11 @@ def strategy_builder(data_list: list, indicator: dict = None, buy: Condition = N
         # If there is no pending order then place order according to the strategy
         else:
             if strategy == BUY:
-                if buy_signal is True:
+                if buy_signal:
                     buy_order()
                     pending_order = True
             if strategy == SELL:
-                if sell_signal is True:
+                if sell_signal:
                     sell_order()
                     pending_order = True
 
@@ -289,6 +356,14 @@ def _check_book_conditions(order):
     elif _check_number(order):
         _logger.debug("Book value in percentage: %s" % order)
         return (float(order)) / 100.0
+    elif type(order) == list:
+        if _check_number(order[-1]):
+            result = order
+            return result
+        else:
+            _logger.debug("Book value not in percentage")
+            result = _evaluate_order_conditions(order)
+            return result
     else:
         _logger.debug("Book value not in percentage")
         result = _evaluate_order_conditions(order)
