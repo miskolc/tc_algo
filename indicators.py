@@ -1,6 +1,5 @@
 import logging
 import calendar
-import math
 from datetime import *
 from dateutil import relativedelta
 
@@ -8,6 +7,7 @@ import talib
 from talib.abstract import Function
 from talib import MA_Type
 
+import constants
 from model import *
 
 _logger = logging.getLogger('indicator')
@@ -16,7 +16,6 @@ data_min = "data_min"
 data_max = "data_max"
 pivot_min = "pivot_min"
 pivot_max = "pivot_max"
-default = 1234567890.0
 
 """
 List of Indicators:
@@ -38,28 +37,6 @@ def indicator_info(indicator=""):
     else:
         info = Function(indicator).info
         _logger.debug(info)
-
-
-def _check_array(array):
-    """
-    Check if array has data.
-    :param array: list[numeric]
-    :return: Boolean
-    """
-    return (array is None) | (array == [])
-
-
-def _remove_nan(result):
-    """
-    Replaces numpy.nan with None value and returns a list.
-    Used with rsi, ema, sma, macd, bollinger_bands, stoch (talib functions)
-    :param result: numpy.ndarray
-    :return: list
-    """
-    where_are_nan = numpy.isnan(result)
-    result[where_are_nan] = default
-    result = result.tolist()
-    return result
 
 
 def rsi(array=None, period=14) -> list:
@@ -414,4 +391,27 @@ def _calc_pivot_points(high, low, close):
         r3 = float(highest_high + (2.0 * (pp - lowest_low)))
         s3 = float(lowest_low - (2.0 * (highest_high - pp)))
         result = PivotObject(pp=pp, r1=r1, r2=r2, r3=r3, s1=s1, s2=s2, s3=s3)
+    return result
+
+
+def _check_array(array):
+    """
+    Check if array has data.
+    :param array: list[numeric]
+    :return: Boolean
+    """
+    return (array is None) | (array == [])
+
+
+def _remove_nan(result):
+    """
+    Replaces numpy.nan with None value and returns a list.
+    Used with rsi, ema, sma, macd, bollinger_bands, stoch (talib functions)
+    :param result: numpy.ndarray
+    :return: list
+    """
+    result = result.tolist()
+    for i in range(len(result)):
+        if numpy.isnan(result[i]):
+            result[i] = constants.default
     return result

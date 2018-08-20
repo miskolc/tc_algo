@@ -1,6 +1,10 @@
+from typing import Union
+
 import numpy
 from dateutil import parser
 from enum import Enum
+
+import constants
 
 
 class DataObject:
@@ -19,7 +23,8 @@ class DataObject:
 
 
 class PivotObject:
-    def __init__(self, pp=None, r1=None, r2=None, r3=None, s1=None, s2=None, s3=None):
+    def __init__(self, pp=constants.default, r1=constants.default, r2=constants.default, r3=constants.default,
+                 s1=constants.default, s2=constants.default, s3=constants.default):
         self.pp = pp
         self.r1 = r1
         self.r2 = r2
@@ -90,3 +95,45 @@ class ConditionsLogic:
         self.cond1 = condition1
         self.cond2 = condition2
         self.logic = logical
+
+
+class ChartType(Enum):
+    CANDLESTICK = 0
+    LINE = 1
+    HISTOGRAM = 2
+    BAR_CHART = 3
+
+    def __str__(self):
+        return str(self.value)
+
+
+class ChartAxis(Enum):
+    ON_AXIS = 0
+    DIFFERENT_AXIS = 1
+
+    def __str__(self):
+        return str(self.value)
+
+
+class ChartColor(Enum):
+    RED = 'RED'
+    BLUE = 'BLUE'
+    GREEN = 'GREEN'
+    YELLOW = 'YELLOW'
+    PINK = 'PINK'
+    PURPLE = 'PURPLE'
+
+    def __str__(self):
+        return self.value
+
+
+# 00000020247980318
+# SBIN0003352
+class ChartElement:
+    def __init__(self, data: Union[list, dict], label: str, chart_type: ChartType, axis: ChartAxis,
+                 color: Union[ChartColor, str]):
+        self.data = data
+        self.type = chart_type
+        self.axis = axis
+        self.color = color
+        self.label = label

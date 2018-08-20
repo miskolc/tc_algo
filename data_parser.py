@@ -8,6 +8,7 @@ import api
 from model import *
 
 _logger = logging.getLogger("data_parser")
+br = "^"
 
 
 def get_date_ohlc(symbol=api.nifty50, start_date=api.start_date, end_date=""):
@@ -124,31 +125,31 @@ def current_month(timestamp=""):
     return current.month
 
 
-def data_builder(data, **kwargs):
+def data_builder(data, charts: list = None):
     params = ["date", "open", "high", "low", "close", "volume"]
-    keys_index = 0
-    keys = []
-    for key, value in kwargs.items():
-        keys.append(key)
     father = _append_data(data)
     indicators = []
-    values = kwargs.values()
-    for item in values:
-        if type(item) == list:
-            _logger.debug("list")
-            indicators.append(item)
-            params.append(keys[keys_index])
-            keys_index += 1
-        elif type(item) == dict:
-            _logger.debug('dict')
-            for key, value in item.items():
-                params.append(keys[keys_index] + "_" + key)
-            dict_values = item.values()
-            for child in dict_values:
-                indicators.append(child)
-            keys_index += 1
-        else:
-            _logger.warning("Unknown data format or type")
+    if charts is None:
+        _logger.debug("No chart element specified")
+    elif type(charts) == list:
+        _logger.debug("Charts specified")
+        for chart_element in charts:
+            if type(chart_element) == ChartElement:
+                parameter = "%s^%s^%s^%s" % (
+                    chart_element.type, chart_element.axis, chart_element.color, chart_element.label)
+                item = chart_element.data
+                if type(item) == list:
+                    _logger.debug("list")
+                    params.append(parameter)
+                    indicators.append(item)
+                elif type(item) == dict:
+                    _logger.debug('dict')
+                    for key, value in item.items():
+                        params.append("%s_%s" % (parameter, key))
+                        indicators.append(value)
+                else:
+                    _logger.warning("Unknown data format or type")
+
     father = _append_indicators(indicators, father)
     _logger.debug("Params are: %s" % params)
     result = [params]
@@ -160,7 +161,10 @@ def data_builder(data, **kwargs):
 def _append_data(data):
     result = []
     for child in data:
-        grand_child = [child.date, child.open, child.high, child.low, child.close, child.volume]
+        if numpy.isnan(child.volume):
+            child.volume = 'null'
+        grand_child = ["%s-%s-%s" % (child.date.year, child.date.month, child.date.day), child.open, child.high,
+                       child.low, child.close, child.volume]
         result.append(grand_child)
     return result
 

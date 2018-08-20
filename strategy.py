@@ -4,6 +4,7 @@ import logging
 import plotly.plotly
 import plotly.graph_objs as go
 
+import constants
 import data_parser
 import indicators
 from model import *
@@ -378,7 +379,7 @@ def _check_data(data):
             True if data is valid(have a value)
             False if data is invalid
     """
-    if (data == indicators.default) | (data is None):
+    if (data == constants.default) | (data is None):
         return False
     else:
         return True
