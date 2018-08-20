@@ -30,9 +30,13 @@ class Strategies:
             ma200 = indicators.sma(close, period=200)
         buy = Condition(data1=ma50, data2=ma200, operation=Operation.CROSSOVER)
         sell = Condition(data1=ma50, data2=ma200, operation=Operation.CROSSUNDER)
-        indicator = dict(ma50=ma50, ma200=ma200)
+        chart_1 = ChartElement(data=ma50, label="ma50", chart_type=ChartType.LINE, axis=ChartAxis.ON_AXIS,
+                               color=ChartColor.GREEN)
+        chart_2 = ChartElement(data=ma200, label="ma200", chart_type=ChartType.LINE, axis=ChartAxis.ON_AXIS,
+                               color=ChartColor.RED)
+        charts = [chart_1, chart_2]
         result = strategy_builder(data_list=data, strategy=BUY, buy=buy, sell=sell,
-                                  indicator=indicator)
+                                  charts=charts)
         show_results(result)
 
     @staticmethod
@@ -43,9 +47,11 @@ class Strategies:
         macd_signal = macd['macdsignal']
         buy = Condition(data1=macd_series, data2=macd_signal, operation=Operation.CROSSOVER)
         sell = Condition(data1=macd_series, data2=macd_signal, operation=Operation.CROSSUNDER)
-        indicator = {"macd": macd['macd'], "macdsignal": macd['macdsignal'], "macdhist": macd['macdhist']}
+        chart_1 = ChartElement(data=macd, label="macd", chart_type=ChartType.LINE, axis=ChartAxis.ON_AXIS,
+                               color=ChartColor.BLUE)
+        charts = [chart_1]
         result = strategy_builder(data_list=data, strategy=BUY, buy=buy, sell=sell,
-                                  indicator=indicator)
+                                  charts=charts)
         show_results(result)
 
     @staticmethod
@@ -54,9 +60,11 @@ class Strategies:
         rsi = indicators.rsi(close)
         buy = Condition(data1=rsi, data2=20, operation=Operation.LESS_THAN)
         sell = Condition(data1=rsi, data2=80, operation=Operation.GREATER_THAN)
-        indicator = dict(rsi=rsi)
+        chart_1 = ChartElement(data=rsi, label="rsi", chart_type=ChartType.LINE, axis=ChartAxis.ON_AXIS,
+                               color=ChartColor.PINK)
+        charts = [chart_1]
         result = strategy_builder(data_list=data, strategy=BUY, buy=buy, sell=sell,
-                                  indicator=indicator)
+                                  charts=charts)
         show_results(result)
 
     @staticmethod
@@ -69,9 +77,10 @@ class Strategies:
         fastd = stoch['fastd']
         buy = Condition(data1=fastk, data2=fastd, operation=Operation.CROSSOVER)
         sell = Condition(data1=fastk, data2=fastd, operation=Operation.CROSSUNDER)
-        indicator = {"fastk": stoch['fastk'], "fastd": stoch['fastd']}
+        charts = [
+            ChartElement(data=stoch, label="STOCH", chart_type=ChartType.LINE, axis=ChartAxis.ON_AXIS, color="#85FF45")]
         result = strategy_builder(data_list=data, strategy=BUY, buy=buy, sell=sell,
-                                  indicator=indicator)
+                                  charts=charts)
         show_results(result)
 
     @staticmethod
@@ -83,10 +92,11 @@ class Strategies:
         lowerband = bbands['lowerband']
         buy = Condition(data1=close, data2=middleband, operation=Operation.LESS_THAN)
         sell = Condition(data1=close, data2=middleband, operation=Operation.GREATER_THAN)
-        indicator = {"upperband": bbands['upperband'], "middleband": bbands['middleband'],
-                     "lowerband": bbands['lowerband']}
+        chart_1 = ChartElement(data=bbands, label="bbands", chart_type=ChartType.LINE, axis=ChartAxis.ON_AXIS,
+                               color="magenta")
+        charts = [chart_1]
         result = strategy_builder(data_list=data, strategy=SELL, buy=buy, sell=sell,
-                                  indicator=indicator, target=lowerband, sl=upperband)
+                                  charts=charts, target=lowerband, sl=upperband)
         show_results(result)
 
     @staticmethod
@@ -98,16 +108,18 @@ class Strategies:
         s1 = pivot['s1']
         buy = Condition(data1=close, data2=pp, operation=Operation.GREATER_THAN)
         sell = Condition(data1=close, data2=pp, operation=Operation.LESS_THAN)
-        indicator = {'pp': pp}
+        chart_1 = ChartElement(data=pivot, label="pivot", chart_type=ChartType.LINE, axis=ChartAxis.ON_AXIS,
+                               color=ChartColor.GREEN)
+        charts = [chart_1]
         result = strategy_builder(data_list=data, strategy=BUY, buy=buy, sell=sell,
-                                  indicator=indicator, target=r1, sl=s1)
+                                  charts=charts, target=r1, sl=s1)
         show_results(result)
 
 
-def strategy_builder(data_list: list, indicator: dict = None, buy: Condition = None, sell: Condition = None,
+def strategy_builder(data_list: list, charts: list = None, buy: Condition = None, sell: Condition = None,
                      target: Condition = None, sl: Condition = None, strategy: str = BUY, qty: int = 1):
     # noinspection PyArgumentList
-    master = data_parser.data_builder(data_list, **indicator)
+    master = data_parser.data_builder(data_list, charts=charts)
     length = 0
     buy_condition, sell_condition = [], []
     if buy is not None:
@@ -425,7 +437,7 @@ def _evaluate_op(data_m, data_n, operation):
     return value
 
 
-def show_results(result: dict):
+def show_results(result: dict, filename: str = 'result_table.html'):
     keys = []
     values = []
     for key, value in result.items():
@@ -450,4 +462,4 @@ def show_results(result: dict):
     data = [trace]
     # fig = dict(data=data, layout=layout)
     fig = dict(data=data)
-    plotly.offline.plot(fig, filename='result_table.html', )
+    plotly.offline.plot(fig, filename, )

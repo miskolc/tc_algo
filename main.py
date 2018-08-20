@@ -6,6 +6,7 @@ import charting
 import indicators
 import data_parser
 from model import *
+import strategy
 from strategy import Strategies
 
 # TODO: Follow the below order:
@@ -14,7 +15,6 @@ from strategy import Strategies
 # TODO: 3. Build Strategies
 # TODO: 4. Back Testing
 # TODO: 5. Add command line interface
-import strategy
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
@@ -40,38 +40,38 @@ if __name__ == '__main__':
     # close = numpy.random.random(105) * 20
     # high = numpy.random.random(105) * 20
     # low = numpy.random.random(105) * 20
-    var = data_parser.get_data(start_date="2017-01-01")
+    var = data_parser.get_data()
     # logging.debug(var)
     # date = data_parser.get_date(var)
     # open = data_parser.get_open(var)
-    high = data_parser.get_high(var)
-    low = data_parser.get_low(var)
-    close = data_parser.get_close(var)
+    # high = data_parser.get_high(var)
+    # low = data_parser.get_low(var)
+    # close = data_parser.get_close(var)
     # indicators.indicator_info("STOCH")
-    rsi = indicators.rsi(close)
-    stoch = indicators.stoch(high, low, close)
-    sma = indicators.sma(close, 30)
-    ema = indicators.ema(close, 30)
-    macd = indicators.macd(close)
-    bbands = indicators.bollinger_bands(close)
-    pivot = indicators.pivot(var)
-    chart1 = ChartElement(data=rsi, chart_type=ChartType.LINE, axis=ChartAxis.DIFFERENT_AXIS, color=ChartColor.RED,
-                          label="RSI")
-    chart2 = ChartElement(data=stoch, chart_type=ChartType.LINE, axis=ChartAxis.ON_AXIS, color=ChartColor.BLUE,
-                          label="STOCH")
-    chart3 = ChartElement(data=sma, chart_type=ChartType.LINE, axis=ChartAxis.ON_AXIS, color=ChartColor.PINK,
-                          label="SMA")
-    chart4 = ChartElement(data=ema, chart_type=ChartType.LINE, axis=ChartAxis.ON_AXIS, color=ChartColor.PURPLE,
-                          label="EMA")
-    chart5 = ChartElement(data=macd, chart_type=ChartType.LINE, axis=ChartAxis.ON_AXIS, color=ChartColor.YELLOW,
-                          label="MACD")
-    chart6 = ChartElement(data=bbands, chart_type=ChartType.LINE, axis=ChartAxis.ON_AXIS, color=ChartColor.GREEN,
-                          label="BBANDS")
-    chart7 = ChartElement(data=pivot, chart_type=ChartType.LINE, axis=ChartAxis.ON_AXIS, color="Magenta",
-                          label="Pivot")
-    charts = [chart1, chart2, chart3, chart4, chart5, chart6, chart7]
-    data_with_indicators = data_parser.data_builder(var, charts=charts)
-    print(data_with_indicators)
+    # rsi = indicators.rsi(close)
+    # stoch = indicators.stoch(high, low, close)
+    # sma = indicators.sma(close, 30)
+    # ema = indicators.ema(close, 30)
+    # macd = indicators.macd(close)
+    # bbands = indicators.bollinger_bands(close)
+    # pivot = indicators.pivot(var)
+    # chart1 = ChartElement(data=rsi, chart_type=ChartType.LINE, axis=ChartAxis.DIFFERENT_AXIS, color=ChartColor.RED,
+    #                       label="RSI")
+    # chart2 = ChartElement(data=stoch, chart_type=ChartType.LINE, axis=ChartAxis.ON_AXIS, color=ChartColor.BLUE,
+    #                       label="STOCH")
+    # chart3 = ChartElement(data=sma, chart_type=ChartType.LINE, axis=ChartAxis.ON_AXIS, color=ChartColor.PINK,
+    #                       label="SMA")
+    # chart4 = ChartElement(data=ema, chart_type=ChartType.LINE, axis=ChartAxis.ON_AXIS, color=ChartColor.PURPLE,
+    #                       label="EMA")
+    # chart5 = ChartElement(data=macd, chart_type=ChartType.LINE, axis=ChartAxis.ON_AXIS, color=ChartColor.YELLOW,
+    #                       label="MACD")
+    # chart6 = ChartElement(data=bbands, chart_type=ChartType.LINE, axis=ChartAxis.ON_AXIS, color=ChartColor.GREEN,
+    #                       label="BBANDS")
+    # chart7 = ChartElement(data=pivot, chart_type=ChartType.LINE, axis=ChartAxis.ON_AXIS, color="Magenta",
+    #                       label="Pivot")
+    # charts = [chart1, chart2, chart3, chart4, chart5, chart6, chart7]
+    # data_with_indicators = data_parser.data_builder(var, charts=charts)
+    # print(data_with_indicators)
     # logging.info(data_with_indicators)
     # data_parser.timestamp_utc("1533203511")
     # data = data_parser.get_date_ohlc(start_date="01/01/2018")
@@ -97,7 +97,7 @@ if __name__ == '__main__':
 
     # strategy.show_results(result)
     # Strategies.ma(var, ma_type=1)
-    # Strategies.rsi(var)
+    Strategies.rsi(var)
     # Strategies.macd(var)
     # Strategies.stoch(var)
     # Strategies.bbands(var)
