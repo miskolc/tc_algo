@@ -104,7 +104,7 @@ class ChartType(Enum):
     BAR_CHART = 'bar_chart'
 
     def __str__(self):
-        return str(self.value)
+        return self.value
 
 
 class ChartAxis(Enum):
@@ -127,8 +127,6 @@ class ChartColor(Enum):
         return self.value
 
 
-# 00000020247980318
-# SBIN0003352
 class ChartElement:
     def __init__(self, data: Union[list, dict], label: str, chart_type: ChartType, plot: Union[int, ChartAxis],
                  color: Union[ChartColor, str]):

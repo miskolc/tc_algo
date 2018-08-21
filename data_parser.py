@@ -32,7 +32,9 @@ def get_data(symbol=api.nifty50, start_date=api.start_date, end_date=""):
         item = response[i]
         data.append(DataObject(item))
     # _logger.debug("%s" % data)
-    return data
+    scrip = symbol.split("/")
+    data_properties = dict(scrip=scrip[1], start_date=start_date, end_date=end_date, chart=ChartType.CANDLESTICK)
+    return data_properties, data
 
 
 # Input should be of List[DataObject]
@@ -125,7 +127,7 @@ def current_month(timestamp=""):
     return current.month
 
 
-def data_builder(data, charts: list = None):
+def data_builder(data, charts: list = None, data_properties=None):
     params = ["date", "open", "high", "low", "close", "volume"]
     father = _append_data(data)
     indicators = []
@@ -152,10 +154,11 @@ def data_builder(data, charts: list = None):
 
     father = _append_indicators(indicators, father)
     _logger.debug("Params are: %s" % params)
+    _logger.debug("Data properties: %s" % data_properties)
+    return data_properties, params, father
     # result = [params]
     # for item in father:
     #     result.append(item)
-    return params, father
     # return result
 
 
