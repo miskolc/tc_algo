@@ -30,9 +30,9 @@ class Strategies:
             ma200 = indicators.sma(close, period=200)
         buy = Condition(data1=ma50, data2=ma200, operation=Operation.CROSSOVER)
         sell = Condition(data1=ma50, data2=ma200, operation=Operation.CROSSUNDER)
-        chart_1 = ChartElement(data=ma50, label="ma50", chart_type=ChartType.LINE, axis=ChartAxis.ON_AXIS,
+        chart_1 = ChartElement(data=ma50, label="ma50", chart_type=ChartType.LINE, plot=ChartAxis.ON_AXIS,
                                color=ChartColor.GREEN)
-        chart_2 = ChartElement(data=ma200, label="ma200", chart_type=ChartType.LINE, axis=ChartAxis.ON_AXIS,
+        chart_2 = ChartElement(data=ma200, label="ma200", chart_type=ChartType.LINE, plot=ChartAxis.ON_AXIS,
                                color=ChartColor.RED)
         charts = [chart_1, chart_2]
         result = strategy_builder(data_list=data, strategy=BUY, buy=buy, sell=sell,
@@ -47,7 +47,7 @@ class Strategies:
         macd_signal = macd['macdsignal']
         buy = Condition(data1=macd_series, data2=macd_signal, operation=Operation.CROSSOVER)
         sell = Condition(data1=macd_series, data2=macd_signal, operation=Operation.CROSSUNDER)
-        chart_1 = ChartElement(data=macd, label="macd", chart_type=ChartType.LINE, axis=ChartAxis.ON_AXIS,
+        chart_1 = ChartElement(data=macd, label="macd", chart_type=ChartType.LINE, plot=ChartAxis.ON_AXIS,
                                color=ChartColor.BLUE)
         charts = [chart_1]
         result = strategy_builder(data_list=data, strategy=BUY, buy=buy, sell=sell,
@@ -61,7 +61,7 @@ class Strategies:
         buy = Condition(data1=rsi, data2=35, operation=Operation.LESS_THAN)
         sell = Condition(data1=rsi, data2=80, operation=Operation.GREATER_THAN)
         sell_01 = Condition(data1=rsi, data2=28, operation=Operation.LESS_THAN)
-        chart_1 = ChartElement(data=rsi, label="rsi", chart_type=ChartType.LINE, axis=ChartAxis.ON_AXIS,
+        chart_1 = ChartElement(data=rsi, label="rsi", chart_type=ChartType.LINE, plot=ChartAxis.ON_AXIS,
                                color=ChartColor.PINK)
         charts = [chart_1]
         result = strategy_builder(data_list=data, strategy=BUY, buy=buy, target=.5, sl=sell_01,
@@ -79,7 +79,7 @@ class Strategies:
         buy = Condition(data1=fastk, data2=fastd, operation=Operation.CROSSOVER)
         sell = Condition(data1=fastk, data2=fastd, operation=Operation.CROSSUNDER)
         charts = [
-            ChartElement(data=stoch, label="STOCH", chart_type=ChartType.LINE, axis=ChartAxis.ON_AXIS, color="#85FF45")]
+            ChartElement(data=stoch, label="STOCH", chart_type=ChartType.LINE, plot=ChartAxis.ON_AXIS, color="#85FF45")]
         result = strategy_builder(data_list=data, strategy=BUY, buy=buy, sell=sell,
                                   charts=charts)
         show_back_testing_reports(result)
@@ -93,7 +93,7 @@ class Strategies:
         lowerband = bbands['lowerband']
         buy = Condition(data1=close, data2=middleband, operation=Operation.LESS_THAN)
         sell = Condition(data1=close, data2=middleband, operation=Operation.GREATER_THAN)
-        chart_1 = ChartElement(data=bbands, label="bbands", chart_type=ChartType.LINE, axis=ChartAxis.ON_AXIS,
+        chart_1 = ChartElement(data=bbands, label="bbands", chart_type=ChartType.LINE, plot=ChartAxis.ON_AXIS,
                                color="magenta")
         charts = [chart_1]
         result = strategy_builder(data_list=data, strategy=SELL, buy=buy, sell=sell,
@@ -109,7 +109,7 @@ class Strategies:
         s1 = pivot['s1']
         buy = Condition(data1=close, data2=pp, operation=Operation.GREATER_THAN)
         sell = Condition(data1=close, data2=pp, operation=Operation.LESS_THAN)
-        chart_1 = ChartElement(data=pivot, label="pivot", chart_type=ChartType.LINE, axis=ChartAxis.ON_AXIS,
+        chart_1 = ChartElement(data=pivot, label="pivot", chart_type=ChartType.LINE, plot=ChartAxis.ON_AXIS,
                                color=ChartColor.GREEN)
         charts = [chart_1]
         result = strategy_builder(data_list=data, strategy=BUY, buy=buy, sell=sell,

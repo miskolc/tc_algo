@@ -152,10 +152,11 @@ def data_builder(data, charts: list = None):
 
     father = _append_indicators(indicators, father)
     _logger.debug("Params are: %s" % params)
-    result = [params]
-    for item in father:
-        result.append(item)
-    return result
+    # result = [params]
+    # for item in father:
+    #     result.append(item)
+    return params, father
+    # return result
 
 
 def _append_data(data):

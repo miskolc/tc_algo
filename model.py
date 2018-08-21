@@ -98,10 +98,10 @@ class ConditionsLogic:
 
 
 class ChartType(Enum):
-    CANDLESTICK = 0
-    LINE = 1
-    HISTOGRAM = 2
-    BAR_CHART = 3
+    CANDLESTICK = "candlestick"
+    LINE = 'line'
+    HISTOGRAM = 'histogram'
+    BAR_CHART = 'bar_chart'
 
     def __str__(self):
         return str(self.value)
@@ -130,10 +130,10 @@ class ChartColor(Enum):
 # 00000020247980318
 # SBIN0003352
 class ChartElement:
-    def __init__(self, data: Union[list, dict], label: str, chart_type: ChartType, axis: ChartAxis,
+    def __init__(self, data: Union[list, dict], label: str, chart_type: ChartType, plot: Union[int, ChartAxis],
                  color: Union[ChartColor, str]):
         self.data = data
         self.type = chart_type
-        self.axis = axis
+        self.axis = plot
         self.color = color
         self.label = label
