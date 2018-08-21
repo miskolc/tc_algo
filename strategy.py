@@ -166,7 +166,7 @@ def strategy_builder(data_properties: dict, data_list: list, charts: list = None
     bt_all_date, bt_all_signal, bt_all_qty, bt_all_price, bt_all_pl, bt_all_cum_pl = [], [], [], [], [], []
     bt_long_date, bt_long_signal, bt_long_qty, bt_long_price, bt_long_pl, bt_long_cum_pl = [], [], [], [], [], []
     bt_short_date, bt_short_signal, bt_short_qty, bt_short_price, bt_short_pl, bt_short_cum_pl = [], [], [], [], [], []
-
+    annotations = []
     # Master index for data will be one ahead of the buy and sell conditions
     for i in range(length):
         buy_signal = buy_condition[i]
@@ -233,6 +233,20 @@ def strategy_builder(data_properties: dict, data_list: list, charts: list = None
                 bt_short_signal.append(signal)
                 bt_short_qty.append(qty)
                 bt_short_price.append(close)
+            if signal.__contains__(BUY):
+                if signal.__contains__(TARGET):
+                    annotations.append([date, "BP"])
+                elif signal.__contains__(SL):
+                    annotations.append([date, "BSL"])
+                else:
+                    annotations.append([date, "BR"])
+            if signal.__contains__(SELL):
+                if signal.__contains__(TARGET):
+                    annotations.append([date, "SSP"])
+                elif signal.__contains__(SL):
+                    annotations.append([date, "SSL"])
+                else:
+                    annotations.append([date, "SR"])
 
         def buy_order():
             global order_target, order_sl, pending_order
@@ -341,8 +355,10 @@ def strategy_builder(data_properties: dict, data_list: list, charts: list = None
         params=params,
         all=bt_all,
         long=bt_long,
-        short=bt_short
+        short=bt_short,
+        annotations=annotations
     )
+    print(annotations)
     return result
 
 
