@@ -117,9 +117,16 @@ class Strategies:
         show_back_testing_reports(result)
 
 
+order_target = None
+order_sl = None
+
+
 def strategy_builder(data_list: list, charts: list = None, buy: Union[Condition, ConditionsLogic] = None,
                      sell: Union[Condition, ConditionsLogic] = None, target: Union[Condition, float] = None,
                      sl: Union[Condition, float] = None, strategy: str = BUY, qty: int = 1):
+    global order_target, order_sl
+    order_target = None
+    order_sl = None
     master = data_parser.data_builder(data_list, charts=charts)
     length = 0
     buy_condition, sell_condition = [], []
@@ -133,11 +140,9 @@ def strategy_builder(data_list: list, charts: list = None, buy: Union[Condition,
         buy_condition = [False] * length
     if sell is None:
         sell_condition = [False] * length
-    order_target = None
-    order_sl = None
+
     profit_condition = _check_book_conditions(target)
     sl_condition = _check_book_conditions(sl)
-
     pending_order = False
 
     bt_all_date, bt_all_signal, bt_all_qty, bt_all_price, bt_all_pl, bt_all_cum_pl = [], [], [], [], [], []

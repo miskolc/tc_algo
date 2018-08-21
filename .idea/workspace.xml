@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="e8e6d9ca-4800-4a51-9684-12e5ec5cd86c" name="Default" comment="Add: Initiated predefined strategies">
+    <list default="true" id="e8e6d9ca-4800-4a51-9684-12e5ec5cd86c" name="Default" comment="Bug: Error when profit/sl in percentage">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/strategy.py" beforeDir="false" afterPath="$PROJECT_DIR$/strategy.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -16,8 +15,9 @@
     <session id="-1799413582">
       <usages-collector id="statistics.lifecycle.project">
         <counts>
-          <entry key="project.closed" value="19" />
+          <entry key="project.closed" value="20" />
           <entry key="project.open.time.11" value="2" />
+          <entry key="project.open.time.12" value="1" />
           <entry key="project.open.time.121" value="1" />
           <entry key="project.open.time.15" value="1" />
           <entry key="project.open.time.16" value="1" />
@@ -34,7 +34,7 @@
           <entry key="project.open.time.42" value="1" />
           <entry key="project.open.time.5" value="1" />
           <entry key="project.open.time.69" value="1" />
-          <entry key="project.opened" value="21" />
+          <entry key="project.opened" value="22" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
@@ -42,7 +42,7 @@
           <entry key="html" value="3" />
           <entry key="ipynb" value="7" />
           <entry key="md" value="1" />
-          <entry key="py" value="146" />
+          <entry key="py" value="148" />
           <entry key="pyi" value="3" />
           <entry key="strategy" value="1" />
           <entry key="txt" value="9" />
@@ -53,14 +53,14 @@
         <counts>
           <entry key="Python Console" value="12" />
           <entry key="dummy" value="21" />
-          <entry key="py" value="41914" />
-          <entry key="txt" value="1011" />
+          <entry key="py" value="42173" />
+          <entry key="txt" value="1050" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="PLAIN_TEXT" value="1032" />
-          <entry key="Python" value="41926" />
+          <entry key="PLAIN_TEXT" value="1071" />
+          <entry key="Python" value="42185" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.open">
@@ -69,7 +69,7 @@
           <entry key="IPNB" value="7" />
           <entry key="Markdown" value="1" />
           <entry key="PLAIN_TEXT" value="9" />
-          <entry key="Python" value="147" />
+          <entry key="Python" value="149" />
           <entry key="PythonStub" value="3" />
           <entry key="XML" value="1" />
         </counts>
@@ -84,14 +84,14 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/strategy.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="848">
-              <caret line="183" column="65" selection-start-line="183" selection-start-column="65" selection-end-line="183" selection-end-column="65" />
+            <state relative-caret-position="70">
+              <caret line="57" column="8" selection-start-line="57" selection-start-column="8" selection-end-line="57" selection-end-column="8" />
               <folding>
                 <element signature="e#49#63#0" expanded="true" />
-                <marker date="1534772222448" expanded="true" signature="6546:6551" ph="..." />
-                <marker date="1534772222448" expanded="true" signature="12678:12680" ph="..." />
-                <marker date="1534772222448" expanded="true" signature="18880:18885" ph="..." />
-                <marker date="1534772222448" expanded="true" signature="18880:19087" ph="..." />
+                <marker date="1534827265195" expanded="true" signature="6618:6623" ph="..." />
+                <marker date="1534827265195" expanded="true" signature="12750:12752" ph="..." />
+                <marker date="1534827265195" expanded="true" signature="18952:18957" ph="..." />
+                <marker date="1534827265195" expanded="true" signature="18952:19159" ph="..." />
               </folding>
             </state>
           </provider>
@@ -100,8 +100,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/main.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-467">
-              <caret line="43" column="24" lean-forward="true" selection-start-line="43" selection-start-column="24" selection-end-line="43" selection-end-column="24" />
+            <state relative-caret-position="258">
+              <caret line="100" column="26" lean-forward="true" selection-start-line="100" selection-start-column="26" selection-end-line="100" selection-end-column="26" />
               <folding>
                 <element signature="e#0#14#0" expanded="true" />
               </folding>
@@ -112,7 +112,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/data_parser.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="931">
+            <state relative-caret-position="2975">
               <caret line="182" column="17" selection-start-line="182" selection-start-column="17" selection-end-line="182" selection-end-column="17" />
             </state>
           </provider>
@@ -121,7 +121,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/model.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="326">
+            <state relative-caret-position="2261">
               <caret line="139" selection-start-line="139" selection-end-line="139" />
               <folding>
                 <element signature="e#0#24#0" expanded="true" />
@@ -176,13 +176,13 @@
         <option value="$PROJECT_DIR$/results.txt" />
         <option value="$PROJECT_DIR$/RESULT.txt" />
         <option value="$PROJECT_DIR$/api.py" />
-        <option value="$PROJECT_DIR$/test.py" />
         <option value="$PROJECT_DIR$/constants.py" />
         <option value="$PROJECT_DIR$/indicators.py" />
         <option value="$PROJECT_DIR$/model.py" />
         <option value="$PROJECT_DIR$/data_parser.py" />
-        <option value="$PROJECT_DIR$/strategy.py" />
         <option value="$PROJECT_DIR$/main.py" />
+        <option value="$PROJECT_DIR$/strategy.py" />
+        <option value="$PROJECT_DIR$/test.py" />
       </list>
     </option>
   </component>
@@ -198,6 +198,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -205,11 +206,15 @@
               <item name="MyProject" type="b2602c69:ProjectViewProjectNode" />
               <item name="MyProject" type="462c0819:PsiDirectoryNode" />
             </path>
+            <path>
+              <item name="MyProject" type="b2602c69:ProjectViewProjectNode" />
+              <item name="MyProject" type="462c0819:PsiDirectoryNode" />
+              <item name="reports" type="462c0819:PsiDirectoryNode" />
+            </path>
           </expand>
           <select />
         </subPane>
       </pane>
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -510,7 +515,14 @@
       <option name="project" value="LOCAL" />
       <updated>1534752642867</updated>
     </task>
-    <option name="localTasksCounter" value="23" />
+    <task id="LOCAL-00023" summary="Bug: Error when profit/sl in percentage">
+      <created>1534772286311</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1534772286311</updated>
+    </task>
+    <option name="localTasksCounter" value="24" />
     <servers />
   </component>
   <component name="TodoView">
@@ -531,7 +543,7 @@
       <window_info id="Structure" order="2" sideWeight="0.50363195" side_tool="true" weight="0.23586309" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32916668" />
-      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.49683145" weight="0.33888888" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" sideWeight="0.49683145" visible="true" weight="0.33888888" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -618,19 +630,9 @@
     <MESSAGE value="Add: Predefined Strategies" />
     <MESSAGE value="Add: Constants file&#10;Add: classes for chart description &#10;Update: Data for charting restructured" />
     <MESSAGE value="Update: Predefined Strategies" />
-    <option name="LAST_COMMIT_MESSAGE" value="Update: Predefined Strategies" />
+    <MESSAGE value="Bug: Error when profit/sl in percentage" />
+    <option name="LAST_COMMIT_MESSAGE" value="Bug: Error when profit/sl in percentage" />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/strategy.py</url>
-          <line>258</line>
-          <option name="timeStamp" value="9" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
   </component>
   <component name="debuggerHistoryManager">
     <expressions id="setValue">
@@ -803,13 +805,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/test.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="34">
-          <caret line="2" column="20" lean-forward="true" selection-start-line="2" selection-start-column="20" selection-end-line="2" selection-end-column="20" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/api.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="102">
@@ -831,9 +826,24 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/result_table.html" />
+    <entry file="file://$PROJECT_DIR$/reports/all_trades.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="34">
+          <caret line="2" column="35" lean-forward="true" selection-start-line="2" selection-start-column="35" selection-end-line="2" selection-end-column="35" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/data_parser.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2975">
+          <caret line="182" column="17" selection-start-line="182" selection-start-column="17" selection-end-line="182" selection-end-column="17" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/model.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="326">
+        <state relative-caret-position="2261">
           <caret line="139" selection-start-line="139" selection-end-line="139" />
           <folding>
             <element signature="e#0#24#0" expanded="true" />
@@ -845,43 +855,31 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/result_table.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-239077" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/data_parser.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="931">
-          <caret line="182" column="17" selection-start-line="182" selection-start-column="17" selection-end-line="182" selection-end-column="17" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/reports/all_trades.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="34">
-          <caret line="2" column="35" lean-forward="true" selection-start-line="2" selection-start-column="35" selection-end-line="2" selection-end-column="35" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/strategy.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="848">
-          <caret line="183" column="65" selection-start-line="183" selection-start-column="65" selection-end-line="183" selection-end-column="65" />
+        <state relative-caret-position="70">
+          <caret line="57" column="8" selection-start-line="57" selection-start-column="8" selection-end-line="57" selection-end-column="8" />
           <folding>
             <element signature="e#49#63#0" expanded="true" />
-            <marker date="1534772222448" expanded="true" signature="6546:6551" ph="..." />
-            <marker date="1534772222448" expanded="true" signature="12678:12680" ph="..." />
-            <marker date="1534772222448" expanded="true" signature="18880:18885" ph="..." />
-            <marker date="1534772222448" expanded="true" signature="18880:19087" ph="..." />
+            <marker date="1534827265195" expanded="true" signature="6618:6623" ph="..." />
+            <marker date="1534827265195" expanded="true" signature="12750:12752" ph="..." />
+            <marker date="1534827265195" expanded="true" signature="18952:18957" ph="..." />
+            <marker date="1534827265195" expanded="true" signature="18952:19159" ph="..." />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="275">
+          <caret line="56" column="19" lean-forward="true" selection-start-line="56" selection-start-column="19" selection-end-line="56" selection-end-column="19" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/main.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-467">
-          <caret line="43" column="24" lean-forward="true" selection-start-line="43" selection-start-column="24" selection-end-line="43" selection-end-column="24" />
+        <state relative-caret-position="258">
+          <caret line="100" column="26" lean-forward="true" selection-start-line="100" selection-start-column="26" selection-end-line="100" selection-end-column="26" />
           <folding>
             <element signature="e#0#14#0" expanded="true" />
           </folding>

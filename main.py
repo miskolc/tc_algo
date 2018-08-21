@@ -12,7 +12,7 @@ from strategy import Strategies
 # TODO: Follow the below order:
 # TODO: 1. Make all Indicators - Done
 # TODO: 2. Work on OHLC data - Done
-# TODO: 3. Build Strategies
+# TODO: 3. Build Strategies - Done
 # TODO: 4. Back Testing
 # TODO: 5. Add command line interface
 
