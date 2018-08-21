@@ -37,7 +37,7 @@ class Strategies:
         charts = [chart_1, chart_2]
         result = strategy_builder(data_properties=data_properties, data_list=data, strategy=BUY, buy=buy, sell=sell,
                                   charts=charts)
-        show_back_testing_reports(result)
+        # show_back_testing_reports(result)
         return result
 
     @staticmethod
@@ -63,13 +63,16 @@ class Strategies:
         buy = Condition(data1=rsi, data2=35, operation=Operation.LESS_THAN)
         sell = Condition(data1=rsi, data2=80, operation=Operation.GREATER_THAN)
         sell_01 = Condition(data1=rsi, data2=28, operation=Operation.LESS_THAN)
-        chart_1 = ChartElement(data=rsi, label="rsi", chart_type=ChartType.LINE, plot=ChartAxis.ON_AXIS,
+        chart_1 = ChartElement(data=rsi, label="rsi", chart_type=ChartType.LINE, plot=ChartAxis.DIFFERENT_AXIS,
                                color=ChartColor.PINK)
-        charts = [chart_1]
+        macd = indicators.macd(close)
+        chart_2 = ChartElement(data=macd, label="macd", chart_type=ChartType.LINE, plot=2,
+                               color=ChartColor.BLUE)
+        charts = [chart_1, chart_2]
         result = strategy_builder(data_properties=data_properties, data_list=data, strategy=BUY, buy=buy, target=.5,
                                   sl=sell_01,
                                   charts=charts)
-        show_back_testing_reports(result)
+        # show_back_testing_reports(result)
         return result
 
     @staticmethod

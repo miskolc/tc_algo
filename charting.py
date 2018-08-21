@@ -1,75 +1,28 @@
-import plotly.graph_objs as go
-import plotly.offline as py
+from flask import Flask, render_template
+import data_parser
+from strategy import Strategies
+
+app = Flask(__name__)
 
 
-def get_candlestick_chart(data):
-    trace_eod = go.Candlestick(x=data['date'],
-                               open=data['open'],
-                               high=data['high'],
-                               low=data['low'],
-                               close=data['close'])
+@app.route("/")
+def main():
+    prop, data = data_parser.get_data(start_date="2017-08-18")
+    result = Strategies.rsi(data, data_properties=prop)
+    data_properties = result['data_properties']
+    main_chart = []
+    for key, values in data_properties.items():
+        main_chart.append([key, values])
+    params = result['params']
+    data = result['data']
 
-    layout = dict(
-        title='Historical EOD data',
-        xaxis=dict(
-            rangeselector=dict(
-                buttons=list([
-                    dict(count=1,
-                         label='1m',
-                         step='month',
-                         stepmode='backward'),
-                    dict(count=3,
-                         label='3m',
-                         step='month',
-                         stepmode='backward'),
-                    dict(count=6,
-                         label='6m',
-                         step='month',
-                         stepmode='backward'),
-                    dict(count=1,
-                         label='1y',
-                         step='year',
-                         stepmode='backward'),
-                    dict(count=3,
-                         label='3y',
-                         step='year',
-                         stepmode='backward'),
-                    dict(count=5,
-                         label='5y',
-                         step='year',
-                         stepmode='backward'),
-                    dict(step='all')
-                ])
-            ),
-            rangeslider=dict(
-                visible=False
+    # print(params,data_with_indicators)
+    # final_data = data_with_indicators[1:]
+    # print(final_data)
 
-            ),
-            type='date'
+    return render_template("index.html", title="Anychart Python template", chartData=data, chart_params=params,
+                           main_chart_properties=main_chart)
 
-        )
-    )
 
-    trace_sma = go.Scatter(
-        x=data['date'],
-        y=data['open'],
-        name="SMA",
-        line=dict(color='blue'),
-        opacity=0.8)
-    trace_sma01 = go.Scatter(
-        x=data['date'],
-        y=data['close'],
-        name="EMA",
-        line=dict(color='#9C00FF'),
-        opacity=0.8)
-    trace_sma02 = go.Scatter(
-        x=data['date'],
-        y=data['low'],
-        name="SMA02",
-        line=dict(color='#FF0062'),
-        opacity=0.8)
-
-    data01 = [trace_eod, trace_sma, trace_sma01, trace_sma02]
-
-    fig = go.Figure(data=data01, layout=layout)
-    py.offline.plot(fig, filename='simple-candlestick.html')
+if __name__ == "__main__":
+    app.run()

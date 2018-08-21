@@ -1,0 +1,111 @@
+<!doctype html>
+<html>
+<head>
+    <script src="https://cdn.anychart.com/releases/8.3.0/js/anychart-base.min.js"></script>
+    <script src="https://cdn.anychart.com/releases/8.3.0/js/anychart-ui.min.js"></script>
+    <script src="https://cdn.anychart.com/releases/8.3.0/js/anychart-exports.min.js"></script>
+    <script src="https://cdn.anychart.com/releases/8.3.0/js/anychart-stock.min.js"></script>
+    <script src="https://cdn.anychart.com/releases/8.3.0/js/anychart-data-adapter.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.anychart.com/releases/8.3.0/css/anychart-ui.min.css"/>
+    <link rel="stylesheet" href="https://cdn.anychart.com/releases/8.3.0/fonts/css/anychart-font.min.css"/>
+    <style>
+    html, body, #container {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+
+    </style>
+</head>
+<body>
+<div id="container"></div>
+<p id="demo"></p>
+<script type="text/javascript">
+
+    // create data table on loaded data
+    var dataTable = anychart.data.table();
+    var data={{chartData|safe}};
+    dataTable.addData(data);
+    //console.log(dataTable)
+
+    //chart parameters
+    var chart_parameter = {{chart_params|safe}};
+    //console.log(chart_parameter);
+
+    //main_chart_proper
+    var main_chart = {{main_chart_properties|safe}};
+    //console.log(main_chart);
+    var chart_name = main_chart[0][1];
+    var chart_start_date = main_chart[1][1];
+    var chart_end_date = main_chart[2][1];
+    var chart_type = main_chart[3][1];
+    //console.log(chart_name,chart_start_date,chart_end_date,chart_type);
+
+    // map loaded data for the ohlc series
+    var mapping = dataTable.mapAs();
+    mapping.addField('open', 1);
+    mapping.addField('high', 2);
+    mapping.addField('low', 3);
+    mapping.addField('close', 4);
+    mapping.addField('value', 5);
+
+    // create stock chart
+    var chart = anychart.stock();
+    // setting chart padding to fit both Y axes
+    chart.padding(10, 50, 20, 50);
+
+    // create first plot on the chart
+    var plot = chart.plot(0);
+    // adding extra Y axis to the right side
+    plot.yAxis(1).orientation();
+
+    // create candlestick series
+    plot[chart_type](mapping).name(chart_name);
+    var mapping_volume = dataTable.mapAs();
+    mapping_volume.addField('volume', 5);
+    mapping_volume.addField('value', 5);
+
+    var i;
+    for (i = 6; i < data[0].length; i++) {
+        var semi_chart_parameter = chart_parameter[i];
+        var semi_chart_split = semi_chart_parameter.split("^");
+        var semi_chart_type = semi_chart_split[0];
+        var semi_chart_plot = semi_chart_split[1];
+        var semi_chart_colour = semi_chart_split[2];
+        var semi_chart_name = semi_chart_split[3];
+        var mapping01 = dataTable.mapAs();
+        mapping01.addField('value', i);
+        var plot = chart.plot(semi_chart_plot);
+        //console.log(plot);
+        if(semi_chart_plot>0){
+        plot.height('25%');
+        }
+        var plo_ = plot[semi_chart_type](mapping01);
+        plo_.name(semi_chart_name);
+
+
+    }
+
+    // create scroller series with mapped data
+    chart.scroller().line(mapping_volume);
+    // set container id for the chart
+    chart.container('container');
+    // initiate chart drawing
+    chart.draw();
+
+    // create range picker
+    var rangePicker = anychart.ui.rangePicker();
+    // init range picker
+    rangePicker.render(chart);
+
+    // create range selector
+    var rangeSelector = anychart.ui.rangeSelector();
+    // init range selector
+    rangeSelector.render(chart);
+
+
+</script>
+</body>
+</html>
+

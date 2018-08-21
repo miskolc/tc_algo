@@ -38,7 +38,7 @@ if __name__ == '__main__':
     # print(args.accumulate(args))
     # print(args.accumulate(args.integers))
     prop, data = data_parser.get_data(start_date="2017-08-18")
-    result = Strategies.rsi(data, data_properties=prop)
+    result = Strategies.ma(data, data_properties=prop)
     print(result['data_properties'])
     print(result['params'])
     print(result['data'])
