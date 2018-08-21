@@ -30,14 +30,14 @@ class Strategies:
             ma200 = indicators.sma(close, period=200)
         buy = Condition(data1=ma50, data2=ma200, operation=Operation.CROSSOVER)
         sell = Condition(data1=ma50, data2=ma200, operation=Operation.CROSSUNDER)
-        chart_1 = ChartElement(data=ma50, label="ma50", chart_type=ChartType.LINE, plot=ChartAxis.ON_AXIS,
+        chart_1 = ChartElement(data=ma50, label="ma50", chart_type=ChartType.LINE, plot=ChartAxis.SAME_AXIS,
                                color=ChartColor.GREEN)
-        chart_2 = ChartElement(data=ma200, label="ma200", chart_type=ChartType.LINE, plot=ChartAxis.ON_AXIS,
+        chart_2 = ChartElement(data=ma200, label="ma200", chart_type=ChartType.LINE, plot=ChartAxis.SAME_AXIS,
                                color=ChartColor.RED)
         charts = [chart_1, chart_2]
         result = strategy_builder(data_properties=data_properties, data_list=data, strategy=BUY, buy=buy, sell=sell,
                                   charts=charts)
-        # show_back_testing_reports(result)
+        show_back_testing_reports(result)
         return result
 
     @staticmethod
@@ -48,7 +48,7 @@ class Strategies:
         macd_signal = macd['macdsignal']
         buy = Condition(data1=macd_series, data2=macd_signal, operation=Operation.CROSSOVER)
         sell = Condition(data1=macd_series, data2=macd_signal, operation=Operation.CROSSUNDER)
-        chart_1 = ChartElement(data=macd, label="macd", chart_type=ChartType.LINE, plot=ChartAxis.ON_AXIS,
+        chart_1 = ChartElement(data=macd, label="macd", chart_type=ChartType.LINE, plot=ChartAxis.SAME_AXIS,
                                color=ChartColor.BLUE)
         charts = [chart_1]
         result = strategy_builder(data_properties=data_properties, data_list=data, strategy=BUY, buy=buy, sell=sell,
@@ -61,18 +61,15 @@ class Strategies:
         close = data_parser.get_close(data)
         rsi = indicators.rsi(close, period=5)
         buy = Condition(data1=rsi, data2=35, operation=Operation.LESS_THAN)
-        sell = Condition(data1=rsi, data2=80, operation=Operation.GREATER_THAN)
+        # sell = Condition(data1=rsi, data2=80, operation=Operation.GREATER_THAN)
         sell_01 = Condition(data1=rsi, data2=28, operation=Operation.LESS_THAN)
-        chart_1 = ChartElement(data=rsi, label="rsi", chart_type=ChartType.LINE, plot=ChartAxis.DIFFERENT_AXIS,
+        chart_1 = ChartElement(data=rsi, label="rsi", chart_type=ChartType.LINE, plot=ChartAxis.SAME_AXIS,
                                color=ChartColor.PINK)
-        macd = indicators.macd(close)
-        chart_2 = ChartElement(data=macd, label="macd", chart_type=ChartType.LINE, plot=2,
-                               color=ChartColor.BLUE)
-        charts = [chart_1, chart_2]
+        charts = [chart_1]
         result = strategy_builder(data_properties=data_properties, data_list=data, strategy=BUY, buy=buy, target=.5,
                                   sl=sell_01,
                                   charts=charts)
-        # show_back_testing_reports(result)
+        show_back_testing_reports(result)
         return result
 
     @staticmethod
@@ -86,7 +83,8 @@ class Strategies:
         buy = Condition(data1=fastk, data2=fastd, operation=Operation.CROSSOVER)
         sell = Condition(data1=fastk, data2=fastd, operation=Operation.CROSSUNDER)
         charts = [
-            ChartElement(data=stoch, label="STOCH", chart_type=ChartType.LINE, plot=ChartAxis.ON_AXIS, color="#85FF45")]
+            ChartElement(data=stoch, label="STOCH", chart_type=ChartType.LINE, plot=ChartAxis.SAME_AXIS,
+                         color="#85FF45")]
         result = strategy_builder(data_properties=data_properties, data_list=data, strategy=BUY, buy=buy, sell=sell,
                                   charts=charts)
         show_back_testing_reports(result)
@@ -101,7 +99,7 @@ class Strategies:
         lowerband = bbands['lowerband']
         buy = Condition(data1=close, data2=middleband, operation=Operation.LESS_THAN)
         sell = Condition(data1=close, data2=middleband, operation=Operation.GREATER_THAN)
-        chart_1 = ChartElement(data=bbands, label="bbands", chart_type=ChartType.LINE, plot=ChartAxis.ON_AXIS,
+        chart_1 = ChartElement(data=bbands, label="bbands", chart_type=ChartType.LINE, plot=ChartAxis.SAME_AXIS,
                                color="magenta")
         charts = [chart_1]
         result = strategy_builder(data_properties=data_properties, data_list=data, strategy=SELL, buy=buy, sell=sell,
@@ -118,7 +116,7 @@ class Strategies:
         s1 = pivot['s1']
         buy = Condition(data1=close, data2=pp, operation=Operation.GREATER_THAN)
         sell = Condition(data1=close, data2=pp, operation=Operation.LESS_THAN)
-        chart_1 = ChartElement(data=pivot, label="pivot", chart_type=ChartType.LINE, plot=ChartAxis.ON_AXIS,
+        chart_1 = ChartElement(data=pivot, label="pivot", chart_type=ChartType.LINE, plot=ChartAxis.SAME_AXIS,
                                color=ChartColor.GREEN)
         charts = [chart_1]
         data_properties.update({"chart": "Line"})
@@ -130,18 +128,23 @@ class Strategies:
 
 order_target = None
 order_sl = None
+pending_order = False
+first_order = True
 
 
 def strategy_builder(data_properties: dict, data_list: list, charts: list = None,
                      buy: Union[Condition, ConditionsLogic] = None,
                      sell: Union[Condition, ConditionsLogic] = None, target: Union[Condition, float] = None,
                      sl: Union[Condition, float] = None, strategy: str = BUY, qty: int = 1) -> dict:
-    global order_target, order_sl
+    global order_target, order_sl, pending_order, first_order
     order_target = None
     order_sl = None
+    pending_order = False
+    first_order = True
     data_prop, params, data = data_parser.data_builder(data_list, charts=charts, data_properties=data_properties)
     length = 0
     buy_condition, sell_condition = [], []
+
     if buy is not None:
         buy_condition = _evaluate_order_conditions(buy)
         length = len(buy_condition)
@@ -151,7 +154,7 @@ def strategy_builder(data_properties: dict, data_list: list, charts: list = None
     if (buy is None) & (sell is None):
         _logger.warning("No condition in either buy or sell")
         _logger.warning("Exiting...")
-        return
+        return dict()
     if buy is None:
         buy_condition = [False] * length
     if sell is None:
@@ -159,7 +162,6 @@ def strategy_builder(data_properties: dict, data_list: list, charts: list = None
 
     profit_condition = _check_book_conditions(target)
     sl_condition = _check_book_conditions(sl)
-    pending_order = False
 
     bt_all_date, bt_all_signal, bt_all_qty, bt_all_price, bt_all_pl, bt_all_cum_pl = [], [], [], [], [], []
     bt_long_date, bt_long_signal, bt_long_qty, bt_long_price, bt_long_pl, bt_long_cum_pl = [], [], [], [], [], []
@@ -175,27 +177,57 @@ def strategy_builder(data_properties: dict, data_list: list, charts: list = None
         # low = master[i][3]
         close = data[i][4]
 
-        def bt_add_order(signal, pl=None, cum_pl=None):
+        def bt_add_order(signal):
+            global pending_order, first_order
+            if first_order:
+                bt_all_pl.append(0)
+                bt_all_cum_pl.append(0)
+            else:
+                if pending_order:
+                    pl = (close - bt_all_price[-1]) * qty
+                    cum_pl = bt_all_cum_pl[-1] + pl
+                else:
+                    pl = None
+                    cum_pl = bt_all_cum_pl[-1]
+                bt_all_pl.append(pl)
+                bt_all_cum_pl.append(cum_pl)
             bt_all_date.append(date)
             bt_all_signal.append(signal)
             bt_all_qty.append(qty)
             bt_all_price.append(close)
-            bt_all_pl.append(pl)
-            bt_all_cum_pl.append(cum_pl)
             if signal.__contains__(BUY):
                 _logger.debug("Long trade")
+                if first_order:
+                    bt_long_pl.append(0)
+                    bt_long_cum_pl.append(0)
+                    first_order = False
+                else:
+                    if pending_order:
+                        pl = (close - bt_long_price[-1]) * qty
+                        cum_pl = bt_long_cum_pl[-1] + pl
+                    else:
+                        pl = None
+                        cum_pl = bt_long_cum_pl[-1]
+                    bt_long_pl.append(pl)
+                    bt_long_cum_pl.append(cum_pl)
                 bt_long_date.append(date)
                 bt_long_signal.append(signal)
                 bt_long_qty.append(qty)
                 bt_long_price.append(close)
-                bt_long_pl.append(pl)
-                bt_long_cum_pl.append(cum_pl)
             if signal.__contains__(SELL):
                 _logger.debug("Short Trade")
+                if first_order:
+                    bt_short_pl.append(0)
+                    bt_short_cum_pl.append(0)
+                    first_order = False
+                else:
+                    if pending_order:
+                        pass
                 bt_short_date.append(date)
                 bt_short_signal.append(signal)
                 bt_short_qty.append(qty)
                 bt_short_price.append(close)
+                pl = cum_pl = 0
                 bt_short_pl.append(pl)
                 bt_short_cum_pl.append(cum_pl)
 
@@ -229,19 +261,19 @@ def strategy_builder(data_properties: dict, data_list: list, charts: list = None
             if strategy == BUY:
                 if (order_target is True) | (close >= order_target):
                     _logger.debug("Target hit on %s" % date)
-                    pending_order = False
                     bt_add_order(signal=TARGET + " in " + BUY)
+                    pending_order = False
                 elif (order_sl is True) | (close <= order_sl):
                     _logger.debug("SL hit on %s" % date)
-                    pending_order = False
                     bt_add_order(signal=SL + " in " + BUY)
+                    pending_order = False
 
                 if sell_signal:
                     if pending_order:
                         _logger.debug("Date: %s Price: %s" % (date, close))
                         _logger.debug(SELL)
-                        pending_order = False
                         bt_add_order(signal=SELL)
+                        sell_order()
                     sell_order()
                     pending_order = True
                     strategy = SELL
@@ -249,19 +281,19 @@ def strategy_builder(data_properties: dict, data_list: list, charts: list = None
             if strategy == SELL:
                 if (order_target is True) | (close <= order_target):
                     _logger.debug("Target hit on %s" % date)
-                    pending_order = False
                     bt_add_order(signal=TARGET + " in " + SELL)
+                    pending_order = False
                 elif (order_sl is True) | (close >= order_sl):
                     _logger.debug("SL hit on %s" % date)
-                    pending_order = False
                     bt_add_order(signal=SL + " in " + SELL)
+                    pending_order = False
 
                 if buy_signal:
                     if pending_order:
                         _logger.debug("Date: %s Price: %s" % (date, close))
                         _logger.debug(BUY)
-                        pending_order = False
                         bt_add_order(signal=BUY)
+                        pending_order = False
                     buy_order()
                     pending_order = True
                     strategy = BUY

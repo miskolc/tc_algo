@@ -108,7 +108,7 @@ class ChartType(Enum):
 
 
 class ChartAxis(Enum):
-    ON_AXIS = 0
+    SAME_AXIS = 0
     DIFFERENT_AXIS = 1
 
     def __str__(self):

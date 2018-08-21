@@ -33,7 +33,7 @@ def get_data(symbol=api.nifty50, start_date=api.start_date, end_date=""):
         data.append(DataObject(item))
     # _logger.debug("%s" % data)
     scrip = symbol.split("/")
-    data_properties = dict(scrip=scrip[1], start_date=start_date, end_date=end_date, chart=ChartType.CANDLESTICK)
+    data_properties = dict(scrip=scrip[1], start_date=start_date, end_date=end_date, chart="%s" % ChartType.CANDLESTICK)
     return data_properties, data
 
 
