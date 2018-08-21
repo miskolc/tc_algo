@@ -127,9 +127,9 @@ def current_month(timestamp=""):
     return current.month
 
 
-def data_builder(data, charts: list = None, data_properties=None):
+def data_builder(data: list, data_properties: dict, charts: list = None):
     params = ["date", "open", "high", "low", "close", "volume"]
-    father = _append_data(data)
+    data_list = _append_data(data)
     indicators = []
     if charts is None:
         _logger.debug("No chart element specified")
@@ -152,10 +152,10 @@ def data_builder(data, charts: list = None, data_properties=None):
                 else:
                     _logger.warning("Unknown data format or type")
 
-    father = _append_indicators(indicators, father)
+    data_list = _append_indicators(indicators, data_list)
     _logger.debug("Params are: %s" % params)
     _logger.debug("Data properties: %s" % data_properties)
-    return data_properties, params, father
+    return data_properties, params, data_list
     # result = [params]
     # for item in father:
     #     result.append(item)

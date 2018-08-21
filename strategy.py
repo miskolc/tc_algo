@@ -63,7 +63,7 @@ class Strategies:
         buy = Condition(data1=rsi, data2=35, operation=Operation.LESS_THAN)
         # sell = Condition(data1=rsi, data2=80, operation=Operation.GREATER_THAN)
         sell_01 = Condition(data1=rsi, data2=28, operation=Operation.LESS_THAN)
-        chart_1 = ChartElement(data=rsi, label="rsi", chart_type=ChartType.LINE, plot=ChartAxis.SAME_AXIS,
+        chart_1 = ChartElement(data=rsi, label="rsi", chart_type=ChartType.LINE, plot=ChartAxis.DIFFERENT_AXIS,
                                color=ChartColor.PINK)
         charts = [chart_1]
         result = strategy_builder(data_properties=data_properties, data_list=data, strategy=BUY, buy=buy, target=.5,
@@ -222,14 +222,17 @@ def strategy_builder(data_properties: dict, data_list: list, charts: list = None
                     first_order = False
                 else:
                     if pending_order:
-                        pass
+                        pl = (close - bt_short_price[-1]) * qty
+                        cum_pl = bt_short_cum_pl[-1] + pl
+                    else:
+                        pl = None
+                        cum_pl = bt_short_cum_pl[-1]
+                    bt_short_pl.append(pl)
+                    bt_short_cum_pl.append(cum_pl)
                 bt_short_date.append(date)
                 bt_short_signal.append(signal)
                 bt_short_qty.append(qty)
                 bt_short_price.append(close)
-                pl = cum_pl = 0
-                bt_short_pl.append(pl)
-                bt_short_cum_pl.append(cum_pl)
 
         def buy_order():
             global order_target, order_sl, pending_order
@@ -517,13 +520,13 @@ def _evaluate_op(data_m, data_n, operation):
     return value
 
 
-def show_back_testing_reports(data: dict):
-    show_results(data['all'], filename="reports/all_trades.html")
-    show_results(data['long'], filename="reports/long_trades.html")
-    show_results(data['short'], filename="reports/short_trades.html")
+def show_back_testing_reports(result: dict, auto_open: bool = True):
+    show_results(result['all'], auto_open, filename="reports/all_trades.html")
+    show_results(result['long'], auto_open, filename="reports/long_trades.html")
+    show_results(result['short'], auto_open, filename="reports/short_trades.html")
 
 
-def show_results(result: dict, filename: str = 'result_table.html'):
+def show_results(result: dict, auto_open: bool, filename: str = 'result_table.html'):
     keys = []
     values = []
     for key, value in result.items():
@@ -544,4 +547,4 @@ def show_results(result: dict, filename: str = 'result_table.html'):
     data = [trace]
     # fig = dict(data=data, layout=layout)
     fig = dict(data=data)
-    plotly.offline.plot(fig, filename=filename, )
+    plotly.offline.plot(fig, filename=filename, auto_open=auto_open)
