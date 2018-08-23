@@ -11,20 +11,20 @@ _logger = logging.getLogger("data_parser")
 br = "^"
 
 
-def get_date_ohlc(symbol=api.nifty50, start_date=api.start_date, end_date=""):
-    data = get_data(symbol=symbol, start_date=start_date, end_date=end_date)
+def get_date_ohlc(symbol: str = api.nifty50, start_date: str = api.start_date, end_date: str = "") -> dict:
+    data_prop, data = get_data(symbol=symbol, start_date=start_date, end_date=end_date)
     date_values = get_date(data)
     open = get_open(data)
     high = get_high(data)
     low = get_low(data)
     close = get_close(data)
     volume = get_volume(data)
-    ohlc = {"symbol": symbol, "date": date_values, "open": open, "high": high, "low": low, "close": close,
-            "volume": volume}
-    return ohlc
+    date_ohlc = {"symbol": symbol, "date": date_values, "open": open, "high": high, "low": low, "close": close,
+                 "volume": volume}
+    return date_ohlc
 
 
-def get_data(symbol=api.nifty50, start_date=api.start_date, end_date=""):
+def get_data(symbol: str = api.nifty50, start_date: str = api.start_date, end_date: str = ""):
     data = []
     quandl.ApiConfig.api_key = api.quandl_api_key
     response = quandl.get(symbol, returns="numpy", start_date=start_date, end_date=end_date)
@@ -37,8 +37,19 @@ def get_data(symbol=api.nifty50, start_date=api.start_date, end_date=""):
     return data_properties, data
 
 
+def get_ohlc(data: list = None):
+    if (data is None) | (data == []) | (type(data[0]) != DataObject):
+        _logger.warning("Invalid data type in get_ohlc \nExpected %s got %s instead" % (DataObject, type(data[0])))
+    else:
+        open = numpy.asarray(get_open(data))
+        high = numpy.asarray(get_high(data))
+        low = numpy.asarray(get_low(data))
+        close = numpy.asarray(get_close(data))
+        return open, high, low, close
+
+
 # Input should be of List[DataObject]
-def get_date(data=None):
+def get_date(data: list = None):
     date_arr = []
     if (data is None) | (data == []):
         _logger.warning("Invalid data")
@@ -50,7 +61,7 @@ def get_date(data=None):
     return date_arr
 
 
-def get_open(data=None):
+def get_open(data: list = None):
     open = []
     if (data is None) | (data == []):
         _logger.warning("Invalid data")
@@ -61,7 +72,7 @@ def get_open(data=None):
     return open
 
 
-def get_high(data=None):
+def get_high(data: list = None):
     high = []
     if (data is None) | (data == []):
         _logger.warning("Invalid data")
@@ -72,7 +83,7 @@ def get_high(data=None):
     return high
 
 
-def get_low(data=None):
+def get_low(data: list = None):
     low = []
     if (data is None) | (data == []):
         _logger.warning("Invalid data")
@@ -83,7 +94,7 @@ def get_low(data=None):
     return low
 
 
-def get_close(data=None):
+def get_close(data: list = None):
     close = []
     if (data is None) | (data == []):
         _logger.warning("Invalid data")
@@ -94,7 +105,7 @@ def get_close(data=None):
     return close
 
 
-def get_volume(data=None):
+def get_volume(data: list = None):
     volume = []
     if (data is None) | (data == []):
         _logger.warning("Invalid data")
@@ -105,7 +116,7 @@ def get_volume(data=None):
     return volume
 
 
-def get_turnover(data=None):
+def get_turnover(data: list = None):
     turnover = []
     if (data is None) | (data == []):
         _logger.warning("Invalid data")

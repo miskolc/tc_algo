@@ -35,8 +35,7 @@ def indicator_info(indicator=""):
         _logger.warning('Enter valid indicator name. For e.g. indicator_info("EMA")')
         _logger.info("For complete list visit http://mrjbq7.github.io/ta-lib/funcs.html")
     else:
-        info = Function(indicator).info
-        _logger.debug(info)
+        _logger.info(Function(indicator).info)
 
 
 def rsi(array=None, period=14) -> list:

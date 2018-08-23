@@ -4,14 +4,17 @@
       <w>bbands</w>
       <w>bollinger</w>
       <w>crossunder</w>
+      <w>doji</w>
       <w>fastd</w>
       <w>fastk</w>
       <w>fastperiod</w>
+      <w>harami</w>
       <w>hdfc</w>
       <w>lowerband</w>
       <w>macd</w>
       <w>macdhist</w>
       <w>macdsignal</w>
+      <w>marubozu</w>
       <w>matype</w>
       <w>middleband</w>
       <w>nbdevdn</w>
@@ -25,6 +28,7 @@
       <w>slowperiod</w>
       <w>stoch</w>
       <w>talib</w>
+      <w>tasuki</w>
       <w>timeperiod</w>
       <w>upperband</w>
     </words>
