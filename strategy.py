@@ -235,18 +235,18 @@ def strategy_builder(data_properties: dict, data_list: list, charts: list = None
                 bt_short_price.append(close)
             if signal.__contains__(BUY):
                 if signal.__contains__(TARGET):
-                    annotations.append([date, "BP"])
+                    annotations.append([date, close, "BP"])
                 elif signal.__contains__(SL):
-                    annotations.append([date, "BSL"])
+                    annotations.append([date, close, "BSL"])
                 else:
-                    annotations.append([date, "BR"])
+                    annotations.append([date, close, "BR"])
             if signal.__contains__(SELL):
                 if signal.__contains__(TARGET):
-                    annotations.append([date, "SSP"])
+                    annotations.append([date, close, "SSP"])
                 elif signal.__contains__(SL):
-                    annotations.append([date, "SSL"])
+                    annotations.append([date, close, "SSL"])
                 else:
-                    annotations.append([date, "SR"])
+                    annotations.append([date, close, "SR"])
 
         def buy_order():
             global order_target, order_sl, pending_order
@@ -358,7 +358,6 @@ def strategy_builder(data_properties: dict, data_list: list, charts: list = None
         short=bt_short,
         annotations=annotations
     )
-    print(annotations)
     return result
 
 
@@ -536,10 +535,13 @@ def _evaluate_op(data_m, data_n, operation):
     return value
 
 
-def show_back_testing_reports(result: dict, auto_open: bool = True):
-    show_results(result['all'], auto_open, filename="reports/all_trades.html")
-    show_results(result['long'], auto_open, filename="reports/long_trades.html")
-    show_results(result['short'], auto_open, filename="reports/short_trades.html")
+def show_back_testing_reports(result: dict, auto_open: bool = True,
+                              all_file: str = "reports/all_trades.html",
+                              long_file: str = "reports/long_trades.html",
+                              short_file: str = "reports/short_trades.html"):
+    show_results(result['all'], auto_open, filename=all_file)
+    show_results(result['long'], auto_open, filename=long_file)
+    show_results(result['short'], auto_open, filename=short_file)
 
 
 def show_results(result: dict, auto_open: bool, filename: str = 'result_table.html'):
