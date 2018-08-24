@@ -210,7 +210,11 @@ def strategy_builder(data_properties: dict, data_list: list, charts: list = None
                         bt_long_date_cum_pl.append([date, cum_pl])
                     else:
                         pl = None
-                        cum_pl = bt_long_cum_pl[-1]
+                        if len(bt_long_cum_pl) == 0:
+                            bt_long_pl.append(0)
+                            bt_long_cum_pl.append(0)
+                        else:
+                            cum_pl = bt_long_cum_pl[-1]
                     bt_long_pl.append(pl)
                     bt_long_cum_pl.append(cum_pl)
                 bt_long_date.append(date)
@@ -230,7 +234,10 @@ def strategy_builder(data_properties: dict, data_list: list, charts: list = None
                         bt_short_date_cum_pl.append([date, cum_pl])
                     else:
                         pl = None
-                        if len(bt_short_cum_pl) != 0:
+                        if len(bt_short_cum_pl) == 0:
+                            bt_short_pl.append(0)
+                            bt_short_cum_pl.append(0)
+                        else:
                             cum_pl = bt_short_cum_pl[-1]
                     bt_short_pl.append(pl)
                     bt_short_cum_pl.append(cum_pl)
