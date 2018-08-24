@@ -18,7 +18,9 @@
       padding: 0;
     }
 
+
     </style>
+    <title>Chart</title>>
 </head>
 <body>
 <div id="container"></div>
@@ -30,9 +32,6 @@
     //console.log(data[0])
     dataTable.addData(data);
     //console.log(dataTable)
-
-    var annotations = {{chart_annotations|safe}};
-    //console.log(annotations);
 
     //chart parameters
     var chartParameter = {{chart_params|safe}};
@@ -71,49 +70,7 @@
     mapping_volume.addField('volume', 5);
     mapping_volume.addField('value', 5);
 
-    var j;
-    var annotationPlotArray=[];
-    for (j = 0; j < annotations.length; j++)
-    {
-        var annotations_date = annotations[j][0];
-        var annotations_value = annotations[j][1];
-        var annotations_text = annotations[j][2];
-          var colour="";
-       if(annotations_text=="BR"){
-       colour = "#128D12";
-
-        }
-        if(annotations_text=="BP"){
-        colour = "#A6ECA6";
-
-        }
-        if(annotations_text=="BSL"){
-         colour = "#00BF2C";
-
-        }
-        if(annotations_text=="SSL"){
-         colour = "#FB9A9A";
-
-        }
-        if(annotations_text=="SR"){
-         colour = "#FF0000";
-
-        }
-        if(annotations_text=="SSP"){
-         colour = "#BF360C";
-
-        }
-        var annotationPlot ={"enabled":true,"type":"label","xAnchor":String(annotations_date),"valueAnchor":annotations_value,
-        "text":annotations_text,"background":colour,"fontColor":"white"};
-        annotationPlotArray.push(annotationPlot);
-     }
-    var annotationsAtServer = {"annotationsList":annotationPlotArray};
-
-    plot.annotations().fromJson(annotationsAtServer);
-
-
-
-    var i;
+  var i;
     for (i = 6; i < data[0].length; i++) {
         var semi_chartParameter = chartParameter[i];
         var semi_chart_split = semi_chartParameter.split("^");
@@ -149,6 +106,7 @@
     var rangeSelector = anychart.ui.rangeSelector();
     // init range selector
     rangeSelector.render(chart);
+
 
 
 </script>

@@ -9,22 +9,10 @@ from model import *
 
 app = Flask(__name__)
 
+
 @app.route("/")
-def backtest():
-    # prop, data = data_parser.get_data(start_date="2017-08-18")
-    # result = Strategies.rsi(data, data_properties=prop)
-    # data_properties = result['data_properties']
-    # main_chart = []
-    # for key, values in data_properties.items():
-    #     main_chart.append([key, values])
-    # params = result['params']
-    # data = result['data']
-
-    # print(params,data_with_indicators)
-    # final_data = data_with_indicators[1:]
-    # print(final_data)
-
-    data_prop, data = data_parser.get_data(start_date="2017-08-18")
+def backtestreport():
+    data_prop, data = data_parser.get_data()
     high = data_parser.get_high(data)
     low = data_parser.get_low(data)
     close = data_parser.get_close(data)
@@ -49,22 +37,21 @@ def backtest():
                            color=ChartColor.RED)
     chart_7 = ChartElement(data=macd, label="macd", chart_type=ChartType.LINE, plot=2,
                            color="magenta")
-    charts = [chart_4, chart_6]
+    charts = [chart_1, chart_2, chart_3, chart_6]
     buy = Condition(data1=sma, data2=ema, operation=Operation.CROSSOVER)
     sell = Condition(data1=rsi, data2=70, operation=Operation.GREATER_THAN)
     result = strategy.strategy_builder(data_properties=data_prop, data_list=data, charts=charts, buy=buy, sell=sell,
                                        target=1.0, sl=0.5, strategy=strategy.BUY)
-    # strategy.show_back_testing_reports(result, auto_open=True)
-    data_properties = result['data_properties']
-    main_chart = []
-    for key, values in data_properties.items():
-        main_chart.append([key, values])
-    params = result['params']
-    # print(params)
-    data_list = result['data']
-    # annotations = result['annotations']
-    return render_template("chart.html", chartData=data_list, chart_params=params,
-                           main_chart_properties=main_chart)
+
+    cum_all = result['all']['DATE_CUM_PL']
+    cum_long = result['long']['DATE_CUM_PL']
+    cum_short = result['short']['DATE_CUM_PL']
+
+    print(cum_long)
+
+    # return render_template("cumall.html", chartData=cum_all)
+    # return render_template("cumlong.html", longData=cum_long)
+    return render_template("cumshort.html", shortData=cum_short)
 
 
 if __name__ == "__main__":

@@ -178,7 +178,8 @@ def _append_data(data):
     for child in data:
         if numpy.isnan(child.volume):
             child.volume = 'null'
-        grand_child = ["%s-%s-%s" % (child.date.year, child.date.month, child.date.day), child.open, child.high,
+        grand_child = ["%s-%s-%s 09:15:00" % (child.date.year, child.date.month, child.date.day), child.open,
+                       child.high,
                        child.low, child.close, child.volume]
         result.append(grand_child)
     return result

@@ -175,7 +175,7 @@ def strategy_builder(data_properties: dict, data_list: list, charts: list = None
         date = data[i][0]
         # open = master[i][1]
         # high = master[i][2]
-        # low = master[i][3]
+        low = data[i][3]
         close = data[i][4]
 
         def bt_add_order(signal):
@@ -230,7 +230,8 @@ def strategy_builder(data_properties: dict, data_list: list, charts: list = None
                         bt_short_date_cum_pl.append([date, cum_pl])
                     else:
                         pl = None
-                        cum_pl = bt_short_cum_pl[-1]
+                        if len(bt_short_cum_pl) != 0:
+                            cum_pl = bt_short_cum_pl[-1]
                     bt_short_pl.append(pl)
                     bt_short_cum_pl.append(cum_pl)
                 bt_short_date.append(date)
@@ -239,18 +240,18 @@ def strategy_builder(data_properties: dict, data_list: list, charts: list = None
                 bt_short_price.append(close)
             if signal.__contains__(BUY):
                 if signal.__contains__(TARGET):
-                    annotations.append([date, close, "BP"])
+                    annotations.append([date, low, "BP"])
                 elif signal.__contains__(SL):
-                    annotations.append([date, close, "BSL"])
+                    annotations.append([date, low, "BSL"])
                 else:
-                    annotations.append([date, close, "BR"])
+                    annotations.append([date, low, "BR"])
             if signal.__contains__(SELL):
                 if signal.__contains__(TARGET):
-                    annotations.append([date, close, "SSP"])
+                    annotations.append([date, low, "SSP"])
                 elif signal.__contains__(SL):
-                    annotations.append([date, close, "SSL"])
+                    annotations.append([date, low, "SSL"])
                 else:
-                    annotations.append([date, close, "SR"])
+                    annotations.append([date, low, "SR"])
 
         def buy_order():
             global order_target, order_sl, pending_order
