@@ -74,7 +74,5 @@ if __name__ == '__main__':
     # print(data_properties)
     # print(params)
     # print(data_list)
-    result, pattern = pattern_hunter.pattern_hunter(data, pattern=Pattern.upside_gap_two_crows)
-    # for i in pattern:
-    #     print(result[i])
+    result = pattern_hunter.pattern_hunter(data, pattern=Pattern.doji)
     pattern_hunter.analyse_pattern(result)

@@ -166,6 +166,7 @@ def strategy_builder(data_properties: dict, data_list: list, charts: list = None
     bt_all_date, bt_all_signal, bt_all_qty, bt_all_price, bt_all_pl, bt_all_cum_pl = [], [], [], [], [], []
     bt_long_date, bt_long_signal, bt_long_qty, bt_long_price, bt_long_pl, bt_long_cum_pl = [], [], [], [], [], []
     bt_short_date, bt_short_signal, bt_short_qty, bt_short_price, bt_short_pl, bt_short_cum_pl = [], [], [], [], [], []
+    bt_all_date_cum_pl, bt_long_date_cum_pl, bt_short_date_cum_pl = [], [], []
     annotations = []
     # Master index for data will be one ahead of the buy and sell conditions
     for i in range(length):
@@ -186,6 +187,7 @@ def strategy_builder(data_properties: dict, data_list: list, charts: list = None
                 if pending_order:
                     pl = (close - bt_all_price[-1]) * qty
                     cum_pl = bt_all_cum_pl[-1] + pl
+                    bt_all_date_cum_pl.append([date, cum_pl])
                 else:
                     pl = None
                     cum_pl = bt_all_cum_pl[-1]
@@ -205,6 +207,7 @@ def strategy_builder(data_properties: dict, data_list: list, charts: list = None
                     if pending_order:
                         pl = (close - bt_long_price[-1]) * qty
                         cum_pl = bt_long_cum_pl[-1] + pl
+                        bt_long_date_cum_pl.append([date, cum_pl])
                     else:
                         pl = None
                         cum_pl = bt_long_cum_pl[-1]
@@ -224,6 +227,7 @@ def strategy_builder(data_properties: dict, data_list: list, charts: list = None
                     if pending_order:
                         pl = (close - bt_short_price[-1]) * qty
                         cum_pl = bt_short_cum_pl[-1] + pl
+                        bt_short_date_cum_pl.append([date, cum_pl])
                     else:
                         pl = None
                         cum_pl = bt_short_cum_pl[-1]
@@ -331,7 +335,8 @@ def strategy_builder(data_properties: dict, data_list: list, charts: list = None
         QTY=bt_all_qty,
         Price=bt_all_price,
         P_L=bt_all_pl,
-        CUM_P_L=bt_all_cum_pl
+        CUM_P_L=bt_all_cum_pl,
+        DATE_CUM_PL=bt_all_date_cum_pl
     )
     bt_long = dict(
         Date=bt_long_date,
@@ -339,7 +344,8 @@ def strategy_builder(data_properties: dict, data_list: list, charts: list = None
         QTY=bt_long_qty,
         Price=bt_long_price,
         P_L=bt_long_pl,
-        CUM_P_L=bt_long_cum_pl
+        CUM_P_L=bt_long_cum_pl,
+        DATE_CUM_PL=bt_long_date_cum_pl
     )
     bt_short = dict(
         Date=bt_short_date,
@@ -347,7 +353,8 @@ def strategy_builder(data_properties: dict, data_list: list, charts: list = None
         QTY=bt_short_qty,
         Price=bt_short_price,
         P_L=bt_short_pl,
-        CUM_P_L=bt_short_cum_pl
+        CUM_P_L=bt_short_cum_pl,
+        DATE_CUM_PL=bt_short_date_cum_pl
     )
     result = dict(
         data_properties=data_prop,
@@ -535,13 +542,10 @@ def _evaluate_op(data_m, data_n, operation):
     return value
 
 
-def show_back_testing_reports(result: dict, auto_open: bool = True,
-                              all_file: str = "reports/all_trades.html",
-                              long_file: str = "reports/long_trades.html",
-                              short_file: str = "reports/short_trades.html"):
-    show_results(result['all'], auto_open, filename=all_file)
-    show_results(result['long'], auto_open, filename=long_file)
-    show_results(result['short'], auto_open, filename=short_file)
+def show_back_testing_reports(result: dict, auto_open: bool = True, strategy: str = ""):
+    show_results(result['all'], auto_open, filename="reports/%s_all_trades.html" % strategy)
+    show_results(result['long'], auto_open, filename="reports/%s_long_trades.html" % strategy)
+    show_results(result['short'], auto_open, filename="reports/%s_short_trades.html" % strategy)
 
 
 def show_results(result: dict, auto_open: bool, filename: str = 'result_table.html'):

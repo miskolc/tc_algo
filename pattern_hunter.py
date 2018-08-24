@@ -1,7 +1,6 @@
 import logging
 
 import talib
-import numpy
 from talib.abstract import Function
 
 import data_parser
@@ -81,7 +80,7 @@ def _get_list(array: numpy.ndarray):
     return array.tolist()
 
 
-def pattern_hunter(data: list = None, pattern: Pattern = ""):
+def pattern_hunter(data: list, pattern: Pattern):
     result, pattern_at = [], []
     pattern_info(pattern.value)
     if _check_data(data):
@@ -92,10 +91,10 @@ def pattern_hunter(data: list = None, pattern: Pattern = ""):
         values = dict(open=open, high=high, low=low, close=close, talib=talib)
         result = eval(exp, values)
         pattern_at = result.nonzero()
-        _logger.debug("pattern_hunter recognised %s at: %s" % (pattern.name, pattern_at))
+        _logger.debug("pattern_hunter recognised %s at these positions: %s" % (pattern.name, pattern_at[0]))
         result = _get_list(result)
-    _logger.debug('%s output: %s' % (pattern, result))
-    return result, pattern_at[0]
+    _logger.debug('%s output: %s' % (pattern.name, result))
+    return result
 
 
 def analyse_pattern(array: list):
@@ -104,10 +103,11 @@ def analyse_pattern(array: list):
     else:
         for i in array:
             if -100 <= i <= -1:
-                print("Bearish")
+                _logger.debug("Bearish")
             elif 1 <= i <= 100:
-                print("Bullish")
+                _logger.debug("Bullish")
             elif i == 0:
-                print("Nothing")
+                # _logger.debug("Nothing")
+                pass
             else:
-                print("False")
+                _logger.debug("False")
