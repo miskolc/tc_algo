@@ -63,7 +63,6 @@ def chart():
     params = result['params']
     # print(params)
     data_list = result['data']
-    # annotations = result['annotations']
     return render_template("chart.html", chartData=data_list, chart_params=params,
                            main_chart_properties=main_chart)
 
@@ -113,7 +112,7 @@ def backtest():
                            main_chart_properties=main_chart, chart_annotations=annotations)
 
 
-@app.route('/back-testreport-cum-all/')
+@app.route('/bt_report_all/')
 def cumall():
     data_prop, data = data_parser.get_data()
     high = data_parser.get_high(data)
@@ -148,10 +147,10 @@ def cumall():
 
     cum_all = result['all']['DATE_CUM_PL']
     # print(cum_all)
-    return render_template("cumall.html", chartData=cum_all)
+    return render_template("cum_pl_all.html", chartData=cum_all)
 
 
-@app.route('/back-testreport-cum-long/')
+@app.route('/bt_report_long/')
 def cumlong():
     data_prop, data = data_parser.get_data()
     high = data_parser.get_high(data)
@@ -186,10 +185,10 @@ def cumlong():
 
     cum_long = result['long']['DATE_CUM_PL']
     # print(cum_long)
-    return render_template("cumlong.html", longData=cum_long)
+    return render_template("cum_pl_long.html", longData=cum_long)
 
 
-@app.route('/back-testreport-cum-short/')
+@app.route('/bt_report_short/')
 def cumshort():
     data_prop, data = data_parser.get_data()
     high = data_parser.get_high(data)
@@ -223,9 +222,9 @@ def cumshort():
                                        target=1.0, sl=0.5, strategy=strategy.BUY)
 
     cum_short = result['short']['DATE_CUM_PL']
-    print(cum_short)
+    # print(cum_short)
 
-    return render_template("cumshort.html", shortData=cum_short)
+    return render_template("cum_pl_short.html", shortData=cum_short)
 
 if __name__ == "__main__":
     app.run()
