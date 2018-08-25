@@ -1,8 +1,30 @@
 <component name="ProjectDictionaryState">
   <dictionary name="sb">
     <words>
+      <w>backtest</w>
       <w>bbands</w>
+      <w>blackcrows</w>
       <w>bollinger</w>
+      <w>cdlclosingmarubozu</w>
+      <w>cdldarkcloudcover</w>
+      <w>cdldoji</w>
+      <w>cdldojistar</w>
+      <w>cdldragonflydoji</w>
+      <w>cdlengulfing</w>
+      <w>cdleveningstar</w>
+      <w>cdlgravestonedoji</w>
+      <w>cdlhammer</w>
+      <w>cdlhangingman</w>
+      <w>cdlharami</w>
+      <w>cdlharamicross</w>
+      <w>cdlinvertedhammer</w>
+      <w>cdlmarubozu</w>
+      <w>cdlmorningdojistar</w>
+      <w>cdlmorningstar</w>
+      <w>cdlshootingstar</w>
+      <w>cdlspinningtop</w>
+      <w>cdltasukigap</w>
+      <w>cdlupsidegap</w>
       <w>crossunder</w>
       <w>doji</w>
       <w>fastd</w>
@@ -19,6 +41,7 @@
       <w>middleband</w>
       <w>nbdevdn</w>
       <w>nbdevup</w>
+      <w>ndarray</w>
       <w>ohlc</w>
       <w>quandl</w>
       <w>relativedelta</w>
@@ -31,6 +54,7 @@
       <w>tasuki</w>
       <w>timeperiod</w>
       <w>upperband</w>
+      <w>whitesoldiers</w>
     </words>
   </dictionary>
 </component>

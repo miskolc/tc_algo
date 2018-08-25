@@ -1,14 +1,12 @@
 import logging
 from datetime import *
 
-import numpy
 import quandl
 
 import api
 from model import *
 
 _logger = logging.getLogger("data_parser")
-br = "^"
 
 
 def get_date_ohlc(symbol: str = api.nifty50, start_date: str = api.start_date, end_date: str = "") -> dict:
@@ -36,7 +34,7 @@ def get_date_ohlc(symbol: str = api.nifty50, start_date: str = api.start_date, e
     return date_ohlc
 
 
-def get_data(symbol: str = api.nifty50, start_date: str = api.start_date, end_date: str = "") -> tuple:
+def get_data(symbol: str = api.nifty50, start_date: str = api.start_date, end_date: str = ""):
     """
     This is base function which extracts data from Quandl in a DataObject
     :param symbol: str
@@ -62,7 +60,7 @@ def get_data(symbol: str = api.nifty50, start_date: str = api.start_date, end_da
     return data_properties, data
 
 
-def get_ohlc(data: list = None) -> tuple:
+def get_ohlc(data: list = None):
     """
     When data is required in ohlc in list. This required for the pattern hunter operations.
     :param data: list[DataObject]
@@ -214,7 +212,7 @@ def current_month(timestamp=""):
     return current
 
 
-def data_builder(data: list, data_properties: dict, charts: list = None) -> tuple:
+def data_builder(data: list, data_properties: dict, charts: list = None):
     """
     Data builder is used to get data for charting.
     It formats data for charting of candle and indicators.

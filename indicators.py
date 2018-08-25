@@ -7,7 +7,6 @@ import talib
 from talib.abstract import Function
 from talib import MA_Type
 
-import constants
 from model import *
 
 _logger = logging.getLogger('indicator')
@@ -251,7 +250,7 @@ def pivot(data=None, charts=True):
     else:
         if len(data) < period:
             _logger.warning("Period greater than length of input. Unexpected behaviour may occur")
-        ranges = _get_ranges(data[0].date, data[len(data) - 1].date)
+        ranges = _get_monthly_ranges(data[0].date, data[len(data) - 1].date)
         pivots = _pivot_data(ranges, data=data)
     pp, r1, r2, r3, s1, s2, s3 = [], [], [], [], [], [], []
     for item in pivots:
@@ -269,7 +268,7 @@ def pivot(data=None, charts=True):
         return pivots
 
 
-def _get_ranges(min_date, max_date):
+def _get_monthly_ranges(min_date, max_date):
     """
     This method finds the different ranges for the pivot calculations
     :param min_date: datetime.date
@@ -287,7 +286,7 @@ def _get_ranges(min_date, max_date):
     else:
 
         while min_date <= max_date:
-            current_range = _date_ranges(min_date)
+            current_range = _monthly_date_ranges(min_date)
             ranges.append(current_range)
             min_date = min_date + month_delta
         # if max_date < min_date:
@@ -296,7 +295,7 @@ def _get_ranges(min_date, max_date):
     return ranges
 
 
-def _date_ranges(current_date):
+def _monthly_date_ranges(current_date):
     """
     This method returns a dict containing info about pivot dates and data dates
     :param current_date: datetime.date

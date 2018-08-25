@@ -11,9 +11,11 @@ from model import *
 import strategy
 from strategy import Strategies
 
-# TODO: Follow the below order:
-# TODO: 1. Pattern Hunting
-# TODO: 2. Add command line interface
+# TODO: Following are under development order:
+# TODO: 1. Pattern Hunting and its implementation in strategy
+# TODO: 2. Weekly, Monthly Data and same for pivots
+# TODO: 3. Strategy Optimization
+# TODO: 4. Add command line interface
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)

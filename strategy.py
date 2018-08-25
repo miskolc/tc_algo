@@ -1,10 +1,8 @@
-# TODO: For any reference contact or see cond.js
 import logging
 
 import plotly.plotly
 import plotly.graph_objs as go
 
-import constants
 import data_parser
 import indicators
 from model import *
@@ -21,6 +19,7 @@ class Strategies:
     """
     All pre-defined strategies.
     """
+
     @staticmethod
     def ma(data: list, data_properties: dict, ma_type: int = 0) -> dict:
         """
@@ -182,7 +181,8 @@ first_order = True
 def strategy_builder(data_properties: dict, data_list: list, charts: list = None,
                      buy: Union[Condition, ConditionsLogic] = None,
                      sell: Union[Condition, ConditionsLogic] = None, target: Union[Condition, float] = None,
-                     sl: Union[Condition, float] = None, strategy: str = BUY, qty: int = 1) -> dict:
+                     sl: Union[Condition, float] = None, strategy: str = BUY, qty: int = 1,
+                     backtest_chart: ChartType = ChartType.LINE) -> dict:
     """
     It is used to build strategy based on different conditions.
     :param data_properties: dict
@@ -207,6 +207,8 @@ def strategy_builder(data_properties: dict, data_list: list, charts: list = None
                 It can be either strategy.BUY or strategy.SELL
     :param qty: int
                 Any positive int value
+    :param backtest_chart: ChartType
+                Type of chart to be plotted for back testing results.
     :return: dict
                 It returns a dict of the form
                 dict(
@@ -225,6 +227,7 @@ def strategy_builder(data_properties: dict, data_list: list, charts: list = None
     pending_order = False
     first_order = True
     data_prop, params, data = data_parser.data_builder(data_list, charts=charts, data_properties=data_properties)
+    data_prop.update({"bt_chart": backtest_chart.value})
     length = 0
     buy_condition, sell_condition = [], []
 
@@ -262,8 +265,8 @@ def strategy_builder(data_properties: dict, data_list: list, charts: list = None
         close = data[i][4]
 
         def bt_add_order(signal):
-            global pending_order, first_order
-            if first_order:
+            global pending_order
+            if len(bt_all_cum_pl) == 0:
                 bt_all_pl.append(0)
                 bt_all_cum_pl.append(0)
             else:
@@ -282,10 +285,9 @@ def strategy_builder(data_properties: dict, data_list: list, charts: list = None
             bt_all_price.append(close)
             if signal.__contains__(BUY):
                 _logger.debug("Long trade")
-                if first_order:
+                if len(bt_long_cum_pl) == 0:
                     bt_long_pl.append(0)
                     bt_long_cum_pl.append(0)
-                    first_order = False
                 else:
                     if pending_order:
                         pl = (close - bt_long_price[-1]) * qty
@@ -293,11 +295,7 @@ def strategy_builder(data_properties: dict, data_list: list, charts: list = None
                         bt_long_date_cum_pl.append([date, cum_pl])
                     else:
                         pl = None
-                        if len(bt_long_cum_pl) == 0:
-                            bt_long_pl.append(0)
-                            bt_long_cum_pl.append(0)
-                        else:
-                            cum_pl = bt_long_cum_pl[-1]
+                        cum_pl = bt_long_cum_pl[-1]
                     bt_long_pl.append(pl)
                     bt_long_cum_pl.append(cum_pl)
                 bt_long_date.append(date)
@@ -306,10 +304,9 @@ def strategy_builder(data_properties: dict, data_list: list, charts: list = None
                 bt_long_price.append(close)
             if signal.__contains__(SELL):
                 _logger.debug("Short Trade")
-                if first_order:
+                if len(bt_short_cum_pl) == 0:
                     bt_short_pl.append(0)
                     bt_short_cum_pl.append(0)
-                    first_order = False
                 else:
                     if pending_order:
                         pl = (close - bt_short_price[-1]) * qty
@@ -317,11 +314,7 @@ def strategy_builder(data_properties: dict, data_list: list, charts: list = None
                         bt_short_date_cum_pl.append([date, cum_pl])
                     else:
                         pl = None
-                        if len(bt_short_cum_pl) == 0:
-                            bt_short_pl.append(0)
-                            bt_short_cum_pl.append(0)
-                        else:
-                            cum_pl = bt_short_cum_pl[-1]
+                        cum_pl = bt_short_cum_pl[-1]
                     bt_short_pl.append(pl)
                     bt_short_cum_pl.append(cum_pl)
                 bt_short_date.append(date)
@@ -479,7 +472,6 @@ def _evaluate_order_conditions(order) -> list:
             result = (order_evaluator[0])
         elif len(order_evaluator) > 1:
             while len(order_evaluator) == 1:
-                # noinspection PyTypeChecker
                 order_evaluator[0] = _logic_evaluator(order_evaluator[0], order_evaluator[1], operation=auto_op)
                 order_evaluator.pop(1)
             result = (order_evaluator[0])
@@ -524,7 +516,7 @@ def _evaluate_logical_element(logic_element):
         return None
 
 
-def _logic_evaluator(arr1, arr2, operation=Logical):
+def _logic_evaluator(arr1, arr2, operation: Logical):
     """
     Used for evaluating a logical operation between data list.
     :param arr1:
@@ -723,6 +715,10 @@ def show_results(result: dict, auto_open: bool, filename: str = 'result_table.ht
     """
     keys = []
     values = []
+
+    if result.__contains__("DATE_CUM_PL"):
+        result.pop("DATE_CUM_PL")
+
     for key, value in result.items():
         keys.append(key)
         values.append(value)
