@@ -12,6 +12,10 @@ app = Flask(__name__)
 
 @app.route('/')
 def chart():
+    """
+    For plotting normal candle chart or along with indicators
+    :return: None
+    """
     # prop, data = data_parser.get_data(start_date="2017-08-18")
     # result = Strategies.rsi(data, data_properties=prop)
     # data_properties = result['data_properties']
@@ -68,7 +72,11 @@ def chart():
 
 
 @app.route('/backtest/')
-def backtest():
+def back_testing():
+    """
+    For plotting back test chart with annotations.
+    :return: None
+    """
     data_prop, data = data_parser.get_data(start_date="2017-08-18")
     high = data_parser.get_high(data)
     low = data_parser.get_low(data)
@@ -113,7 +121,11 @@ def backtest():
 
 
 @app.route('/bt_report_all/')
-def cumall():
+def cum_pl_all():
+    """
+    Chart for back test reports of Cumulative profit and loss
+    :return: None
+    """
     data_prop, data = data_parser.get_data()
     high = data_parser.get_high(data)
     low = data_parser.get_low(data)
@@ -151,7 +163,11 @@ def cumall():
 
 
 @app.route('/bt_report_long/')
-def cumlong():
+def cum_pl_long():
+    """
+    Chart for back test reports of Cumulative profit and loss
+    :return: None
+    """
     data_prop, data = data_parser.get_data()
     high = data_parser.get_high(data)
     low = data_parser.get_low(data)
@@ -189,7 +205,11 @@ def cumlong():
 
 
 @app.route('/bt_report_short/')
-def cumshort():
+def cum_pl_short():
+    """
+    Chart for back test reports of Cumulative profit and loss
+    :return: None
+    """
     data_prop, data = data_parser.get_data()
     high = data_parser.get_high(data)
     low = data_parser.get_low(data)
@@ -225,6 +245,7 @@ def cumshort():
     # print(cum_short)
 
     return render_template("cum_pl_short.html", shortData=cum_short)
+
 
 if __name__ == "__main__":
     app.run()

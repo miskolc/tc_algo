@@ -404,7 +404,7 @@ def _check_array(array):
 
 def _remove_nan(result):
     """
-    Replaces numpy.nan with None value and returns a list.
+    Replaces numpy.nan with default value and returns a list.
     Used with rsi, ema, sma, macd, bollinger_bands, stoch (talib functions)
     :param result: numpy.ndarray
     :return: list

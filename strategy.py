@@ -18,9 +18,21 @@ auto_op = Logical.AND
 
 
 class Strategies:
-
+    """
+    All pre-defined strategies.
+    """
     @staticmethod
     def ma(data: list, data_properties: dict, ma_type: int = 0) -> dict:
+        """
+        Strategy for moving averages.
+        :param data: list[numeric]
+        :param data_properties: dict
+        :param ma_type: Moving Average Type
+                SMA = 0
+                EMA = 1
+        :return: dict
+                Result from strategy_builder
+        """
         close = data_parser.get_close(data)
         if ma_type == 1:
             ma50 = indicators.ema(close, period=50)
@@ -42,6 +54,13 @@ class Strategies:
 
     @staticmethod
     def macd(data: list, data_properties: dict) -> dict:
+        """
+        Strategy for Moving Average Convergence/Diversion.
+        :param data: list[numeric]
+        :param data_properties: dict
+        :return: dict
+                Result from strategy_builder
+        """
         close = data_parser.get_close(data)
         macd = indicators.macd(close)
         macd_series = macd['macd']
@@ -58,6 +77,13 @@ class Strategies:
 
     @staticmethod
     def rsi(data: list, data_properties: dict) -> dict:
+        """
+        Strategy for Relative Strength Index.
+        :param data: list[numeric]
+        :param data_properties: dict
+        :return: dict
+                Result from strategy_builder
+        """
         close = data_parser.get_close(data)
         rsi = indicators.rsi(close, period=5)
         buy = Condition(data1=rsi, data2=35, operation=Operation.LESS_THAN)
@@ -74,6 +100,13 @@ class Strategies:
 
     @staticmethod
     def stoch(data: list, data_properties: dict) -> dict:
+        """
+        Strategy for Stochastic Oscillator.
+        :param data: list[numeric]
+        :param data_properties: dict
+        :return: dict
+                Result from strategy_builder
+        """
         high = data_parser.get_high(data)
         low = data_parser.get_low(data)
         close = data_parser.get_close(data)
@@ -92,6 +125,13 @@ class Strategies:
 
     @staticmethod
     def bbands(data: list, data_properties: dict) -> dict:
+        """
+        Strategy for Bollinger Bands.
+        :param data: list[numeric]
+        :param data_properties: dict
+        :return: dict
+                Result from strategy_builder
+        """
         close = data_parser.get_close(data)
         bbands = indicators.bollinger_bands(close, timeperiod=20)
         upperband = bbands['upperband']
@@ -109,6 +149,13 @@ class Strategies:
 
     @staticmethod
     def pivot(data: list, data_properties: dict) -> dict:
+        """
+        Strategy for Pivot points.
+        :param data: list[numeric]
+        :param data_properties: dict
+        :return: dict
+                Result from strategy_builder
+        """
         close = data_parser.get_close(data)
         pivot = indicators.pivot(data)
         pp = pivot['pp']
@@ -136,6 +183,42 @@ def strategy_builder(data_properties: dict, data_list: list, charts: list = None
                      buy: Union[Condition, ConditionsLogic] = None,
                      sell: Union[Condition, ConditionsLogic] = None, target: Union[Condition, float] = None,
                      sl: Union[Condition, float] = None, strategy: str = BUY, qty: int = 1) -> dict:
+    """
+    It is used to build strategy based on different conditions.
+    :param data_properties: dict
+                Properties of the data given to the strategy.
+    :param data_list: list
+                list[DataObejct]
+    :param charts: list
+                list[ChartElement]
+    :param buy: Union[Condition, ConditionsLogic]
+                It can be a Condition, ConditionLogic or a list of Condition or ConditionLogic or both
+    :param sell: Union[Condition, ConditionsLogic]
+                It can be a Condition, ConditionLogic or a list of Condition or ConditionLogic or both
+    :param target: Union[Condition, float]
+                Target or profit condition.
+                It can be a Condition, ConditionLogic or a list of Condition or ConditionLogic or both
+                Value can also be given in numeric. This will be treated as percentage for target value.
+    :param sl: Union[Condition, float]
+                Stop loss or sl condition.
+                It can be a Condition, ConditionLogic or a list of Condition or ConditionLogic or both
+                Value can also be given in numeric. This will be treated as percentage for stop loss value
+    :param strategy: str
+                It can be either strategy.BUY or strategy.SELL
+    :param qty: int
+                Any positive int value
+    :return: dict
+                It returns a dict of the form
+                dict(
+                    data_properties=dict,
+                    data=list,
+                    params=list,
+                    all=dict,
+                    long=dict,
+                    short=dict,
+                    annotations=list
+                )
+    """
     global order_target, order_sl, pending_order, first_order
     order_target = None
     order_sl = None
@@ -377,6 +460,11 @@ def strategy_builder(data_properties: dict, data_list: list, charts: list = None
 
 
 def _evaluate_order_conditions(order) -> list:
+    """
+    Used for evaluating conditions.
+    :param order: Any
+    :return: list
+    """
     result = []
     order_evaluator = []
     if type(order) == list:
@@ -405,6 +493,11 @@ def _evaluate_order_conditions(order) -> list:
 
 
 def _calc_conditions_logic(cond_logic=ConditionsLogic):
+    """
+    Evaluates a ConditionLogic object.
+    :param cond_logic: ConditionLogic
+    :return: list
+    """
     temp = []
     cond1 = cond_logic.cond1
     cond2 = cond_logic.cond2
@@ -417,6 +510,11 @@ def _calc_conditions_logic(cond_logic=ConditionsLogic):
 
 
 def _evaluate_logical_element(logic_element):
+    """
+    Used for evaluating different type of inputs
+    :param logic_element: Any
+    :return: Any
+    """
     if type(logic_element) == Condition:
         return _calc_condition(logic_element)
     elif type(logic_element) == ConditionsLogic:
@@ -427,6 +525,13 @@ def _evaluate_logical_element(logic_element):
 
 
 def _logic_evaluator(arr1, arr2, operation=Logical):
+    """
+    Used for evaluating a logical operation between data list.
+    :param arr1:
+    :param arr2:
+    :param operation:
+    :return:
+    """
     result = []
     exp = 'item1 %s item2' % operation
     for i in range(len(arr1)):
@@ -436,6 +541,11 @@ def _logic_evaluator(arr1, arr2, operation=Logical):
 
 
 def _calc_condition(condition=Condition) -> list:
+    """
+    Used to evaluate a Condition Object
+    :param condition: Condition
+    :return: list
+    """
     result = []
     offset = 0
     if condition.data2 is not None:
@@ -476,6 +586,11 @@ def _calc_condition(condition=Condition) -> list:
 
 
 def _check_book_conditions(order):
+    """
+    Used for evaluating book conditions (profit, sl)
+    :param order: Any
+    :return: Any
+    """
     if order is None:
         _logger.warning("No condition specified in profit/sl")
         return None
@@ -511,6 +626,11 @@ def _check_data(data):
 
 
 def _check_number(data):
+    """
+    Check whether data is numeric.
+    :param data: Any
+    :return: Boolean
+    """
     if (type(data) == int) | (type(data) == float):
         return True
     else:
@@ -518,6 +638,14 @@ def _check_number(data):
 
 
 def _cross_over(data_m_1, data_m, data_n_1, data_n):
+    """
+    Used for evaluating Cross Over
+    :param data_m_1: Previous candle data for data 1
+    :param data_m: Current candle data for data 1
+    :param data_n_1: Previous candle data for data 2
+    :param data_n: Current candle data for data 2
+    :return: Boolean
+    """
     if (data_m_1 < data_n_1) & (data_m > data_n):
         return True
     else:
@@ -525,6 +653,14 @@ def _cross_over(data_m_1, data_m, data_n_1, data_n):
 
 
 def _cross_under(data_m_1, data_m, data_n_1, data_n):
+    """
+    Used for evaluating Cross Under
+    :param data_m_1: Previous candle data for data 1
+    :param data_m: Current candle data for data 1
+    :param data_n_1: Previous candle data for data 2
+    :param data_n: Current candle data for data 2
+    :return: Boolean
+    """
     if (data_m_1 > data_n_1) & (data_m < data_n):
         return True
     else:
@@ -532,6 +668,12 @@ def _cross_under(data_m_1, data_m, data_n_1, data_n):
 
 
 def _evaluate_range(data_m, data_n):
+    """
+    Used for evaluating range equal operation
+    :param data_m: Current candle data for data 1
+    :param data_n: Current candle data for data 2
+    :return: Boolean
+    """
     dev = 0.1
     if _check_number(data_n):
         exp = "(data_n - (data_n * dev)) <= data_m <= (data_n + (data_n * dev))"
@@ -544,6 +686,13 @@ def _evaluate_range(data_m, data_n):
 
 
 def _evaluate_op(data_m, data_n, operation):
+    """
+    Used for evaluating logical operation
+    :param data_m: Current candle data for data 1
+    :param data_n: Current candle data for data 2
+    :param operation: Operation
+    :return: Boolean
+    """
     exp = "var1 %s var2" % operation
     data = {"var1": data_m, "var2": data_n}
     value = eval(exp, data)
@@ -551,12 +700,27 @@ def _evaluate_op(data_m, data_n, operation):
 
 
 def show_back_testing_reports(result: dict, auto_open: bool = True, strategy: str = ""):
+    """
+    Displays the back test reports in browser.
+    :param result: dict returned by strategy_builder
+    :param auto_open: Boolean
+    :param strategy: str
+            Name of the strategy
+    :return: None
+    """
     show_results(result['all'], auto_open, filename="reports/%s_all_trades.html" % strategy)
     show_results(result['long'], auto_open, filename="reports/%s_long_trades.html" % strategy)
     show_results(result['short'], auto_open, filename="reports/%s_short_trades.html" % strategy)
 
 
 def show_results(result: dict, auto_open: bool, filename: str = 'result_table.html'):
+    """
+    Displays results in browser.
+    :param result: dict
+    :param auto_open: Boolean
+    :param filename: Name for the file
+    :return: None
+    """
     keys = []
     values = []
     for key, value in result.items():

@@ -64,23 +64,47 @@ class Pattern(Enum):
         return self.value
 
 
-def pattern_info(pattern=""):
+def pattern_info(pattern: Pattern):
+    """
+    Displays info about the pattern mentioned.
+    :param pattern: Any pattern from Pattern
+    :return: None
+    """
     if pattern is "":
-        _logger.warning('Enter valid indicator name. For e.g. indicator_info("EMA")')
+        _logger.warning('Enter valid indicator name. For e.g. pattern_info("CDLMARUBOZU")')
         _logger.info("For complete list visit http://mrjbq7.github.io/ta-lib/funcs.html")
     else:
         _logger.info(Function(pattern).info)
 
 
 def _check_data(data):
+    """
+    Check whether data entered is valid.
+    :param data: list
+    :return: False if data is not list[DataObject]
+    """
     return (data is None) | (data == []) | (type(data[0]) != DataObject)
 
 
 def _get_list(array: numpy.ndarray):
+    """
+    Converts numpy.ndarray to list
+    :param array: numpy.ndarray
+    :return: list
+    """
     return array.tolist()
 
 
 def pattern_hunter(data: list, pattern: Pattern):
+    """
+    Returns a list which defines where pattern is either bullish, bearish or nothing.
+    If value in list is between 1 and 100 - bullish
+    If value in list is between -1 and -100 - bearish
+    If value in list is 0 - Nothing
+    :param data: list[DataObject]
+    :param pattern: str: Pattern enum
+    :return: list[numeric]
+    """
     result, pattern_at = [], []
     pattern_info(pattern.value)
     if _check_data(data):
@@ -98,6 +122,12 @@ def pattern_hunter(data: list, pattern: Pattern):
 
 
 def analyse_pattern(array: list):
+    """
+    Analyses the list whether pattern has a value for bullish, bearish or nothing.
+    :param array: list
+            list got from pattern_hunter
+    :return: None
+    """
     if (array is None) | (array == []):
         _logger.warning("Invalid data")
     else:

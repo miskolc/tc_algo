@@ -8,7 +8,16 @@ import constants
 
 
 class DataObject:
-    def __init__(self, item=numpy.record):
+    """
+    A class for creating an object which contains candle data.
+    """
+
+    def __init__(self, item: numpy.record):
+        """
+        Converts data received from Quandl in DataObject
+        :param item: numpy.record
+                Received from Quandl API
+        """
         self.date = date_format([item[0]])[0]
         self.open = item[1]
         self.high = item[2]
@@ -23,8 +32,21 @@ class DataObject:
 
 
 class PivotObject:
+    """
+    A class for creating an object which contains pivot related data
+    """
     def __init__(self, pp=constants.default, r1=constants.default, r2=constants.default, r3=constants.default,
                  s1=constants.default, s2=constants.default, s3=constants.default):
+        """
+        Pivot data
+        :param pp: Pivot Point
+        :param r1: Resistance level 1
+        :param r2: Resistance level 2
+        :param r3: Resistance level 3
+        :param s1: Support level 1
+        :param s2: Support level 2
+        :param s3: Support level 3
+        """
         self.pp = pp
         self.r1 = r1
         self.r2 = r2
@@ -38,8 +60,12 @@ class PivotObject:
             self.pp, self.r1, self.s1, self.r2, self.s2, self.r3, self.s3)
 
 
-# This only required for quandl data where date is in ISO format
 def date_format(date_array=None):
+    """
+    This only required for quandl data where date is in ISO format
+    :param date_array: list where date is in ISO format
+    :return: list of date in datetime.date object
+    """
     result = []
     if date_array is None:
         date_array = []
@@ -51,6 +77,9 @@ def date_format(date_array=None):
 
 
 class Operation(Enum):
+    """
+    This class is used to define operation for data in a Condition Object
+    """
     EQUAL = "="
     GREATER_THAN_EQUAL = ">="
     LESS_THAN_EQUAL = "<="
@@ -65,11 +94,22 @@ class Operation(Enum):
 
 
 class Condition:
+    """
+    This class is used to define condition between two data list.
+    """
     data1 = None
     data2 = None
     operation = None
 
     def __init__(self, data1=list, data2=list, operation=Operation):
+        """
+        Initialize a Condition which can be between any list & list or list & constant.
+        list should contain numeric values or default or None values.
+        For e.g. Condition(data1 = indicator1, data2= indicator2, operation= Operation.EQUAL)
+        :param data1: list
+        :param data2: list or numeric
+        :param operation: Operation
+        """
         self.data1 = data1
         self.data2 = data2
         self.operation = operation
@@ -79,6 +119,10 @@ class Condition:
 
 
 class Logical(Enum):
+    """
+    This class is used to define logical operation between two Condition Objects
+    in ConditionLogic object
+    """
     AND = "&"
     OR = "|"
 
@@ -87,17 +131,30 @@ class Logical(Enum):
 
 
 class ConditionsLogic:
+    """
+    This class is used to define condition between two Condition Objects.
+    This ConditionLogic can only be used between two Condition Objects.
+    """
     logic = None
     cond1 = None
     cond2 = None
 
     def __init__(self, condition1=Condition, condition2=Condition, logical=Logical):
+        """
+        It initializes a ConditionLogic object.
+        :param condition1: Condition
+        :param condition2: Condition
+        :param logical: Logical
+        """
         self.cond1 = condition1
         self.cond2 = condition2
         self.logic = logical
 
 
 class ChartType(Enum):
+    """
+    This class defines the type of chart in ChartElement object
+    """
     CANDLESTICK = "candlestick"
     LINE = 'line'
     HISTOGRAM = 'histogram'
@@ -108,6 +165,9 @@ class ChartType(Enum):
 
 
 class ChartAxis(Enum):
+    """
+    This class defines the chart axis in ChartElement object
+    """
     SAME_AXIS = 0
     DIFFERENT_AXIS = 1
 
@@ -116,6 +176,9 @@ class ChartAxis(Enum):
 
 
 class ChartColor(Enum):
+    """
+    This class defines the color of element in ChartElement object
+    """
     RED = 'RED'
     BLUE = 'BLUE'
     GREEN = 'GREEN'
@@ -128,8 +191,23 @@ class ChartColor(Enum):
 
 
 class ChartElement:
+    """
+    This class is used to define a Charting element which needs to be plotted on the chart
+    """
     def __init__(self, data: Union[list, dict], label: str, chart_type: ChartType, plot: Union[int, ChartAxis],
                  color: Union[ChartColor, str]):
+        """
+        It initializes a ChartElement to be plotted on chart either through strategy or data_builder
+        :param data: Union[list, dict]
+        :param label: str
+                Name of the element on the chart
+        :param chart_type: ChartType
+                    Type of chart
+        :param plot: Union[int, ChartAxis]
+                    Axis of chart element. It can be an Integer or ChartAxis enum.
+        :param color: Union[ChartColor, str]
+                    Color of chart element. It can be an str or ChartColor enum.
+        """
         self.data = data
         self.type = chart_type
         self.axis = plot
