@@ -9,6 +9,15 @@ from model import *
 
 app = Flask(__name__)
 
+"""
+List of Chart:
+1. Chart with indicators
+2. BackTest with Annotation (Buy and Sell)
+3. BackTest Report - Cum P&L all
+                   - Cum P&L Long
+                   - Cum P&L Short
+"""
+
 
 @app.route('/')
 def chart():
