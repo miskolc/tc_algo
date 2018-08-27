@@ -5,16 +5,14 @@ from dateutil import relativedelta
 
 import talib
 from talib.abstract import Function
+# noinspection PyProtectedMember
 from talib import MA_Type
 
 from model import *
 
-_logger = logging.getLogger('indicator')
+_logger = logging.getLogger('indicators')
 month_delta = relativedelta.relativedelta(months=1)
-data_min = "data_min"
-data_max = "data_max"
-pivot_min = "pivot_min"
-pivot_max = "pivot_max"
+
 
 """
 List of Indicators:
@@ -47,7 +45,7 @@ def rsi(array=None, period=14) -> list:
             [double]
     """
     result = []
-    indicator_info("RSI")
+    indicator_info(Keys.rsi)
     if _check_array(array):
         _logger.warning("Invalid Input")
     elif period < 1:
@@ -76,7 +74,7 @@ def stoch(high=None, low=None, close=None, fastk_period=5, fastd_period=3, fastd
             {"fastk": list, "fastd": list}
     """
     fastk, fastd = [], []
-    indicator_info("STOCH")
+    indicator_info(Keys.stoch)
     if _check_array(high) | _check_array(low) | _check_array(close):
         _logger.warning("Invalid Input")
     elif (len(high) != len(low)) | (len(high) != len(close)):
@@ -95,7 +93,7 @@ def stoch(high=None, low=None, close=None, fastk_period=5, fastd_period=3, fastd
     # _logger.debug('STOCH output slowd: %s ' % slowd)
     fastk = _remove_nan(fastk)
     fastd = _remove_nan(fastd)
-    result = {"fastk": fastk, "fastd": fastd}
+    result = {Keys.fastk: fastk, Keys.fastd: fastd}
     _logger.debug("STOCH output: %s" % result)
     return result
 
@@ -110,7 +108,7 @@ def sma(array=None, period=30) -> list:
             [double]
     """
     result = []
-    indicator_info("SMA")
+    indicator_info(Keys.sma)
     if _check_array(array):
         _logger.warning("Invalid Input")
     elif period < 1:
@@ -135,7 +133,7 @@ def ema(array=None, period=30) -> list:
             [double]
     """
     result = []
-    indicator_info("EMA")
+    indicator_info(Keys.ema)
     if _check_array(array):
         _logger.warning("Invalid Input")
     elif period < 1:
@@ -161,7 +159,7 @@ def macd(array=None, fastperiod=12, slowperiod=26, signalperiod=9) -> dict:
             {"macd": list, "macdsignal": list, "macdhist": list}
     """
     macd_value, macdsignal, macdhist = [], [], []
-    indicator_info("MACD")
+    indicator_info(Keys.macd)
     if _check_array(array):
         _logger.warning("Invalid Input")
     elif fastperiod < 1 | slowperiod < 1 | signalperiod < 1:
@@ -175,8 +173,8 @@ def macd(array=None, fastperiod=12, slowperiod=26, signalperiod=9) -> dict:
     macd_value = _remove_nan(macd_value)
     macdsignal = _remove_nan(macdsignal)
     macdhist = _remove_nan(macdhist)
-    result = {"macd": macd_value, "macdsignal": macdsignal, "macdhist": macdhist}
-    _logger.debug('MACD output: \n      macd: %s \n      macdsignal: %s \n      macdhist: %s' % (
+    result = {Keys.macd_value: macd_value, Keys.macdsignal: macdsignal, Keys.macdhist: macdhist}
+    _logger.debug('MACD output: \n      macd_value: %s \n      macdsignal: %s \n      macdhist: %s' % (
         macd_value, macdsignal, macdhist))
     return result
 
@@ -196,7 +194,7 @@ def bollinger_bands(array=None, timeperiod=5, nbdevup=2, nbdevdn=2, matype=MA_Ty
             {"upperband": list[float], "middleband": list[float], "lowerband": list[float]}
     """
     upperband, middleband, lowerband = [], [], []
-    indicator_info("BBANDS")
+    indicator_info(Keys.bbands)
     if (array is None) | (array == []):
         _logger.warning("Invalid Input")
     elif timeperiod < 1:
@@ -212,7 +210,7 @@ def bollinger_bands(array=None, timeperiod=5, nbdevup=2, nbdevdn=2, matype=MA_Ty
     upperband = _remove_nan(upperband)
     middleband = _remove_nan(middleband)
     lowerband = _remove_nan(lowerband)
-    result = {"upperband": upperband, "middleband": middleband, "lowerband": lowerband}
+    result = {Keys.upperband: upperband, Keys.middleband: middleband, Keys.lowerband: lowerband}
     _logger.debug(
         'Bollinger Bands output: \n      UpperBand: %s \n      MiddleBand: %s \n      LowerBand: %s' % (
             upperband, middleband, lowerband))
@@ -261,7 +259,13 @@ def pivot(data=None, charts=True):
         s1.append(item.s1)
         s2.append(item.s2)
         s3.append(item.s3)
-    result = dict(pp=pp, r1=r1, r2=r2, r3=r3, s1=s1, s2=s2, s3=s3)
+    result = {Keys.pp: pp,
+              Keys.r1: r1,
+              Keys.r2: r2,
+              Keys.r3: r3,
+              Keys.s1: s1,
+              Keys.s2: s2,
+              Keys.s3: s3}
     if charts:
         return result
     else:
@@ -310,8 +314,8 @@ def _monthly_date_ranges(current_date):
     previous_range = calendar.monthrange(previous_month.year, previous_month.month)
     data_start = date(year=previous_month.year, month=previous_month.month, day=1)
     data_end = date(year=previous_month.year, month=previous_month.month, day=previous_range[1])
-    date_range = {data_min: data_start, data_max: data_end, pivot_min: first_pivot_date,
-                  pivot_max: last_pivot_date}
+    date_range = {Keys.data_min: data_start, Keys.data_max: data_end, Keys.pivot_min: first_pivot_date,
+                  Keys.pivot_max: last_pivot_date}
     _logger.debug(date_range)
     return date_range
 
@@ -331,12 +335,12 @@ def _pivot_data(date_range, data):
     """
     data_pivot = []
     for kRange in date_range:
-        _logger.debug("Pivot values for the range %s and %s" % (kRange[pivot_min], kRange[pivot_max]))
-        pivot_values = _get_pivot_for_range(kRange[data_min], kRange[data_max], data)
+        _logger.debug("Pivot values for the range %s and %s" % (kRange[Keys.pivot_min], kRange[Keys.pivot_max]))
+        pivot_values = _get_pivot_for_range(kRange[Keys.data_min], kRange[Keys.data_max], data)
         _logger.debug(pivot_values)
         for i in range(len(data)):
             current_date = data[i].date
-            if kRange[pivot_min] <= current_date <= kRange[pivot_max]:
+            if kRange[Keys.pivot_min] <= current_date <= kRange[Keys.pivot_max]:
                 # data_and_pivot = [data[i], pivot_values]
                 data_and_pivot = pivot_values
                 data_pivot.append(data_and_pivot)
@@ -411,5 +415,5 @@ def _remove_nan(result):
     result = result.tolist()
     for i in range(len(result)):
         if numpy.isnan(result[i]):
-            result[i] = constants.default
+            result[i] = ct.default
     return result

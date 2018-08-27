@@ -1,17 +1,17 @@
-from flask import Flask, render_template, url_for
-
-import constants as ct
+from flask import Flask, render_template
+from constants import Keys
 
 """
-List of Chart:
+List of Charts:
 1. Chart with indicators
 2. BackTest with Annotation (Buy and Sell)
 3. BackTest Report - Cum P&L all
                    - Cum P&L Long
                    - Cum P&L Short
 """
+
 result = {}
-app = Flask(__name__, )
+app = Flask(__name__)
 
 
 def create_app(input_result):
@@ -35,14 +35,14 @@ def chart_template():
     For plotting normal candle chart or along with indicators
     :return: None
     """
-    if (result.__contains__(ct.key_data_prop)) & (result.__contains__(ct.key_data)) & (
-            result.__contains__(ct.key_params)):
-        data_properties = result[ct.key_data_prop]
+    if (result.__contains__(Keys.data_prop)) & (result.__contains__(Keys.data)) & (
+            result.__contains__(Keys.params)):
+        data_properties = result[Keys.data_prop]
         main_chart = []
         for key, values in data_properties.items():
             main_chart.append([key, values])
-        params = result[ct.key_params]
-        data_list = result[ct.key_data]
+        params = result[Keys.params]
+        data_list = result[Keys.data]
         return render_template("chart.html", chartData=data_list, chart_params=params, main_chart_properties=main_chart)
 
 
@@ -52,15 +52,15 @@ def back_test_template():
     For plotting back test chart with annotations.
     :return: None
     """
-    if (result.__contains__(ct.key_data_prop)) & (result.__contains__(ct.key_data)) & (
-            result.__contains__(ct.key_params)) & (result.__contains__(ct.key_annotations)):
-        data_properties = result[ct.key_data_prop]
+    if (result.__contains__(Keys.data_prop)) & (result.__contains__(Keys.data)) & (
+            result.__contains__(Keys.params)) & (result.__contains__(Keys.annotations)):
+        data_properties = result[Keys.data_prop]
         main_chart = []
         for key, values in data_properties.items():
             main_chart.append([key, values])
-        params = result[ct.key_params]
-        data_list = result[ct.key_data]
-        annotations = result[ct.key_annotations]
+        params = result[Keys.params]
+        data_list = result[Keys.data]
+        annotations = result[Keys.annotations]
         return render_template("backtest.html", chartData=data_list, chart_params=params,
                                main_chart_properties=main_chart, chart_annotations=annotations)
 
@@ -71,9 +71,9 @@ def cum_pl_all():
     Chart for back test reports of Cumulative profit and loss for all strategies
     :return: None
     """
-    if (result.__contains__(ct.key_all)) & (result.__contains__(ct.key_data_prop)):
-        cum_all = result[ct.key_all][ct.key_date_cum_pl]
-        data_properties = result[ct.key_data_prop]
+    if result.__contains__(Keys.all) & (result.__contains__(Keys.data_prop)):
+        cum_all = result[Keys.all][Keys.date_cum_pl]
+        data_properties = result[Keys.data_prop]
         bt_chart = []
         for key, values in data_properties.items():
             bt_chart.append([key, values])
@@ -86,9 +86,9 @@ def cum_pl_long():
     Chart for back test reports of Cumulative profit and loss for long strategy
     :return: None
     """
-    if result.__contains__(ct.key_long) & (result.__contains__(ct.key_data_prop)):
-        cum_long = result[ct.key_long][ct.key_date_cum_pl]
-        data_properties = result[ct.key_data_prop]
+    if result.__contains__(Keys.long) & (result.__contains__(Keys.data_prop)):
+        cum_long = result[Keys.long][Keys.date_cum_pl]
+        data_properties = result[Keys.data_prop]
         bt_chart = []
         for key, values in data_properties.items():
             bt_chart.append([key, values])
@@ -101,9 +101,9 @@ def cum_pl_short():
     Chart for back test reports of Cumulative profit and loss for short strategy
     :return: None
     """
-    if result.__contains__(ct.key_short) & (result.__contains__(ct.key_data_prop)):
-        cum_short = result[ct.key_short][ct.key_date_cum_pl]
-        data_properties = result[ct.key_data_prop]
+    if result.__contains__(Keys.short) & (result.__contains__(Keys.data_prop)):
+        cum_short = result[Keys.short][Keys.date_cum_pl]
+        data_properties = result[Keys.data_prop]
         bt_chart = []
         for key, values in data_properties.items():
             bt_chart.append([key, values])

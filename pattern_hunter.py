@@ -35,35 +35,6 @@ List of Indicators under pattern_hunter are:
 """
 
 
-class Pattern(Enum):
-    two_crows = "CDL2CROWS"
-    three_black_crows = "CDL3BLACKCROWS"
-    three_advancing_black_soldiers = "CDL3WHITESOLDIERS"
-    closing_marubozu = "CDLCLOSINGMARUBOZU"
-    dark_cloud_cover = "CDLDARKCLOUDCOVER"
-    doji = "CDLDOJI"
-    doji_star = "CDLDOJISTAR"
-    dragonfly_doji = "CDLDRAGONFLYDOJI"
-    engulfing_pattern = "CDLENGULFING"
-    evening_star = "CDLEVENINGSTAR"
-    gravestone_doji = "CDLGRAVESTONEDOJI"
-    hammer = "CDLHAMMER"
-    hanging_man = "CDLHANGINGMAN"
-    harami_pattern = "CDLHARAMI"
-    harami_cross_pattern = "CDLHARAMICROSS"
-    inverted_hammer = "CDLINVERTEDHAMMER"
-    marubozu = "CDLMARUBOZU"
-    morning_doji_star = "CDLMORNINGDOJISTAR"
-    morning_star = "CDLMORNINGSTAR"
-    shooting_star = "CDLSHOOTINGSTAR"
-    spinning_top = "CDLSPINNINGTOP"
-    tasuki_gap = "CDLTASUKIGAP"
-    upside_gap_two_crows = "CDLUPSIDEGAP2CROWS"
-
-    def __str__(self):
-        return self.value
-
-
 def pattern_info(pattern: Pattern):
     """
     Displays info about the pattern mentioned.

@@ -27,7 +27,7 @@ class Strategies:
         :param data: list[numeric]
         :param data_properties: dict
         :param ma_type: Moving Average Type
-                SMA = 0
+                SMA = 0 (Default case)
                 EMA = 1
         :return: dict
                 Result from strategy_builder
@@ -62,8 +62,8 @@ class Strategies:
         """
         close = data_parser.get_close(data)
         macd = indicators.macd(close)
-        macd_series = macd['macd']
-        macd_signal = macd['macdsignal']
+        macd_series = macd[Keys.macd_value]
+        macd_signal = macd[Keys.macdsignal]
         buy = Condition(data1=macd_series, data2=macd_signal, operation=Operation.CROSSOVER)
         sell = Condition(data1=macd_series, data2=macd_signal, operation=Operation.CROSSUNDER)
         chart_1 = ChartElement(data=macd, label="macd", chart_type=ChartType.LINE, plot=ChartAxis.SAME_AXIS,
@@ -110,8 +110,8 @@ class Strategies:
         low = data_parser.get_low(data)
         close = data_parser.get_close(data)
         stoch = indicators.stoch(high, low, close)
-        fastk = stoch['fastk']
-        fastd = stoch['fastd']
+        fastk = stoch[Keys.fastk]
+        fastd = stoch[Keys.fastd]
         buy = Condition(data1=fastk, data2=fastd, operation=Operation.CROSSOVER)
         sell = Condition(data1=fastk, data2=fastd, operation=Operation.CROSSUNDER)
         charts = [
@@ -133,9 +133,9 @@ class Strategies:
         """
         close = data_parser.get_close(data)
         bbands = indicators.bollinger_bands(close, timeperiod=20)
-        upperband = bbands['upperband']
-        middleband = bbands['middleband']
-        lowerband = bbands['lowerband']
+        upperband = bbands[Keys.upperband]
+        middleband = bbands[Keys.middleband]
+        lowerband = bbands[Keys.lowerband]
         buy = Condition(data1=close, data2=middleband, operation=Operation.LESS_THAN)
         sell = Condition(data1=close, data2=middleband, operation=Operation.GREATER_THAN)
         chart_1 = ChartElement(data=bbands, label="bbands", chart_type=ChartType.LINE, plot=ChartAxis.SAME_AXIS,
@@ -157,15 +157,14 @@ class Strategies:
         """
         close = data_parser.get_close(data)
         pivot = indicators.pivot(data)
-        pp = pivot['pp']
-        r1 = pivot['r1']
-        s1 = pivot['s1']
+        pp = pivot[Keys.pp]
+        r1 = pivot[Keys.r1]
+        s1 = pivot[Keys.s1]
         buy = Condition(data1=close, data2=pp, operation=Operation.GREATER_THAN)
         sell = Condition(data1=close, data2=pp, operation=Operation.LESS_THAN)
         chart_1 = ChartElement(data=pivot, label="pivot", chart_type=ChartType.LINE, plot=ChartAxis.SAME_AXIS,
                                color=ChartColor.GREEN)
         charts = [chart_1]
-        data_properties.update({"chart": "Line"})
         result = strategy_builder(data_properties=data_properties, data_list=data, strategy=BUY, buy=buy, sell=sell,
                                   charts=charts, target=r1, sl=s1, backtest_chart=ChartType.COLUMN)
         show_back_testing_reports(result)
@@ -228,7 +227,11 @@ def strategy_builder(data_properties: dict, data_list: list, charts: list = None
     pending_order = False
     first_order = True
     data_prop, params, data = data_parser.data_builder(data_list, charts=charts, data_properties=data_properties)
-    data_prop.update({"bt_chart": backtest_chart.value})
+    if (backtest_chart == ChartType.LINE) | (backtest_chart == ChartType.COLUMN):
+        data_prop.update({Keys.bt_chart: backtest_chart.value})
+    else:
+        _logger.warning("Back testing chart only be line or column")
+        data_prop.update({Keys.bt_chart: ChartType.LINE})
     length = 0
     buy_condition, sell_condition = [], []
 
@@ -324,18 +327,18 @@ def strategy_builder(data_properties: dict, data_list: list, charts: list = None
                 bt_short_price.append(close)
             if signal.__contains__(BUY):
                 if signal.__contains__(TARGET):
-                    annotations.append([date, low, "BP"])
+                    annotations.append([date, low, Keys.buy_book_profit])
                 elif signal.__contains__(SL):
-                    annotations.append([date, low, "BSL"])
+                    annotations.append([date, low, Keys.buy_book_sl])
                 else:
-                    annotations.append([date, low, "BR"])
+                    annotations.append([date, low, Keys.buy_regular])
             if signal.__contains__(SELL):
                 if signal.__contains__(TARGET):
-                    annotations.append([date, low, "SSP"])
+                    annotations.append([date, low, Keys.sell_book_profit])
                 elif signal.__contains__(SL):
-                    annotations.append([date, low, "SSL"])
+                    annotations.append([date, low, Keys.sell_book_sl])
                 else:
-                    annotations.append([date, low, "SR"])
+                    annotations.append([date, low, Keys.sell_regular])
 
         def buy_order():
             global order_target, order_sl, pending_order
@@ -415,41 +418,41 @@ def strategy_builder(data_properties: dict, data_list: list, charts: list = None
                     pending_order = True
 
     bt_all = {
-        constants.key_date: bt_all_date,
-        constants.key_signal: bt_all_signal,
-        constants.key_quantity: bt_all_qty,
-        constants.key_price: bt_all_price,
-        constants.key_pl: bt_all_pl,
-        constants.key_cum_pl: bt_all_cum_pl,
-        constants.key_date_cum_pl: bt_all_date_cum_pl
+        Keys.date: bt_all_date,
+        Keys.signal: bt_all_signal,
+        Keys.quantity: bt_all_qty,
+        Keys.price: bt_all_price,
+        Keys.pl: bt_all_pl,
+        Keys.cum_pl: bt_all_cum_pl,
+        Keys.date_cum_pl: bt_all_date_cum_pl
     }
 
     bt_long = {
-        constants.key_date: bt_long_date,
-        constants.key_signal: bt_long_signal,
-        constants.key_quantity: bt_long_qty,
-        constants.key_price: bt_long_price,
-        constants.key_pl: bt_long_pl,
-        constants.key_cum_pl: bt_long_cum_pl,
-        constants.key_date_cum_pl: bt_long_date_cum_pl
+        Keys.date: bt_long_date,
+        Keys.signal: bt_long_signal,
+        Keys.quantity: bt_long_qty,
+        Keys.price: bt_long_price,
+        Keys.pl: bt_long_pl,
+        Keys.cum_pl: bt_long_cum_pl,
+        Keys.date_cum_pl: bt_long_date_cum_pl
     }
     bt_short = {
-        constants.key_date: bt_short_date,
-        constants.key_signal: bt_short_signal,
-        constants.key_quantity: bt_short_qty,
-        constants.key_price: bt_short_price,
-        constants.key_pl: bt_short_pl,
-        constants.key_cum_pl: bt_short_cum_pl,
-        constants.key_date_cum_pl: bt_short_date_cum_pl
+        Keys.date: bt_short_date,
+        Keys.signal: bt_short_signal,
+        Keys.quantity: bt_short_qty,
+        Keys.price: bt_short_price,
+        Keys.pl: bt_short_pl,
+        Keys.cum_pl: bt_short_cum_pl,
+        Keys.date_cum_pl: bt_short_date_cum_pl
     }
     result = {
-        constants.key_data_prop: data_prop,
-        constants.key_data: data,
-        constants.key_params: params,
-        constants.key_all: bt_all,
-        constants.key_long: bt_long,
-        constants.key_short: bt_short,
-        constants.key_annotations: annotations
+        Keys.data_prop: data_prop,
+        Keys.data: data,
+        Keys.params: params,
+        Keys.all: bt_all,
+        Keys.long: bt_long,
+        Keys.short: bt_short,
+        Keys.annotations: annotations
     }
     return result
 
@@ -613,7 +616,7 @@ def _check_data(data):
             True if data is valid(have a value)
             False if data is invalid
     """
-    if (data == constants.default) | (data is None):
+    if (data == ct.default) | (data is None):
         return False
     else:
         return True

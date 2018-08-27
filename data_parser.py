@@ -9,7 +9,7 @@ from model import *
 _logger = logging.getLogger("data_parser")
 
 
-def get_date_ohlc(symbol: str = api.nifty50, start_date: str = api.start_date, end_date: str = "") -> dict:
+def get_date_ohlc(symbol: str = api.NIFTY50, start_date: str = api.start_date, end_date: str = "") -> dict:
     """
     This is used when data is required in separate list
     :param symbol: str
@@ -29,12 +29,17 @@ def get_date_ohlc(symbol: str = api.nifty50, start_date: str = api.start_date, e
     low = get_low(data)
     close = get_close(data)
     volume = get_volume(data)
-    date_ohlc = {"symbol": symbol, "date": date_values, "open": open, "high": high, "low": low, "close": close,
-                 "volume": volume}
+    date_ohlc = {Keys.symbol: symbol,
+                 Keys.date: date_values,
+                 Keys.open: open,
+                 Keys.high: high,
+                 Keys.low: low,
+                 Keys.close: close,
+                 Keys.volume: volume}
     return date_ohlc
 
 
-def get_data(symbol: str = api.nifty50, start_date: str = api.start_date, end_date: str = ""):
+def get_data(symbol: str = api.NIFTY50, start_date: str = api.start_date, end_date: str = ""):
     """
     This is base function which extracts data from Quandl in a DataObject
     :param symbol: str
@@ -54,9 +59,11 @@ def get_data(symbol: str = api.nifty50, start_date: str = api.start_date, end_da
     for i in range(len(response)):
         item = response[i]
         data.append(DataObject(item))
-    # _logger.debug("%s" % data)
     scrip = symbol.split("/")
-    data_properties = dict(scrip=scrip[1], start_date=start_date, end_date=end_date, chart="%s" % ChartType.CANDLESTICK)
+    data_properties = {Keys.scrip: scrip[1],
+                       Keys.start_date: start_date,
+                       Keys.end_date: end_date,
+                       Keys.chart: "%s" % ChartType.CANDLESTICK}
     return data_properties, data
 
 
@@ -91,7 +98,6 @@ def get_date(data: list = None) -> list:
         for i in data:
             value = i.date
             date_arr.append(value)
-    # date_arr = date_format(date_arr)
     return date_arr
 
 
@@ -204,11 +210,6 @@ def current_month(timestamp=""):
     :return: datetime.datetime object
     """
     current = date.fromtimestamp(float(timestamp))
-    # date1 = date(year=2018, month=1, day=15)
-    # delta = relativedelta.relativedelta(month=1)
-    # old = current - delta
-    # test = date(year=2018, month=7, day=15)
-    # print(date2 < test < date1)
     return current
 
 
@@ -230,7 +231,7 @@ def data_builder(data: list, data_properties: dict, charts: list = None):
         data_list: list
                     A 2D list of data for charting
     """
-    params = ["date", "open", "high", "low", "close", "volume"]
+    params = [Keys.date, Keys.open, Keys.high, Keys.low, Keys.close, Keys.volume]
     data_list = _append_data(data)
     indicators = []
     if charts is None:
@@ -274,7 +275,7 @@ def _append_data(data):
     result = []
     for child in data:
         if numpy.isnan(child.volume):
-            child.volume = 'null'
+            child.volume = ct.default
         grand_child = ["%s-%s-%s 09:15:00" % (child.date.year, child.date.month, child.date.day), child.open,
                        child.high,
                        child.low, child.close, child.volume]
@@ -296,10 +297,5 @@ def _append_indicators(indicators, father):
         _logger.debug("Item: %s " % len(item))
         _logger.debug("Father: %s" % len(father))
         for i in range(len(father)):
-            # if type(item[i]) == PivotObject:
-            #     pv = item[i]
-            #     item[i] = [pv.pp, pv.r1, pv.r2, pv.r3, pv.s1, pv.s2, pv.s3]
-            #     father[i] += item[i]
-            # else:
             father[i].append(item[i])
     return father

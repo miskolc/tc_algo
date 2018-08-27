@@ -4,7 +4,8 @@ import numpy
 from dateutil import parser
 from enum import Enum
 
-import constants
+import constants as ct
+from constants import Keys
 
 
 class DataObject:
@@ -35,8 +36,9 @@ class PivotObject:
     """
     A class for creating an object which contains pivot related data
     """
-    def __init__(self, pp=constants.default, r1=constants.default, r2=constants.default, r3=constants.default,
-                 s1=constants.default, s2=constants.default, s3=constants.default):
+
+    def __init__(self, pp=ct.default, r1=ct.default, r2=ct.default, r3=ct.default,
+                 s1=ct.default, s2=ct.default, s3=ct.default):
         """
         Pivot data
         :param pp: Pivot Point
@@ -212,3 +214,35 @@ class ChartElement:
         self.axis = plot
         self.color = color
         self.label = label
+
+
+class Pattern(Enum):
+    """
+    Pattern Keys for pattern hunter
+    """
+    two_crows = "CDL2CROWS"
+    three_black_crows = "CDL3BLACKCROWS"
+    three_advancing_black_soldiers = "CDL3WHITESOLDIERS"
+    closing_marubozu = "CDLCLOSINGMARUBOZU"
+    dark_cloud_cover = "CDLDARKCLOUDCOVER"
+    doji = "CDLDOJI"
+    doji_star = "CDLDOJISTAR"
+    dragonfly_doji = "CDLDRAGONFLYDOJI"
+    engulfing_pattern = "CDLENGULFING"
+    evening_star = "CDLEVENINGSTAR"
+    gravestone_doji = "CDLGRAVESTONEDOJI"
+    hammer = "CDLHAMMER"
+    hanging_man = "CDLHANGINGMAN"
+    harami_pattern = "CDLHARAMI"
+    harami_cross_pattern = "CDLHARAMICROSS"
+    inverted_hammer = "CDLINVERTEDHAMMER"
+    marubozu = "CDLMARUBOZU"
+    morning_doji_star = "CDLMORNINGDOJISTAR"
+    morning_star = "CDLMORNINGSTAR"
+    shooting_star = "CDLSHOOTINGSTAR"
+    spinning_top = "CDLSPINNINGTOP"
+    tasuki_gap = "CDLTASUKIGAP"
+    upside_gap_two_crows = "CDLUPSIDEGAP2CROWS"
+
+    def __str__(self):
+        return self.value
