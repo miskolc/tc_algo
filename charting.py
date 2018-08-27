@@ -46,7 +46,7 @@ def chart_template():
         return render_template("chart.html", chartData=data_list, chart_params=params, main_chart_properties=main_chart)
 
 
-@app.route("/backtest")
+@app.route("/backtest/")
 def back_test_template():
     """
     For plotting back test chart with annotations.

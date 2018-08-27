@@ -39,7 +39,7 @@ if __name__ == '__main__':
     # args = parser.parse_args()
     # print(args.accumulate(args))
     # print(args.accumulate(args.integers))
-    data_prop, data = data_parser.get_data(start_date="2017-08-01")
+    data_prop, data = data_parser.get_data(start_date="2007-08-01")
     high = data_parser.get_high(data)
     low = data_parser.get_low(data)
     close = data_parser.get_close(data)
