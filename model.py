@@ -157,8 +157,7 @@ class ChartType(Enum):
     """
     CANDLESTICK = "candlestick"
     LINE = 'line'
-    HISTOGRAM = 'histogram'
-    BAR_CHART = 'bar_chart'
+    COLUMN = 'column'
 
     def __str__(self):
         return self.value

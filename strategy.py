@@ -167,7 +167,7 @@ class Strategies:
         charts = [chart_1]
         data_properties.update({"chart": "Line"})
         result = strategy_builder(data_properties=data_properties, data_list=data, strategy=BUY, buy=buy, sell=sell,
-                                  charts=charts, target=r1, sl=s1)
+                                  charts=charts, target=r1, sl=s1, backtest_chart=ChartType.COLUMN)
         show_back_testing_reports(result)
         return result
 
@@ -208,7 +208,8 @@ def strategy_builder(data_properties: dict, data_list: list, charts: list = None
     :param qty: int
                 Any positive int value
     :param backtest_chart: ChartType
-                Type of chart to be plotted for back testing results.
+                Type of chart to be plotted for back testing results. By default: ChartType.LINE
+                It can be only of two types ChartType.LINE or ChartType.COLUMN
     :return: dict
                 It returns a dict of the form
                 dict(
