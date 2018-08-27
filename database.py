@@ -1,7 +1,7 @@
-import pymysql
+import mysql.connector
 
 # Open database connection
-db = pymysql.connect("localhost", "root", "", "test")
+db = mysql.connector.connect(host="localhost", user="root", password="")
 # print ("happy")
 # prepare a cursor object using cursor() method
 cursor = db.cursor()

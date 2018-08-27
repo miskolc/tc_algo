@@ -17,6 +17,7 @@ from strategy import Strategies
 # TODO: 3. Strategy Optimization
 # TODO: 4. Add command line interface
 
+
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
     # parser = ArgumentParser(description='Trading Campus Python for Finance.')
@@ -38,7 +39,7 @@ if __name__ == '__main__':
     # args = parser.parse_args()
     # print(args.accumulate(args))
     # print(args.accumulate(args.integers))
-    data_prop, data = data_parser.get_data()
+    data_prop, data = data_parser.get_data(start_date="2017-08-01")
     high = data_parser.get_high(data)
     low = data_parser.get_low(data)
     close = data_parser.get_close(data)
@@ -68,18 +69,8 @@ if __name__ == '__main__':
     sell = Condition(data1=rsi, data2=70, operation=Operation.GREATER_THAN)
     result = strategy.strategy_builder(data_properties=data_prop, data_list=data, charts=charts, buy=buy, sell=sell,
                                        target=1.0, sl=0.5, strategy=strategy.BUY)
-    strategy.show_back_testing_reports(result, auto_open=True)
-    cum_all = result['all']['DATE_CUM_PL']
-    cum_long = result['long']['DATE_CUM_PL']
-    cum_short = result['short']['DATE_CUM_PL']
-
-    print(cum_all)
-    # print(result['data_properties'])
-    # print(result['params'])
-    # print(result['data'])
-    # data_properties, params, data_list = data_parser.data_builder(data, charts=charts, data_properties=data_prop)
-    # print(data_properties)
-    # print(params)
-    # print(data_list)
+    app = charting.create_app(result)
+    app.run()
+    strategy.show_back_testing_reports(result, auto_open=False)
     # result = pattern_hunter.pattern_hunter(data, pattern=Pattern.doji)
     # pattern_hunter.analyse_pattern(result)

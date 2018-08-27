@@ -413,42 +413,43 @@ def strategy_builder(data_properties: dict, data_list: list, charts: list = None
                     sell_order()
                     pending_order = True
 
-    bt_all = dict(
-        Date=bt_all_date,
-        Signal=bt_all_signal,
-        QTY=bt_all_qty,
-        Price=bt_all_price,
-        P_L=bt_all_pl,
-        CUM_P_L=bt_all_cum_pl,
-        DATE_CUM_PL=bt_all_date_cum_pl
-    )
-    bt_long = dict(
-        Date=bt_long_date,
-        Signal=bt_long_signal,
-        QTY=bt_long_qty,
-        Price=bt_long_price,
-        P_L=bt_long_pl,
-        CUM_P_L=bt_long_cum_pl,
-        DATE_CUM_PL=bt_long_date_cum_pl
-    )
-    bt_short = dict(
-        Date=bt_short_date,
-        Signal=bt_short_signal,
-        QTY=bt_short_qty,
-        Price=bt_short_price,
-        P_L=bt_short_pl,
-        CUM_P_L=bt_short_cum_pl,
-        DATE_CUM_PL=bt_short_date_cum_pl
-    )
-    result = dict(
-        data_properties=data_prop,
-        data=data,
-        params=params,
-        all=bt_all,
-        long=bt_long,
-        short=bt_short,
-        annotations=annotations
-    )
+    bt_all = {
+        constants.key_date: bt_all_date,
+        constants.key_signal: bt_all_signal,
+        constants.key_quantity: bt_all_qty,
+        constants.key_price: bt_all_price,
+        constants.key_pl: bt_all_pl,
+        constants.key_cum_pl: bt_all_cum_pl,
+        constants.key_date_cum_pl: bt_all_date_cum_pl
+    }
+
+    bt_long = {
+        constants.key_date: bt_long_date,
+        constants.key_signal: bt_long_signal,
+        constants.key_quantity: bt_long_qty,
+        constants.key_price: bt_long_price,
+        constants.key_pl: bt_long_pl,
+        constants.key_cum_pl: bt_long_cum_pl,
+        constants.key_date_cum_pl: bt_long_date_cum_pl
+    }
+    bt_short = {
+        constants.key_date: bt_short_date,
+        constants.key_signal: bt_short_signal,
+        constants.key_quantity: bt_short_qty,
+        constants.key_price: bt_short_price,
+        constants.key_pl: bt_short_pl,
+        constants.key_cum_pl: bt_short_cum_pl,
+        constants.key_date_cum_pl: bt_short_date_cum_pl
+    }
+    result = {
+        constants.key_data_prop: data_prop,
+        constants.key_data: data,
+        constants.key_params: params,
+        constants.key_all: bt_all,
+        constants.key_long: bt_long,
+        constants.key_short: bt_short,
+        constants.key_annotations: annotations
+    }
     return result
 
 
