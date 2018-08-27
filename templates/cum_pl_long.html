@@ -32,6 +32,13 @@
     dataTable.addData(data);
     //console.log(dataTable)
 
+    //bt_chart_proper
+    var bt_chart = {{bt_chart_properties|safe}};
+    console.log(bt_chart);
+    var chart_name = bt_chart[0][1];
+    var bt_chart_type = bt_chart[4][1];
+    //console.log(chart_name,bt_chart_type);
+
     // map loaded data for the ohlc series
     var mapping = dataTable.mapAs({'x': 0, 'value': 1});
 
@@ -39,7 +46,7 @@
     var chart = anychart.stock();
     // setting chart padding to fit both Y axes
     chart.padding(10, 50, 30, 50);
-    chart.title("Cum P&L");
+    chart.title(chart_name);
 
     // create first plot on the chart
     var plot = chart.plot(0);
@@ -47,10 +54,19 @@
     plot.yAxis(1).orientation('right');
 
    // create candlestick series
-    plot.line(mapping)
-        .name("Cum long")
-        .stroke("5 green")
-        .negativeStroke("5 red");
+    if(bt_chart_type=="line"){
+    plot[bt_chart_type](mapping)
+        .name("Cum P&L")
+        .stroke("3 green")
+        .negativeStroke("3 red");}
+    if(bt_chart_type=="column"){
+    plot[bt_chart_type](mapping)
+        .name("Cum P&L")
+        .stroke("#25DB25")
+        .fill("#25DB25")
+        .negativeStroke("#c10d0d")
+        .negativeFill("#c10d0d");
+    }
     plot.lineMarker()
         .stroke('black')
         .layout('horizontal')

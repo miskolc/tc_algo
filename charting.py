@@ -71,9 +71,13 @@ def cum_pl_all():
     Chart for back test reports of Cumulative profit and loss for all strategies
     :return: None
     """
-    if result.__contains__(ct.key_all):
+    if (result.__contains__(ct.key_all)) & (result.__contains__(ct.key_data_prop)):
         cum_all = result[ct.key_all][ct.key_date_cum_pl]
-        return render_template("cum_pl_all.html", chartData=cum_all)
+        data_properties = result[ct.key_data_prop]
+        bt_chart = []
+        for key, values in data_properties.items():
+            bt_chart.append([key, values])
+        return render_template("cum_pl_all.html", chartData=cum_all, bt_chart_properties=bt_chart)
 
 
 @app.route("/bt_report_long/")
@@ -82,9 +86,13 @@ def cum_pl_long():
     Chart for back test reports of Cumulative profit and loss for long strategy
     :return: None
     """
-    if result.__contains__(ct.key_long):
+    if result.__contains__(ct.key_long) & (result.__contains__(ct.key_data_prop)):
         cum_long = result[ct.key_long][ct.key_date_cum_pl]
-        return render_template("cum_pl_long.html", longData=cum_long)
+        data_properties = result[ct.key_data_prop]
+        bt_chart = []
+        for key, values in data_properties.items():
+            bt_chart.append([key, values])
+        return render_template("cum_pl_long.html", longData=cum_long, bt_chart_properties=bt_chart)
 
 
 @app.route("/bt_report_short/")
@@ -93,6 +101,10 @@ def cum_pl_short():
     Chart for back test reports of Cumulative profit and loss for short strategy
     :return: None
     """
-    if result.__contains__(ct.key_short):
+    if result.__contains__(ct.key_short) & (result.__contains__(ct.key_data_prop)):
         cum_short = result[ct.key_short][ct.key_date_cum_pl]
-        return render_template("cum_pl_short.html", shortData=cum_short)
+        data_properties = result[ct.key_data_prop]
+        bt_chart = []
+        for key, values in data_properties.items():
+            bt_chart.append([key, values])
+        return render_template("cum_pl_short.html", shortData=cum_short, bt_chart_properties=bt_chart)
