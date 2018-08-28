@@ -34,7 +34,7 @@
 
     //bt_chart_proper
     var bt_chart = {{bt_chart_properties|safe}};
-    console.log(bt_chart);
+    //console.log(bt_chart);
     var chart_name = bt_chart[0][1];
     var bt_chart_type = bt_chart[4][1];
     //console.log(chart_name,bt_chart_type);
@@ -74,7 +74,7 @@
         .value(0);
 
     // create scroller series with mapped data
-    //chart.scroller().line(mapping);
+    chart.scroller(false);
     // set container id for the chart
     chart.container('container');
     // initiate chart drawing
