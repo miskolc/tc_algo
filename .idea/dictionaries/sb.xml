@@ -32,6 +32,7 @@
       <w>fastperiod</w>
       <w>harami</w>
       <w>hdfc</w>
+      <w>hdfcbank</w>
       <w>lowerband</w>
       <w>macd</w>
       <w>macdhist</w>
@@ -42,6 +43,8 @@
       <w>nbdevdn</w>
       <w>nbdevup</w>
       <w>ndarray</w>
+      <w>nsecm</w>
+      <w>nsefo</w>
       <w>ohlc</w>
       <w>quandl</w>
       <w>relativedelta</w>

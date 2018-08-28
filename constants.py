@@ -9,6 +9,7 @@ default = "null"
 class Keys:
     scrip = 'scrip'
     symbol = 'symbol'
+    size = 'size'
     start_date = 'start_date'
     end_date = 'end_date'
     chart = 'chart'

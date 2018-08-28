@@ -1,11 +1,22 @@
 from typing import Union
-
-import numpy
+from decimal import *
 from dateutil import parser
 from enum import Enum
 
+import numpy
+
 import constants as ct
 from constants import Keys
+
+PRECISION = Decimal(10) ** -2
+
+
+class Symbol:
+
+    def __init__(self, scrip: str, api_key: str, size: int):
+        self.scrip = scrip
+        self.api_key = api_key
+        self.size = size
 
 
 class DataObject:

@@ -234,7 +234,7 @@ def strategy_builder(data_properties: dict, data_list: list, charts: list = None
         data_prop.update({Keys.bt_chart: ChartType.LINE})
     length = 0
     buy_condition, sell_condition = [], []
-
+    qty = qty * data_prop[Keys.size]
     if buy is not None:
         buy_condition = _evaluate_order_conditions(buy)
         length = len(buy_condition)
@@ -275,8 +275,8 @@ def strategy_builder(data_properties: dict, data_list: list, charts: list = None
                 bt_all_cum_pl.append(0)
             else:
                 if pending_order:
-                    pl = (close - bt_all_price[-1]) * qty
-                    cum_pl = bt_all_cum_pl[-1] + pl
+                    pl = data_parser.round_float((close - bt_all_price[-1]) * qty)
+                    cum_pl = data_parser.round_float(bt_all_cum_pl[-1] + pl)
                     bt_all_date_cum_pl.append([date, cum_pl])
                 else:
                     pl = None
@@ -294,8 +294,8 @@ def strategy_builder(data_properties: dict, data_list: list, charts: list = None
                     bt_long_cum_pl.append(0)
                 else:
                     if pending_order:
-                        pl = (close - bt_long_price[-1]) * qty
-                        cum_pl = bt_long_cum_pl[-1] + pl
+                        pl = data_parser.round_float((close - bt_long_price[-1]) * qty)
+                        cum_pl = data_parser.round_float(bt_long_cum_pl[-1] + pl)
                         bt_long_date_cum_pl.append([date, cum_pl])
                     else:
                         pl = None
@@ -313,8 +313,8 @@ def strategy_builder(data_properties: dict, data_list: list, charts: list = None
                     bt_short_cum_pl.append(0)
                 else:
                     if pending_order:
-                        pl = (close - bt_short_price[-1]) * qty
-                        cum_pl = bt_short_cum_pl[-1] + pl
+                        pl = data_parser.round_float((close - bt_short_price[-1]) * qty)
+                        cum_pl = data_parser.round_float(bt_short_cum_pl[-1] + pl)
                         bt_short_date_cum_pl.append([date, cum_pl])
                     else:
                         pl = None
@@ -732,14 +732,12 @@ def show_results(result: dict, auto_open: bool, filename: str = 'result_table.ht
         header=dict(values=keys,
                     line=dict(color='#7D7F80'),
                     fill=dict(color='#a1c3d1'),
-                    align=['left'] * 5),
+                    align=['center'] * 5),
         cells=dict(values=values,
                    line=dict(color='#7D7F80'),
                    fill=dict(color='#EDFAFF'),
                    align=['left'] * 5))
 
-    # layout = dict(width=700, height=700)
     data = [trace]
-    # fig = dict(data=data, layout=layout)
     fig = dict(data=data)
     plotly.offline.plot(fig, filename=filename, auto_open=auto_open)

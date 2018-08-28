@@ -4,16 +4,17 @@ from datetime import *
 import quandl
 
 import api
+from api import *
 from model import *
 
 _logger = logging.getLogger("data_parser")
 
 
-def get_date_ohlc(symbol: str = api.NIFTY50, start_date: str = api.start_date, end_date: str = "") -> dict:
+def get_date_ohlc(symbol: Symbol = NSEFO.NIFTY50, start_date: str = api.min_date, end_date: str = "") -> dict:
     """
     This is used when data is required in separate list
-    :param symbol: str
-                Scrip for which data is required
+    :param symbol: Symbol
+                Scrip for which data is required. An Instance of api.Symbol class
     :param start_date: str
                 Starting date for data. For e.g. '2017-08-08'
     :param end_date: str
@@ -29,7 +30,7 @@ def get_date_ohlc(symbol: str = api.NIFTY50, start_date: str = api.start_date, e
     low = get_low(data)
     close = get_close(data)
     volume = get_volume(data)
-    date_ohlc = {Keys.symbol: symbol,
+    date_ohlc = {Keys.symbol: symbol.scrip,
                  Keys.date: date_values,
                  Keys.open: open,
                  Keys.high: high,
@@ -39,11 +40,11 @@ def get_date_ohlc(symbol: str = api.NIFTY50, start_date: str = api.start_date, e
     return date_ohlc
 
 
-def get_data(symbol: str = api.NIFTY50, start_date: str = api.start_date, end_date: str = ""):
+def get_data(symbol: Symbol = NSEFO.NIFTY50, start_date: str = api.min_date, end_date: str = ""):
     """
     This is base function which extracts data from Quandl in a DataObject
-    :param symbol: str
-                Scrip for which data is required
+    :param symbol: Symbol
+                Scrip for which data is required. An Instance of api.Symbol class
     :param start_date: str
                 Starting date for data. For e.g. '2017-08-08'
     :param end_date: str
@@ -55,15 +56,15 @@ def get_data(symbol: str = api.NIFTY50, start_date: str = api.start_date, end_da
     """
     data = []
     quandl.ApiConfig.api_key = api.quandl_api_key
-    response = quandl.get(symbol, returns="numpy", start_date=start_date, end_date=end_date)
+    response = quandl.get(symbol.api_key, returns="numpy", start_date=start_date, end_date=end_date)
     for i in range(len(response)):
         item = response[i]
         data.append(DataObject(item))
-    scrip = symbol.split("/")
-    data_properties = {Keys.scrip: scrip[1],
+    data_properties = {Keys.scrip: symbol.scrip,
                        Keys.start_date: start_date,
                        Keys.end_date: end_date,
-                       Keys.chart: "%s" % ChartType.CANDLESTICK}
+                       Keys.chart: "%s" % ChartType.CANDLESTICK,
+                       Keys.size: symbol.size}
     return data_properties, data
 
 
@@ -299,3 +300,7 @@ def _append_indicators(indicators, father):
         for i in range(len(father)):
             father[i].append(item[i])
     return father
+
+
+def round_float(number: float) -> float:
+    return float(Decimal(number).quantize(PRECISION))

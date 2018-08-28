@@ -385,13 +385,13 @@ def _calc_pivot_points(high, low, close):
         _logger.debug("High for period: %s" % highest_high)
         _logger.debug("Low for period: %s" % lowest_low)
         _logger.debug("Close for the period: %s" % last_close)
-        pp = float((highest_high + lowest_low + last_close) / 3.0)
-        r1 = float((2.0 * pp) - lowest_low)
-        s1 = float((2.0 * pp) - highest_high)
-        r2 = float(pp + (highest_high - lowest_low))
-        s2 = float(pp - (highest_high - lowest_low))
-        r3 = float(highest_high + (2.0 * (pp - lowest_low)))
-        s3 = float(lowest_low - (2.0 * (highest_high - pp)))
+        pp = float(Decimal((highest_high + lowest_low + last_close) / 3.0).quantize(PRECISION))
+        r1 = float(Decimal((2.0 * pp) - lowest_low).quantize(PRECISION))
+        s1 = float(Decimal((2.0 * pp) - highest_high).quantize(PRECISION))
+        r2 = float(Decimal(pp + (highest_high - lowest_low)).quantize(PRECISION))
+        s2 = float(Decimal(pp - (highest_high - lowest_low)).quantize(PRECISION))
+        r3 = float(Decimal(highest_high + (2.0 * (pp - lowest_low))).quantize(PRECISION))
+        s3 = float(Decimal(lowest_low - (2.0 * (highest_high - pp))).quantize(PRECISION))
         result = PivotObject(pp=pp, r1=r1, r2=r2, r3=r3, s1=s1, s2=s2, s3=s3)
     return result
 
@@ -416,4 +416,9 @@ def _remove_nan(result):
     for i in range(len(result)):
         if numpy.isnan(result[i]):
             result[i] = ct.default
+    for i in range(len(result)):
+        if result[i] == ct.default:
+            pass
+        else:
+            result[i] = float(Decimal(result[i]).quantize(PRECISION))
     return result
