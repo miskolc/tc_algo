@@ -34,6 +34,38 @@ List of Indicators under pattern_hunter are:
 23.	Upside gap two crows
 """
 
+"""
+These patterns are defined for bullish views:
+1.	Three Advancing White Soldiers
+2.	Doji
+3.	Dragonfly Doji (Not sure of Bullish must be used with trend)
+4.	Gravestone Doji (Not sure of Bullish must be used with trend)
+5.	Hammer
+6.	Inverted Hammer
+7.	Morning Doji Star
+8.	Morning Star
+
+These patterns are defined for bearish views:
+1.	Two Crows
+2.	Three black Crows
+3.	Dark Cloud Cover
+4.	Doji Star
+5.	Evening Star
+6.	Hanging Man
+7.	Shooting Star
+8.	Upside Gap Two Crows
+
+These patterns are defined for both bullish and bearish views:
+1.	Closing Marubozu
+2.	Engulfing Pattern
+3.	Harami Pattern
+4.	Harami Cross Pattern
+5.	Marubozu
+6.	Spinning Top
+7.	Tasuki Gap
+
+"""
+
 
 def pattern_info(pattern: Pattern):
     """
@@ -54,7 +86,7 @@ def _check_data(data):
     :param data: list
     :return: False if data is not list[DataObject]
     """
-    return (data is None) | (data == []) | (type(data[0]) != DataObject)
+    return (data is None) | (data == []) | (type(data) != numpy.ndarray)
 
 
 def _get_list(array: numpy.ndarray):
@@ -66,22 +98,26 @@ def _get_list(array: numpy.ndarray):
     return array.tolist()
 
 
-def pattern_hunter(data: list, pattern: Pattern):
+def pattern_hunter(open: list, high: list, low: list, close: list, pattern: Pattern) -> list:
     """
     Returns a list which defines where pattern is either bullish, bearish or nothing.
     If value in list is between 1 and 100 - bullish
     If value in list is between -1 and -100 - bearish
     If value in list is 0 - Nothing
-    :param data: list[DataObject]
+    :param close: list[numeric]
+    :param low: list[numeric]
+    :param high: list[numeric]
+    :param open: list[numeric]
     :param pattern: str: Pattern enum
     :return: list[numeric]
     """
     result, pattern_at = [], []
     pattern_info(pattern.value)
-    if _check_data(data):
+    if (_check_data(open)) & (_check_data(high)) & (_check_data(low)) & (_check_data(close)):
         _logger.warning("Invalid Input for pattern_hunter")
+    elif (len(open) != len(high)) | (len(open) != len(low)) | (len(open) != len(close)):
+        _logger.warning("Variable data length in pattern hunter")
     else:
-        open, high, low, close = data_parser.get_ohlc(data)
         exp = "talib.%s(open, high, low, close)" % pattern
         values = dict(open=open, high=high, low=low, close=close, talib=talib)
         result = eval(exp, values)

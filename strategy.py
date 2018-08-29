@@ -1,10 +1,12 @@
 import logging
+from typing import List
 
 import plotly.plotly
 import plotly.graph_objs as go
 
 import data_parser
 import indicators
+import pattern_hunter
 from model import *
 
 _logger = logging.getLogger("strategy")
@@ -13,6 +15,7 @@ SELL = "sell"
 TARGET = "target"
 SL = "sl"
 auto_op = Logical.AND
+data_objects = []
 
 
 class Strategies:
@@ -178,16 +181,19 @@ first_order = True
 
 
 def strategy_builder(data_properties: dict, data_list: list, charts: list = None,
-                     buy: Union[Condition, ConditionsLogic] = None,
-                     sell: Union[Condition, ConditionsLogic] = None, target: Union[Condition, float] = None,
-                     sl: Union[Condition, float] = None, strategy: str = BUY, qty: int = 1,
+                     buy: Union[Condition, ConditionsLogic, List[Condition], List[ConditionsLogic]] = None,
+                     sell: Union[Condition, ConditionsLogic, List[Condition], List[ConditionsLogic]] = None,
+                     target: Union[float, Condition, list] = None,
+                     sl: Union[float, Condition, list] = None,
+                     strategy: str = BUY,
+                     qty: int = 1,
                      backtest_chart: ChartType = ChartType.LINE) -> dict:
     """
     It is used to build strategy based on different conditions.
     :param data_properties: dict
                 Properties of the data given to the strategy.
     :param data_list: list
-                list[DataObejct]
+                list[DataObject]
     :param charts: list
                 list[ChartElement]
     :param buy: Union[Condition, ConditionsLogic]
@@ -221,7 +227,8 @@ def strategy_builder(data_properties: dict, data_list: list, charts: list = None
                     annotations=list
                 )
     """
-    global order_target, order_sl, pending_order, first_order
+    global order_target, order_sl, pending_order, first_order, data_objects
+    data_objects = data_list
     order_target = None
     order_sl = None
     pending_order = False
@@ -545,40 +552,49 @@ def _calc_condition(condition=Condition) -> list:
     """
     result = []
     offset = 0
-    if condition.data2 is not None:
-        if _check_number(condition.data2):
-            condition.data2 = [condition.data2] * len(condition.data1)
-    if len(condition.data1) != len(condition.data2):
-        return result
+    if type(condition.data1) == Pattern:
+        if (condition.operation == Operation.BULL_RANGE) | (condition.operation == Operation.BEAR_RANGE):
+            open, high, low, close = data_parser.get_ohlc(data_objects)
+            result = _evaluate_patterns(open, high, low, close, pattern=condition.data1,
+                                        pattern_range=condition.operation.value)
+            return result
+        else:
+            _logger.warning("Operation for pattern can be either a BULL_RANGE or BEAR_RANGE")
     else:
-        for i in range(len(condition.data1)):
-            data_m = condition.data1[i]
-            data_n = condition.data2[i]
-            if condition.operation is not None:
-                if _check_data(data_m) & _check_data(data_n):
-                    if (condition.operation == Operation.CROSSOVER) | (condition.operation == Operation.CROSSUNDER):
-                        if offset == 0:
-                            offset = 1
-                            result.append(False)
-                        elif offset == 1:
-                            data_m_1 = condition.data1[i - 1]
-                            data_n_1 = condition.data2[i - 1]
-                            if condition.operation == Operation.CROSSOVER:
-                                result.append(
-                                    _cross_over(data_m_1=data_m_1, data_n_1=data_n_1, data_m=data_m, data_n=data_n))
-                            elif condition.operation == Operation.CROSSUNDER:
-                                result.append(
-                                    _cross_under(data_m_1=data_m_1, data_n_1=data_n_1, data_m=data_m, data_n=data_n))
-                            else:
+        if condition.data2 is not None:
+            if _check_number(condition.data2):
+                condition.data2 = [condition.data2] * len(condition.data1)
+        if len(condition.data1) != len(condition.data2):
+            return result
+        else:
+            for i in range(len(condition.data1)):
+                data_m = condition.data1[i]
+                data_n = condition.data2[i]
+                if condition.operation is not None:
+                    if _check_data(data_m) & _check_data(data_n):
+                        if (condition.operation == Operation.CROSSOVER) | (condition.operation == Operation.CROSSUNDER):
+                            if offset == 0:
+                                offset = 1
                                 result.append(False)
-                    elif condition.operation == Operation.RANGE_EQUAL:
-                        result.append(_evaluate_range(data_m=data_m, data_n=data_n))
+                            elif offset == 1:
+                                data_m_1 = condition.data1[i - 1]
+                                data_n_1 = condition.data2[i - 1]
+                                if condition.operation == Operation.CROSSOVER:
+                                    result.append(
+                                        _cross_over(data_m_1=data_m_1, data_n_1=data_n_1, data_m=data_m, data_n=data_n))
+                                elif condition.operation == Operation.CROSSUNDER:
+                                    result.append(_cross_under(data_m_1=data_m_1, data_n_1=data_n_1, data_m=data_m,
+                                                               data_n=data_n))
+                                else:
+                                    result.append(False)
+                        elif condition.operation == Operation.RANGE_EQUAL:
+                            result.append(_evaluate_range(data_m=data_m, data_n=data_n))
+                        else:
+                            result.append(_evaluate_op(data_m=data_m, data_n=data_n, operation=condition.operation))
                     else:
-                        result.append(_evaluate_op(data_m=data_m, data_n=data_n, operation=condition.operation))
+                        result.append(False)
                 else:
-                    result.append(False)
-            else:
-                _logger.warning("No operation specified in %s" % condition)
+                    _logger.warning("No operation specified in %s" % condition)
     return result
 
 
@@ -741,3 +757,72 @@ def show_results(result: dict, auto_open: bool, filename: str = 'result_table.ht
     data = [trace]
     fig = dict(data=data)
     plotly.offline.plot(fig, filename=filename, auto_open=auto_open)
+
+
+def _evaluate_patterns(open: list, high: list, low: list, close: list, pattern: Union[Pattern, list],
+                       pattern_range: list) -> list:
+    """
+
+    :param open: list
+                list[numeric]
+    :param high: list
+                list[numeric]
+    :param low: list
+                list[numeric]
+    :param close: list
+                list[numeric]
+    :param pattern: Union[Pattern, list]
+                Pattern or Patterns to be analysed along with the strategy. If a pattern is bullish and
+                Strategy is BUY then we will give a signal for a buy and similarly for SELL strategy and
+                bearish pattern sell signal will be generated.
+    :param pattern_range: list
+                This parameter needs to be specified if patterns are used in the strategy. For e.g. [50,100]
+                A range of values which should appear in the strategy for the pattern(s) specified.
+                If more than two values are mentioned then max and min will be taken and others will be discarded.
+                A pattern value may range from -100 to +100.
+                Values for each pattern is specified and accordingly their importance.
+    :return: list[Boolean]
+    """
+    pattern_values, result = [], []
+    max_range, min_range = 0, 0
+    if type(pattern_range) == list:
+        max_range = max(pattern_range)
+        min_range = min(pattern_range)
+    if type(pattern) == Pattern:
+        x = pattern_hunter.pattern_hunter(open, high, low, close, pattern)
+        pattern_values.append(x)
+    elif type(pattern) == list:
+        for item in pattern:
+            if type(item) == Pattern:
+                y = pattern_hunter.pattern_hunter(open, high, low, close, item)
+                pattern_values.append(y)
+            else:
+                _logger.warning("Expected a type of %s got %s instead" % (Pattern, item))
+    else:
+        _logger.debug("Invalid input in patterns for strategy_builder")
+        _logger.warning("Expected a type of %s got %s instead" % (Pattern, type(pattern)))
+
+    def add_as_list(data_arr):
+        res = []
+        for j in range(len(data_arr)):
+            res.append([data_arr[j]])
+        return res
+
+    pattern_arr = []
+    if len(pattern_values) == 1:
+        pattern_arr = add_as_list(pattern_values[0])
+    elif len(pattern_values) > 1:
+        father = add_as_list(pattern_values[0])
+        pattern_values.pop(0)
+        for arr in pattern_values:
+            for i in range(len(arr)):
+                father[i] = father[i] + [arr[i]]
+            pattern_arr = father
+
+    for k in range(len(pattern_arr)):
+        val = False
+        for m in pattern_arr[k]:
+            if min_range <= m <= max_range:
+                val = True
+        result.append(val)
+    return result

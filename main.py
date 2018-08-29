@@ -39,7 +39,7 @@ if __name__ == '__main__':
     # args = parser.parse_args()
     # print(args.accumulate(args))
     # print(args.accumulate(args.integers))
-    data_prop, data = data_parser.get_data(start_date="2007-08-01")
+    data_prop, data = data_parser.get_data(start_date="2012-08-01")
     high = data_parser.get_high(data)
     low = data_parser.get_low(data)
     close = data_parser.get_close(data)
@@ -66,11 +66,12 @@ if __name__ == '__main__':
                            color="magenta")
     charts = [chart_1, chart_2, chart_3, chart_4, chart_5, chart_6, chart_7]
     buy = Condition(data1=sma, data2=ema, operation=Operation.CROSSOVER)
+    buy1 = Condition(data1=Pattern.closing_marubozu, data2=[-100, -50], operation=Operation.BEAR_RANGE)
     sell = Condition(data1=rsi, data2=70, operation=Operation.GREATER_THAN)
-    result = strategy.strategy_builder(data_properties=data_prop, data_list=data, charts=charts, buy=buy, sell=sell,
-                                       target=1.0, sl=0.5, strategy=strategy.BUY)
+    result = strategy.strategy_builder(data_properties=data_prop, data_list=data, charts=charts, buy=[buy, buy1],
+                                       sell=sell, target=1.0, sl=0.5, strategy=strategy.BUY, )
     app = charting.create_app(result)
     app.run()
-    # strategy.show_back_testing_reports(result)
+    strategy.show_back_testing_reports(result)
     # result = pattern_hunter.pattern_hunter(data, pattern=Pattern.doji)
     # pattern_hunter.analyse_pattern(result)

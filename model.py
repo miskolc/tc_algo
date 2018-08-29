@@ -101,6 +101,8 @@ class Operation(Enum):
     CROSSOVER = "CROSSOVER"
     CROSSUNDER = "CROSSUNDER"
     RANGE_EQUAL = "<=  <="
+    BULL_RANGE = [1, 100]
+    BEAR_RANGE = [-1, -100]
 
     def __str__(self):
         return self.value
