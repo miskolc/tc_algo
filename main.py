@@ -58,7 +58,7 @@ if __name__ == '__main__':
                            color=ChartColor.PURPLE)
     chart_4 = ChartElement(data=bbands, label="bbands", chart_type=ChartType.LINE, plot=ChartAxis.SAME_AXIS,
                            color=ChartColor.BLUE)
-    chart_5 = ChartElement(data=pivot, label="pivot", chart_type=ChartType.LINE, plot=ChartAxis.SAME_AXIS,
+    chart_5 = ChartElement(data=pivot, label="pivot", chart_type=ChartType.JUMPLINE, plot=ChartAxis.SAME_AXIS,
                            color=ChartColor.GREEN)
     chart_6 = ChartElement(data=rsi, label="rsi", chart_type=ChartType.LINE, plot=ChartAxis.DIFFERENT_AXIS,
                            color=ChartColor.RED)

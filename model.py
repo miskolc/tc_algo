@@ -171,6 +171,7 @@ class ChartType(Enum):
     CANDLESTICK = "candlestick"
     LINE = 'line'
     COLUMN = 'column'
+    JUMPLINE = 'jumpLine'
 
     def __str__(self):
         return self.value
