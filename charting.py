@@ -44,6 +44,8 @@ def chart_template():
         params = result[Keys.params]
         data_list = result[Keys.data]
         return render_template("chart.html", chartData=data_list, chart_params=params, main_chart_properties=main_chart)
+    else:
+        return render_template("404.html")
 
 
 @app.route("/backtest/")
@@ -63,6 +65,8 @@ def back_test_template():
         annotations = result[Keys.annotations]
         return render_template("backtest.html", chartData=data_list, chart_params=params,
                                main_chart_properties=main_chart, chart_annotations=annotations)
+    else:
+        return render_template("404.html")
 
 
 @app.route("/bt_report_all/")
@@ -78,6 +82,8 @@ def cum_pl_all():
         for key, values in data_properties.items():
             bt_chart.append([key, values])
         return render_template("cum_pl_all.html", chartData=cum_all, bt_chart_properties=bt_chart)
+    else:
+        return render_template("404.html")
 
 
 @app.route("/bt_report_long/")
@@ -93,6 +99,8 @@ def cum_pl_long():
         for key, values in data_properties.items():
             bt_chart.append([key, values])
         return render_template("cum_pl_long.html", longData=cum_long, bt_chart_properties=bt_chart)
+    else:
+        return render_template("404.html")
 
 
 @app.route("/bt_report_short/")
@@ -108,3 +116,10 @@ def cum_pl_short():
         for key, values in data_properties.items():
             bt_chart.append([key, values])
         return render_template("cum_pl_short.html", shortData=cum_short, bt_chart_properties=bt_chart)
+    else:
+        return render_template("404.html")
+
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
