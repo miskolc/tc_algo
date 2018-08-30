@@ -8,6 +8,7 @@ from talib.abstract import Function
 # noinspection PyProtectedMember
 from talib import MA_Type
 
+import data_parser
 from model import *
 
 _logger = logging.getLogger('indicators')
@@ -385,13 +386,13 @@ def _calc_pivot_points(high, low, close):
         _logger.debug("High for period: %s" % highest_high)
         _logger.debug("Low for period: %s" % lowest_low)
         _logger.debug("Close for the period: %s" % last_close)
-        pp = float(Decimal((highest_high + lowest_low + last_close) / 3.0).quantize(PRECISION))
-        r1 = float(Decimal((2.0 * pp) - lowest_low).quantize(PRECISION))
-        s1 = float(Decimal((2.0 * pp) - highest_high).quantize(PRECISION))
-        r2 = float(Decimal(pp + (highest_high - lowest_low)).quantize(PRECISION))
-        s2 = float(Decimal(pp - (highest_high - lowest_low)).quantize(PRECISION))
-        r3 = float(Decimal(highest_high + (2.0 * (pp - lowest_low))).quantize(PRECISION))
-        s3 = float(Decimal(lowest_low - (2.0 * (highest_high - pp))).quantize(PRECISION))
+        pp = data_parser.round_float((highest_high + lowest_low + last_close) / 3.0)
+        r1 = data_parser.round_float((2.0 * pp) - lowest_low)
+        s1 = data_parser.round_float((2.0 * pp) - highest_high)
+        r2 = data_parser.round_float(pp + (highest_high - lowest_low))
+        s2 = data_parser.round_float(pp - (highest_high - lowest_low))
+        r3 = data_parser.round_float(highest_high + (2.0 * (pp - lowest_low)))
+        s3 = data_parser.round_float(lowest_low - (2.0 * (highest_high - pp)))
         result = PivotObject(pp=pp, r1=r1, r2=r2, r3=r3, s1=s1, s2=s2, s3=s3)
     return result
 

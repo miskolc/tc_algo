@@ -7,6 +7,11 @@ default = "null"
 
 
 class Keys:
+    daily = 'daily'
+    weekly = 'weekly'
+    monthly = 'monthly'
+    yearly = 'yearly'
+    interval = 'interval'
     scrip = 'scrip'
     symbol = 'symbol'
     size = 'size'
@@ -20,6 +25,7 @@ class Keys:
     low = 'low'
     close = 'close'
     volume = 'volume'
+    turnover = 'turnover'
 
     rsi = "RSI"
     stoch = "STOCH"
