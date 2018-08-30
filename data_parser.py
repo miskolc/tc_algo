@@ -394,10 +394,6 @@ def data_builder(data: list, data_properties: dict, charts: list = None):
     _logger.debug("Params are: %s" % params)
     _logger.debug("Data properties: %s" % data_properties)
     return data_properties, params, data_list
-    # result = [params]
-    # for item in father:
-    #     result.append(item)
-    # return result
 
 
 def _append_data(data):
