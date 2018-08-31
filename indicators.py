@@ -1,17 +1,20 @@
 import logging
 import calendar
 from datetime import *
-from dateutil import relativedelta
+from dateutil.relativedelta import relativedelta
 
 import talib
 from talib.abstract import Function
 # noinspection PyProtectedMember
 from talib import MA_Type
 
+import data_parser
 from model import *
 
 _logger = logging.getLogger('indicators')
-month_delta = relativedelta.relativedelta(months=1)
+day_delta = relativedelta(days=1)
+week_delta = relativedelta(weeks=1)
+month_delta = relativedelta(months=1)
 
 
 """
@@ -217,7 +220,7 @@ def bollinger_bands(array=None, timeperiod=5, nbdevup=2, nbdevdn=2, matype=MA_Ty
     return result
 
 
-def pivot(data=None, charts=True):
+def pivot(data=None, interval: str = Keys.monthly, charts=True):
     """
     Calculates monthly pivot for the given range of data list.
     Formula used is:
@@ -228,10 +231,14 @@ def pivot(data=None, charts=True):
     S2 = PP - high-low
     R3 = high + 2*(PP-low)
     S3 = low - 2*(high-PP)
-    :param charts: Boolean
-                Whether data is required for the charts. If false data is returned in list[PivotObject]
     :param data: list
             [model.DataObject]
+    :param interval: str
+            Interval for which pivots needed.
+            Currently supports daily, weekly and monthly pivots.
+    :param charts: Boolean
+                Whether data is required for the charts. If false data is returned in list[PivotObject]
+
     :return: dict
             dict(pp=list[double], r1=list[double], r2=list[double], r3=list[double],
                                         s1=list[double], s2=list[double], s3=list[double])
@@ -248,8 +255,16 @@ def pivot(data=None, charts=True):
     else:
         if len(data) < period:
             _logger.warning("Period greater than length of input. Unexpected behaviour may occur")
-        ranges = _get_monthly_ranges(data[0].date, data[len(data) - 1].date)
-        pivots = _pivot_data(ranges, data=data)
+        if interval == Keys.daily:
+            ranges = _get_daily_ranges(data)
+            pivots = _pivot_data(ranges, data=data)
+        else:
+            if interval == Keys.weekly:
+                ranges = _get_weekly_ranges(data[0].date, data[len(data) - 1].date)
+            else:
+                ranges = _get_monthly_ranges(data[0].date, data[len(data) - 1].date)
+            pivots = _pivot_data(ranges, data=data)
+
     pp, r1, r2, r3, s1, s2, s3 = [], [], [], [], [], [], []
     for item in pivots:
         pp.append(item.pp)
@@ -272,6 +287,39 @@ def pivot(data=None, charts=True):
         return pivots
 
 
+def _get_daily_ranges(data):
+    ranges = []
+    for i in range(len(data)):
+        if i == 0:
+            data_min = data_max = data[i].date - timedelta(days=1)
+            pivot_min = pivot_max = data[i].date
+        else:
+            data_min = data_max = data[i - 1].date
+            pivot_min = pivot_max = data[i].date
+        date_range = {Keys.data_min: data_min, Keys.data_max: data_max, Keys.pivot_min: pivot_min,
+                      Keys.pivot_max: pivot_max}
+        ranges.append(date_range)
+        i += 1
+    return ranges
+
+
+def _get_weekly_ranges(min_date, max_date):
+    delta = timedelta(days=7)
+    diff = max_date - min_date
+    ranges = []
+    if diff < delta:
+        _logger.warning("Pivots can't be found for current data")
+    else:
+        while min_date < max_date:
+            current_range = _get_date_ranges(min_date, interval=Keys.weekly)
+            ranges.append(current_range)
+            min_date = min_date + week_delta
+        if (max_date < min_date) & (max_date.isocalendar()[1] == min_date.isocalendar()[1]):
+            month_range = _get_date_ranges(max_date, interval=Keys.weekly)
+            ranges.append(month_range)
+    return ranges
+
+
 def _get_monthly_ranges(min_date, max_date):
     """
     This method finds the different ranges for the pivot calculations
@@ -288,18 +336,14 @@ def _get_monthly_ranges(min_date, max_date):
     if diff < delta:
         _logger.warning("Pivots can't be found for current data")
     else:
-
         while min_date <= max_date:
-            current_range = _monthly_date_ranges(min_date)
+            current_range = _get_date_ranges(min_date, interval=Keys.monthly)
             ranges.append(current_range)
             min_date = min_date + month_delta
-        # if max_date < min_date:
-        #     month_range = _date_ranges(max_date)
-        #     ranges.append(month_range)
     return ranges
 
 
-def _monthly_date_ranges(current_date):
+def _get_date_ranges(current_date, interval: str):
     """
     This method returns a dict containing info about pivot dates and data dates
     :param current_date: datetime.date
@@ -307,17 +351,30 @@ def _monthly_date_ranges(current_date):
             {"data_min": datetime.date, "data_max": datetime.date, "pivot_min": datetime.date,
                   "pivot_max": datetime.date}
     """
-    previous_month = current_date - month_delta
-    current_range = calendar.monthrange(current_date.year, current_date.month)
-    first_pivot_date = date(year=current_date.year, month=current_date.month, day=1)
-    last_pivot_date = date(year=current_date.year, month=current_date.month, day=current_range[1])
-    previous_range = calendar.monthrange(previous_month.year, previous_month.month)
-    data_start = date(year=previous_month.year, month=previous_month.month, day=1)
-    data_end = date(year=previous_month.year, month=previous_month.month, day=previous_range[1])
-    date_range = {Keys.data_min: data_start, Keys.data_max: data_end, Keys.pivot_min: first_pivot_date,
-                  Keys.pivot_max: last_pivot_date}
-    _logger.debug(date_range)
-    return date_range
+    if interval == Keys.weekly:
+        weekday = current_date.isocalendar()
+        back_time = timedelta(days=weekday[2] - 1)
+        forward_time = timedelta(days=6)
+        week_first = current_date - back_time
+        week_last = week_first + forward_time
+        previous_week_first = week_first - timedelta(days=7)
+        previous_week_last = week_first - timedelta(days=1)
+        date_range = {Keys.data_min: previous_week_first, Keys.data_max: previous_week_last, Keys.pivot_min: week_first,
+                      Keys.pivot_max: week_last}
+        _logger.debug(date_range)
+        return date_range
+    if interval == Keys.monthly:
+        previous_month = current_date - month_delta
+        current_range = calendar.monthrange(current_date.year, current_date.month)
+        first_pivot_date = date(year=current_date.year, month=current_date.month, day=1)
+        last_pivot_date = date(year=current_date.year, month=current_date.month, day=current_range[1])
+        previous_range = calendar.monthrange(previous_month.year, previous_month.month)
+        data_start = date(year=previous_month.year, month=previous_month.month, day=1)
+        data_end = date(year=previous_month.year, month=previous_month.month, day=previous_range[1])
+        date_range = {Keys.data_min: data_start, Keys.data_max: data_end, Keys.pivot_min: first_pivot_date,
+                      Keys.pivot_max: last_pivot_date}
+        _logger.debug(date_range)
+        return date_range
 
 
 def _pivot_data(date_range, data):
@@ -385,13 +442,13 @@ def _calc_pivot_points(high, low, close):
         _logger.debug("High for period: %s" % highest_high)
         _logger.debug("Low for period: %s" % lowest_low)
         _logger.debug("Close for the period: %s" % last_close)
-        pp = float(Decimal((highest_high + lowest_low + last_close) / 3.0).quantize(PRECISION))
-        r1 = float(Decimal((2.0 * pp) - lowest_low).quantize(PRECISION))
-        s1 = float(Decimal((2.0 * pp) - highest_high).quantize(PRECISION))
-        r2 = float(Decimal(pp + (highest_high - lowest_low)).quantize(PRECISION))
-        s2 = float(Decimal(pp - (highest_high - lowest_low)).quantize(PRECISION))
-        r3 = float(Decimal(highest_high + (2.0 * (pp - lowest_low))).quantize(PRECISION))
-        s3 = float(Decimal(lowest_low - (2.0 * (highest_high - pp))).quantize(PRECISION))
+        pp = data_parser.round_float((highest_high + lowest_low + last_close) / 3.0)
+        r1 = data_parser.round_float((2.0 * pp) - lowest_low)
+        s1 = data_parser.round_float((2.0 * pp) - highest_high)
+        r2 = data_parser.round_float(pp + (highest_high - lowest_low))
+        s2 = data_parser.round_float(pp - (highest_high - lowest_low))
+        r3 = data_parser.round_float(highest_high + (2.0 * (pp - lowest_low)))
+        s3 = data_parser.round_float(lowest_low - (2.0 * (highest_high - pp)))
         result = PivotObject(pp=pp, r1=r1, r2=r2, r3=r3, s1=s1, s2=s2, s3=s3)
     return result
 

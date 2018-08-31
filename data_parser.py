@@ -1,7 +1,9 @@
+import calendar
 import logging
 from datetime import *
 
 import quandl
+from dateutil.relativedelta import relativedelta
 
 import api
 from api import *
@@ -40,7 +42,8 @@ def get_date_ohlc(symbol: Symbol = NSEFO.NIFTY50, start_date: str = api.min_date
     return date_ohlc
 
 
-def get_data(symbol: Symbol = NSEFO.NIFTY50, start_date: str = api.min_date, end_date: str = ""):
+def get_data(symbol: Symbol = NSEFO.NIFTY50, start_date: str = api.min_date, end_date: str = "",
+             interval: str = Keys.daily):
     """
     This is base function which extracts data from Quandl in a DataObject
     :param symbol: Symbol
@@ -49,6 +52,9 @@ def get_data(symbol: Symbol = NSEFO.NIFTY50, start_date: str = api.min_date, end
                 Starting date for data. For e.g. '2017-08-08'
     :param end_date: str
                 End date for data. For e.g. '2018-08-08'
+    :param interval: str
+                Data Interval for the scrip.
+                Currently supports daily, weekly, monthly and yearly formats.
     :return: tuple
             data_properties: dict
                         Contains info about the data fetched from Quandl API. Such as scrip, start date etc.
@@ -65,7 +71,135 @@ def get_data(symbol: Symbol = NSEFO.NIFTY50, start_date: str = api.min_date, end
                        Keys.end_date: end_date,
                        Keys.chart: "%s" % ChartType.CANDLESTICK,
                        Keys.size: symbol.size}
-    return data_properties, data
+
+    if interval == Keys.daily:
+        data_properties.update({Keys.interval: Keys.daily})
+        return data_properties, data
+    elif interval == Keys.weekly:
+        data_properties.update({Keys.interval: Keys.weekly})
+        data = get_weekly_data(data)
+        return data_properties, data
+    elif interval == Keys.monthly:
+        data_properties.update({Keys.interval: Keys.monthly})
+        data = get_monthly_data(data)
+        return data_properties, data
+    elif interval == Keys.yearly:
+        data_properties.update({Keys.interval: Keys.yearly})
+        data = get_yearly_data(data)
+        return data_properties, data
+    else:
+        data_properties.update({Keys.interval: interval})
+        return data_properties, data
+
+
+def get_weekly_data(data: list):
+    candle_dates = []
+    data_arr = []
+    week_delta = relativedelta(weeks=1)
+    first_date = data[0].date
+    last_date = data[-1].date
+    while first_date < last_date:
+        weekday = first_date.isocalendar()
+        back_time = timedelta(days=weekday[2] - 1)
+        forward_time = timedelta(days=6)
+        week_first = first_date - back_time
+        week_last = week_first + forward_time
+        candle_dates.append([week_first, week_last])
+        first_date = first_date + week_delta
+    for dates in candle_dates:
+        month_date, open, high, low, close, volume, turnover = [], [], [], [], [], [], []
+        for i in range(len(data)):
+            if dates[0] <= data[i].date <= dates[1]:
+                month_date.append(data[i].date)
+                open.append(data[i].open)
+                high.append(data[i].high)
+                low.append(data[i].low)
+                close.append(data[i].close)
+                volume.append(data[i].volume)
+                turnover.append(data[i].turnover)
+        # month_date = dates[0]
+        month_date = month_date[0]
+        open = open[0]
+        high = max(high)
+        low = min(low)
+        close = close[-1]
+        volume = sum(volume)
+        turnover = sum(turnover)
+        obj = DataObject(**{Keys.date: month_date, Keys.open: open, Keys.high: high, Keys.low: low, Keys.close: close,
+                            Keys.volume: volume, Keys.turnover: turnover})
+        data_arr.append(obj)
+    return data_arr
+
+
+def get_monthly_data(data: list):
+    candle_dates = []
+    data_arr = []
+    month_delta = relativedelta(months=1)
+    first_date = data[0].date
+    last_date = data[-1].date
+    while first_date < last_date:
+        days = calendar.monthrange(first_date.year, first_date.month)[1]
+        candle_dates.append([date(year=first_date.year, month=first_date.month, day=1),
+                             date(year=first_date.year, month=first_date.month, day=days)])
+        first_date = first_date + month_delta
+    for dates in candle_dates:
+        month_date, open, high, low, close, volume, turnover = [], [], [], [], [], [], []
+        for i in range(len(data)):
+            if dates[0] <= data[i].date <= dates[1]:
+                month_date.append(data[i].date)
+                open.append(data[i].open)
+                high.append(data[i].high)
+                low.append(data[i].low)
+                close.append(data[i].close)
+                volume.append(data[i].volume)
+                turnover.append(data[i].turnover)
+        # month_date = dates[0]
+        month_date = month_date[0]
+        open = open[0]
+        high = max(high)
+        low = min(low)
+        close = close[-1]
+        volume = sum(volume)
+        turnover = sum(turnover)
+        obj = DataObject(**{Keys.date: month_date, Keys.open: open, Keys.high: high, Keys.low: low, Keys.close: close,
+                            Keys.volume: volume, Keys.turnover: turnover})
+        data_arr.append(obj)
+    return data_arr
+
+
+def get_yearly_data(data: list):
+    candle_dates = []
+    data_arr = []
+    year_delta = relativedelta(years=1)
+    first_date = data[0].date
+    last_date = data[-1].date
+    while first_date < last_date:
+        candle_dates.append([date(year=first_date.year, month=1, day=1),
+                             date(year=first_date.year, month=12, day=31)])
+        first_date = first_date + year_delta
+    for dates in candle_dates:
+        year_date, open, high, low, close, volume, turnover = [], [], [], [], [], [], []
+        for i in range(len(data)):
+            if dates[0] <= data[i].date <= dates[1]:
+                year_date.append(data[i].date)
+                open.append(data[i].open)
+                high.append(data[i].high)
+                low.append(data[i].low)
+                close.append(data[i].close)
+                volume.append(data[i].volume)
+                turnover.append(data[i].turnover)
+        # month_date = dates[0]
+        year_date = year_date[0]
+        open = open[0]
+        high = max(high)
+        low = min(low)
+        close = close[-1]
+        volume = sum(volume)
+        turnover = sum(turnover)
+        obj = DataObject(**{Keys.date: year_date, Keys.open: open, Keys.high: high, Keys.low: low, Keys.close: close,
+                            Keys.volume: volume, Keys.turnover: turnover})
+        data_arr.append(obj)
+    return data_arr
 
 
 def get_ohlc(data: list = None):
@@ -260,10 +394,6 @@ def data_builder(data: list, data_properties: dict, charts: list = None):
     _logger.debug("Params are: %s" % params)
     _logger.debug("Data properties: %s" % data_properties)
     return data_properties, params, data_list
-    # result = [params]
-    # for item in father:
-    #     result.append(item)
-    # return result
 
 
 def _append_data(data):

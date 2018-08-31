@@ -12,7 +12,7 @@ import strategy
 from strategy import Strategies
 
 # TODO: Following are under development order:
-# TODO: 1. Pattern Hunting and its implementation in strategy
+# TODO: 1. Pattern Hunting and its implementation in strategy - Done
 # TODO: 2. Weekly, Monthly Data and same for pivots
 # TODO: 3. Strategy Optimization
 # TODO: 4. Add command line interface
@@ -39,7 +39,7 @@ if __name__ == '__main__':
     # args = parser.parse_args()
     # print(args.accumulate(args))
     # print(args.accumulate(args.integers))
-    data_prop, data = data_parser.get_data(start_date="2012-08-01")
+    data_prop, data = data_parser.get_data(start_date="2012-03-01", interval=Keys.daily)
     high = data_parser.get_high(data)
     low = data_parser.get_low(data)
     close = data_parser.get_close(data)
@@ -49,7 +49,9 @@ if __name__ == '__main__':
     rsi = indicators.rsi(close)
     stoch = indicators.stoch(high, low, close)
     bbands = indicators.bollinger_bands(close)
-    pivot = indicators.pivot(data)
+    pivot = indicators.pivot(data, interval=Keys.monthly)
+    pivot1 = indicators.pivot(data, interval=Keys.weekly)
+    pivot2 = indicators.pivot(data, interval=Keys.daily)
     chart_1 = ChartElement(data=sma, label="sma", chart_type=ChartType.LINE, plot=ChartAxis.SAME_AXIS,
                            color=ChartColor.YELLOW)
     chart_2 = ChartElement(data=ema, label="ema", chart_type=ChartType.LINE, plot=ChartAxis.SAME_AXIS,
@@ -58,13 +60,18 @@ if __name__ == '__main__':
                            color=ChartColor.PURPLE)
     chart_4 = ChartElement(data=bbands, label="bbands", chart_type=ChartType.LINE, plot=ChartAxis.SAME_AXIS,
                            color=ChartColor.BLUE)
-    chart_5 = ChartElement(data=pivot, label="pivot", chart_type=ChartType.JUMPLINE, plot=ChartAxis.SAME_AXIS,
+    chart_5 = ChartElement(data=pivot, label="monthly_pivot", chart_type=ChartType.JUMPLINE, plot=ChartAxis.SAME_AXIS,
                            color=ChartColor.GREEN)
     chart_6 = ChartElement(data=rsi, label="rsi", chart_type=ChartType.LINE, plot=ChartAxis.DIFFERENT_AXIS,
                            color=ChartColor.RED)
     chart_7 = ChartElement(data=macd, label="macd", chart_type=ChartType.LINE, plot=ChartAxis.DIFFERENT_AXIS,
                            color="magenta")
-    charts = [chart_1, chart_2, chart_3, chart_4, chart_5, chart_6, chart_7]
+    chart_8 = ChartElement(data=pivot1, label="weekly_pivot", chart_type=ChartType.JUMPLINE, plot=ChartAxis.SAME_AXIS,
+                           color=ChartColor.GREEN)
+    chart_9 = ChartElement(data=pivot2, label="daily_pivot", chart_type=ChartType.JUMPLINE, plot=ChartAxis.SAME_AXIS,
+                           color=ChartColor.GREEN)
+    # charts = [chart_1, chart_2, chart_3, chart_4, chart_5, chart_6, chart_7]
+    charts = [chart_5, chart_8, chart_9]
     buy = Condition(data1=sma, data2=ema, operation=Operation.CROSSOVER)
     buy1 = Condition(data1=Pattern.closing_marubozu, data2=[-100, -50], operation=Operation.BEAR_RANGE)
     sell = Condition(data1=rsi, data2=70, operation=Operation.GREATER_THAN)
@@ -72,6 +79,6 @@ if __name__ == '__main__':
                                        sell=sell, target=1.0, sl=0.5, strategy=strategy.BUY, )
     app = charting.create_app(result)
     app.run()
-    strategy.show_back_testing_reports(result)
+    # strategy.show_back_testing_reports(result)
     # result = pattern_hunter.pattern_hunter(data, pattern=Pattern.doji)
     # pattern_hunter.analyse_pattern(result)

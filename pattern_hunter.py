@@ -3,7 +3,6 @@ import logging
 import talib
 from talib.abstract import Function
 
-import data_parser
 from model import *
 
 _logger = logging.getLogger("pattern_hunter")
