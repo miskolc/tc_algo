@@ -93,6 +93,11 @@ def get_data(symbol: Symbol = NSEFO.NIFTY50, start_date: str = api.min_date, end
 
 
 def get_weekly_data(data: list):
+    """
+    Weekly data from list[DataObject]
+    :param data: list[DataObject]
+    :return: list[DataObject]
+    """
     candle_dates = []
     data_arr = []
     week_delta = relativedelta(weeks=1)
@@ -132,6 +137,11 @@ def get_weekly_data(data: list):
 
 
 def get_monthly_data(data: list):
+    """
+    Monthly data from list[DataObject]
+    :param data: list[DataObject]
+    :return: list[DataObject]
+    """
     candle_dates = []
     data_arr = []
     month_delta = relativedelta(months=1)
@@ -168,6 +178,11 @@ def get_monthly_data(data: list):
 
 
 def get_yearly_data(data: list):
+    """
+    Yearly data from list[DataObject]
+    :param data: list[DataObject]
+    :return: list[DataObject]
+    """
     candle_dates = []
     data_arr = []
     year_delta = relativedelta(years=1)
@@ -433,4 +448,9 @@ def _append_indicators(indicators, father):
 
 
 def round_float(number: float) -> float:
+    """
+    Round the float to two decimal precision.
+    :param number: float
+    :return: float
+    """
     return float(Decimal(number).quantize(PRECISION))

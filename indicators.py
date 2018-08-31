@@ -287,7 +287,13 @@ def pivot(data=None, interval: str = Keys.monthly, charts=True):
         return pivots
 
 
-def _get_daily_ranges(data):
+def _get_daily_ranges(data: list):
+    """
+    This method finds the daily ranges for the pivot calculations
+    :param: list[DataObject]
+    :return: list
+            [dict]
+    """
     ranges = []
     for i in range(len(data)):
         if i == 0:
@@ -304,6 +310,15 @@ def _get_daily_ranges(data):
 
 
 def _get_weekly_ranges(min_date, max_date):
+    """
+    This method finds the weekly ranges for the pivot calculations
+    :param min_date: datetime.date
+            This date is minimum date for current data
+    :param max_date: datetime.date
+            This date is maximum date for current data
+    :return: list
+            [dict]
+    """
     delta = timedelta(days=7)
     diff = max_date - min_date
     ranges = []
