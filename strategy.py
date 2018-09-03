@@ -839,7 +839,7 @@ def strategy_optimizations(data_properties: dict, data_list: list, charts: list 
                            sl_range: Union[list, numpy.ndarray, float] = None):
     _logger1 = logging.getLogger("strategy.optimizer")
     length = 0
-    if (type(target_range) != float) & (type(sl_range) != float):
+    if not ((type(target_range) == float) & (type(sl_range) == float)):
         if type(target_range) == list:
             length = len(target_range)
         if type(sl_range) == list:

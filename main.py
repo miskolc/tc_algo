@@ -81,8 +81,8 @@ if __name__ == '__main__':
     #                                 sell=sell, target_range=numpy.arange(0.3, 1.8, 0.2),
     #                                 sl_range=numpy.arange(0.1, 0.9, 0.1), strategy=strategy.BUY,)
     strategy.strategy_optimizations(data_properties=data_prop, data_list=data, charts=charts, buy=[buy, buy1],
-                                    sell=sell, target_range=1.7,
-                                    sl_range=0.4, strategy=strategy.BUY, )
+                                    sell=sell, target_range=numpy.arange(0.3, 1.8, 0.2),
+                                    sl_range=0.3, strategy=strategy.BUY, )
     # app = charting.create_app(result)
     # app.run()
     # strategy.show_back_testing_reports(result)

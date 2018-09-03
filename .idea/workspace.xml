@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="e8e6d9ca-4800-4a51-9684-12e5ec5cd86c" name="Default" comment="Add: Weekly and Daily Pivots">
+    <list default="true" id="e8e6d9ca-4800-4a51-9684-12e5ec5cd86c" name="Default" comment="Update: Strategy Optimizer">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/strategy.py" beforeDir="false" afterPath="$PROJECT_DIR$/strategy.py" afterDir="false" />
@@ -16,7 +16,7 @@
     <session id="-1799413582">
       <usages-collector id="statistics.lifecycle.project">
         <counts>
-          <entry key="project.closed" value="38" />
+          <entry key="project.closed" value="39" />
           <entry key="project.open.time.0" value="2" />
           <entry key="project.open.time.10" value="1" />
           <entry key="project.open.time.104" value="1" />
@@ -31,7 +31,7 @@
           <entry key="project.open.time.20" value="2" />
           <entry key="project.open.time.21" value="3" />
           <entry key="project.open.time.22" value="2" />
-          <entry key="project.open.time.24" value="2" />
+          <entry key="project.open.time.24" value="3" />
           <entry key="project.open.time.27" value="3" />
           <entry key="project.open.time.3" value="3" />
           <entry key="project.open.time.31" value="1" />
@@ -43,7 +43,7 @@
           <entry key="project.open.time.6" value="1" />
           <entry key="project.open.time.69" value="1" />
           <entry key="project.open.time.75" value="1" />
-          <entry key="project.opened" value="41" />
+          <entry key="project.opened" value="42" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
@@ -63,15 +63,15 @@
           <entry key="Python Console" value="12" />
           <entry key="dummy" value="41" />
           <entry key="html" value="6" />
-          <entry key="py" value="70123" />
-          <entry key="txt" value="1832" />
+          <entry key="py" value="70135" />
+          <entry key="txt" value="1863" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
           <entry key="HTML" value="6" />
-          <entry key="PLAIN_TEXT" value="1873" />
-          <entry key="Python" value="70135" />
+          <entry key="PLAIN_TEXT" value="1904" />
+          <entry key="Python" value="70147" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.open">
@@ -95,7 +95,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/indicators.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="434">
+            <state relative-caret-position="7769">
               <caret line="468" selection-start-line="468" selection-end-line="468" />
               <folding>
                 <element signature="e#0#14#0" expanded="true" />
@@ -107,8 +107,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/main.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="362">
-              <caret line="84" column="45" lean-forward="true" selection-start-line="84" selection-start-column="45" selection-end-line="84" selection-end-column="45" />
+            <state relative-caret-position="206">
+              <caret line="83" column="87" lean-forward="true" selection-start-line="83" selection-start-column="87" selection-end-line="83" selection-end-column="87" />
               <folding>
                 <element signature="e#0#14#0" expanded="true" />
               </folding>
@@ -119,11 +119,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/strategy.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="308">
-              <caret line="894" column="16" selection-start-line="894" selection-start-column="16" selection-end-line="894" selection-end-column="16" />
-              <folding>
-                <marker date="1535966552346" expanded="true" signature="33419:35828" ph="..." />
-              </folding>
+            <state relative-caret-position="138">
+              <caret line="841" column="58" selection-start-line="841" selection-start-column="58" selection-end-line="841" selection-end-column="58" />
             </state>
           </provider>
         </entry>
@@ -140,7 +137,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/data_parser.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="227">
+            <state relative-caret-position="7106">
               <caret line="427" column="10" selection-start-line="427" selection-start-column="10" selection-end-line="427" selection-end-column="10" />
             </state>
           </provider>
@@ -149,7 +146,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/model.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="394">
+            <state relative-caret-position="697">
               <caret line="49" column="48" selection-start-line="49" selection-start-column="48" selection-end-line="49" selection-end-column="48" />
               <folding>
                 <element signature="e#0#24#0" expanded="true" />
@@ -248,6 +245,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -259,7 +257,6 @@
           <select />
         </subPane>
       </pane>
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -625,7 +622,14 @@
       <option name="project" value="LOCAL" />
       <updated>1535962050699</updated>
     </task>
-    <option name="localTasksCounter" value="42" />
+    <task id="LOCAL-00042" summary="Update: Strategy Optimizer">
+      <created>1535966591809</created>
+      <option name="number" value="00042" />
+      <option name="presentableId" value="LOCAL-00042" />
+      <option name="project" value="LOCAL" />
+      <updated>1535966591809</updated>
+    </task>
+    <option name="localTasksCounter" value="43" />
     <servers />
   </component>
   <component name="TodoView">
@@ -731,7 +735,6 @@
     <option name="myLimit" value="2678400000" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Update: Strategy Builder Logic Complete" />
     <MESSAGE value="Add: Back testing(display using plotly)&#10;Update: Order placement conditions optimized" />
     <MESSAGE value="Add: Initiated predefined strategies" />
     <MESSAGE value="Add: Predefined Strategies" />
@@ -756,7 +759,8 @@
     <MESSAGE value="Add: Weekly and Daily Pivots" />
     <MESSAGE value="Add: Docs for data and pivots" />
     <MESSAGE value="Add: Strategy optimizer" />
-    <option name="LAST_COMMIT_MESSAGE" value="Add: Strategy optimizer" />
+    <MESSAGE value="Update: Strategy Optimizer" />
+    <option name="LAST_COMMIT_MESSAGE" value="Update: Strategy Optimizer" />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
   </component>
   <component name="debuggerHistoryManager">
@@ -995,16 +999,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/indicators.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="434">
-          <caret line="468" selection-start-line="468" selection-end-line="468" />
-          <folding>
-            <element signature="e#0#14#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$USER_HOME$/.PyCharmCE2018.2/system/python_stubs/273770122/builtins.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="161">
@@ -1012,21 +1006,13 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/model.py">
+    <entry file="file://$PROJECT_DIR$/indicators.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="394">
-          <caret line="49" column="48" selection-start-line="49" selection-start-column="48" selection-end-line="49" selection-end-column="48" />
+        <state relative-caret-position="7769">
+          <caret line="468" selection-start-line="468" selection-end-line="468" />
           <folding>
-            <element signature="e#0#24#0" expanded="true" />
-            <marker date="1535624893920" expanded="true" signature="1530:1539" ph="..." />
+            <element signature="e#0#14#0" expanded="true" />
           </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/data_parser.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="227">
-          <caret line="427" column="10" selection-start-line="427" selection-start-column="10" selection-end-line="427" selection-end-column="10" />
         </state>
       </provider>
     </entry>
@@ -1037,10 +1023,28 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/data_parser.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="7106">
+          <caret line="427" column="10" selection-start-line="427" selection-start-column="10" selection-end-line="427" selection-end-column="10" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/model.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="697">
+          <caret line="49" column="48" selection-start-line="49" selection-start-column="48" selection-end-line="49" selection-end-column="48" />
+          <folding>
+            <element signature="e#0#24#0" expanded="true" />
+            <marker date="1535624893920" expanded="true" signature="1530:1539" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/main.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="362">
-          <caret line="84" column="45" lean-forward="true" selection-start-line="84" selection-start-column="45" selection-end-line="84" selection-end-column="45" />
+        <state relative-caret-position="206">
+          <caret line="83" column="87" lean-forward="true" selection-start-line="83" selection-start-column="87" selection-end-line="83" selection-end-column="87" />
           <folding>
             <element signature="e#0#14#0" expanded="true" />
           </folding>
@@ -1049,11 +1053,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/strategy.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="308">
-          <caret line="894" column="16" selection-start-line="894" selection-start-column="16" selection-end-line="894" selection-end-column="16" />
-          <folding>
-            <marker date="1535966552346" expanded="true" signature="33419:35828" ph="..." />
-          </folding>
+        <state relative-caret-position="138">
+          <caret line="841" column="58" selection-start-line="841" selection-start-column="58" selection-end-line="841" selection-end-column="58" />
         </state>
       </provider>
     </entry>
