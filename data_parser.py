@@ -420,7 +420,9 @@ def _append_data(data):
     """
     result = []
     for child in data:
-        if numpy.isnan(child.volume):
+        if child.volume == ct.default:
+            pass
+        elif numpy.isnan(child.volume):
             child.volume = ct.default
         grand_child = ["%s-%s-%s 09:15:00" % (child.date.year, child.date.month, child.date.day), child.open,
                        child.high,

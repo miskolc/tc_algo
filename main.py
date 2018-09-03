@@ -13,7 +13,7 @@ from strategy import Strategies
 
 # TODO: Following are under development order:
 # TODO: 1. Pattern Hunting and its implementation in strategy - Done
-# TODO: 2. Weekly, Monthly Data and same for pivots
+# TODO: 2. Weekly, Monthly Data and same for pivots - Done
 # TODO: 3. Strategy Optimization
 # TODO: 4. Add command line interface
 
@@ -75,10 +75,16 @@ if __name__ == '__main__':
     buy = Condition(data1=sma, data2=ema, operation=Operation.CROSSOVER)
     buy1 = Condition(data1=Pattern.closing_marubozu, data2=[-100, -50], operation=Operation.BEAR_RANGE)
     sell = Condition(data1=rsi, data2=70, operation=Operation.GREATER_THAN)
-    result = strategy.strategy_builder(data_properties=data_prop, data_list=data, charts=charts, buy=[buy, buy1],
-                                       sell=sell, target=1.0, sl=0.5, strategy=strategy.BUY, )
-    app = charting.create_app(result)
-    app.run()
+    # result = strategy.strategy_builder(data_properties=data_prop, data_list=data, charts=charts, buy=[buy, buy1],
+    #                                    sell=sell, target=1.0, sl=0.5, strategy=strategy.BUY, )
+    # strategy.strategy_optimizations(data_properties=data_prop, data_list=data, charts=charts, buy=[buy, buy1],
+    #                                 sell=sell, target_range=[1.0, 1.3, 1.9, 2.2],
+    #                                 sl_range=[0.3, 0.5, 0.6, 0.8], strategy=strategy.BUY, )
+    strategy.strategy_optimizations(data_properties=data_prop, data_list=data, charts=charts, buy=[buy, buy1],
+                                    sell=sell, target_range=numpy.arange(0.3, 1.8, 0.2),
+                                    sl_range=numpy.arange(0.1, 0.9, 0.1), strategy=strategy.BUY, )
+    # app = charting.create_app(result)
+    # app.run()
     # strategy.show_back_testing_reports(result)
     # result = pattern_hunter.pattern_hunter(data, pattern=Pattern.doji)
     # pattern_hunter.analyse_pattern(result)

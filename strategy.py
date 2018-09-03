@@ -826,3 +826,52 @@ def _evaluate_patterns(open: list, high: list, low: list, close: list, pattern: 
                 val = True
         result.append(val)
     return result
+
+
+def strategy_optimizations(data_properties: dict, data_list: list, charts: list = None,
+                           buy: Union[Condition, ConditionsLogic, List[Condition], List[ConditionsLogic]] = None,
+                           sell: Union[Condition, ConditionsLogic, List[Condition], List[ConditionsLogic]] = None,
+                           strategy: str = BUY,
+                           qty: int = 1,
+                           backtest_chart: ChartType = ChartType.LINE,
+                           target_range: Union[list, numpy.ndarray] = None,
+                           sl_range: Union[list, numpy.ndarray] = None):
+    _logger1 = logging.getLogger("strategy.optimizer")
+    if type(target_range) == numpy.ndarray:
+        target_range = target_range.tolist()
+    if type(sl_range) == numpy.ndarray:
+        sl_range = sl_range.tolist()
+
+    if (type(target_range) == list) & (type(sl_range) == list):
+        if len(target_range) == len(sl_range):
+            heads = ["target", "sl", "p&l"]
+            target, sl, cum_pl = [], [], []
+            for i in range(len(target_range)):
+                _logger1.debug("For target: %s" % target_range[i])
+                _logger1.debug("For sl: %s" % sl_range[i])
+                result = strategy_builder(data_properties=data_properties, data_list=data_list, charts=charts, buy=buy,
+                                          sell=sell, target=float(target_range[i]), sl=float(sl_range[i]),
+                                          strategy=strategy, qty=qty, backtest_chart=backtest_chart)
+                target.append(target_range[i])
+                sl.append(sl_range[i])
+                cum_pl.append(result[Keys.all][Keys.cum_pl][-1])
+            values = [target, sl, cum_pl]
+            trace = go.Table(
+                header=dict(values=heads,
+                            line=dict(color='#7D7F80'),
+                            fill=dict(color='#a1c3d1'),
+                            align=['center'] * 5),
+                cells=dict(values=values,
+                           line=dict(color='#7D7F80'),
+                           fill=dict(color='#EDFAFF'),
+                           align=['left'] * 5))
+
+            data = [trace]
+            fig = dict(data=data)
+            plotly.offline.plot(fig, filename="reports/optimize.html")
+        else:
+            _logger1.warning("Length differs for target and sl")
+            _logger1.info("Target Length: %s" % len(target_range))
+            _logger1.info("SL Length: %s" % len(sl_range))
+    else:
+        _logger1.warning("The type for both target and sl should be %s" % list)
