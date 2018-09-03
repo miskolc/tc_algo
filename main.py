@@ -12,10 +12,7 @@ import strategy
 from strategy import Strategies
 
 # TODO: Following are under development order:
-# TODO: 1. Pattern Hunting and its implementation in strategy - Done
-# TODO: 2. Weekly, Monthly Data and same for pivots - Done
-# TODO: 3. Strategy Optimization
-# TODO: 4. Add command line interface
+# TODO: 1. Add command line interface
 
 
 if __name__ == '__main__':
@@ -80,9 +77,12 @@ if __name__ == '__main__':
     # strategy.strategy_optimizations(data_properties=data_prop, data_list=data, charts=charts, buy=[buy, buy1],
     #                                 sell=sell, target_range=[1.0, 1.3, 1.9, 2.2],
     #                                 sl_range=[0.3, 0.5, 0.6, 0.8], strategy=strategy.BUY, )
+    # strategy.strategy_optimizations(data_properties=data_prop, data_list=data, charts=charts, buy=[buy, buy1],
+    #                                 sell=sell, target_range=numpy.arange(0.3, 1.8, 0.2),
+    #                                 sl_range=numpy.arange(0.1, 0.9, 0.1), strategy=strategy.BUY,)
     strategy.strategy_optimizations(data_properties=data_prop, data_list=data, charts=charts, buy=[buy, buy1],
-                                    sell=sell, target_range=numpy.arange(0.3, 1.8, 0.2),
-                                    sl_range=numpy.arange(0.1, 0.9, 0.1), strategy=strategy.BUY, )
+                                    sell=sell, target_range=1.7,
+                                    sl_range=0.4, strategy=strategy.BUY, )
     # app = charting.create_app(result)
     # app.run()
     # strategy.show_back_testing_reports(result)
