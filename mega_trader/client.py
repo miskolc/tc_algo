@@ -70,22 +70,43 @@ if __name__ == '__main__':
         _client = ClientApplication()
         initiator = fix.SocketInitiator(_client, store_factory, settings, log_factory)
         initiator.start()
+        logon = fix.Message()
+        logon.getHeader().setField(fix.BeginString(fix.BeginString_FIXT11))
+        logon.getHeader().setField(fix.MsgType(fix.MsgType_Logon))
+        logon.setField(fix.Username("AP"))
+        logon.setField(fix.EncryptMethod(0))
+        fix.Session.sendToTarget(logon, _client.session_id)
         # _client.onLogon(_client.session_id)
-        while 1:
-            input_value = int(input())
-            if input_value == 1:
-                if initiator.isLoggedOn():
-                    print("logged")
-                else:
-                    print(initiator)
-                logon = fix.Message()
-                logon.getHeader().setField(fix.BeginString(fix.BeginString_FIXT11))
-                logon.getHeader().setField(fix.MsgType(fix.MsgType_Logon))
-                print(_client.session_id)
-                fix.Session.sendToTarget(logon, _client.session_id)
-            else:
-                initiator.stop()
-                break
+        # while True:
+        #     input_value = int(input())
+        #     if input_value == 1:
+        #         if initiator.isLoggedOn():
+        #             print("logged")
+        #         else:
+        #             print(initiator)
+        #         logon = fix.Message()
+        #         logon.getHeader().setField(fix.BeginString(fix.BeginString_FIXT11))
+        #         logon.getHeader().setField(fix.MsgType(fix.MsgType_Logon))
+        #         logon.setField(fix.Username("AP"))
+        #         logon.setField(fix.EncryptMethod(0))
+        #         message = logon.toString()
+        #         print(_client.session_id)
+        #         fix.Session.sendToTarget(logon, _client.session_id)
+        #     else:
+        #         initiator.stop()
+        #         break
+
+        # while True:
+        #     in_res = int(input())
+        #     if in_res == 1:
+        #         message = fix.Message()
+        #         message.setField(fix.MDReqID('1'))
+        #         message.setField(fix.SubscriptionRequestType(fix.SubscriptionRequestType_SNAPSHOT_PLUS_UPDATES))
+        #         message.setField(fix.MarketDepth(0))
+        #         message.setField(fix.NoMDEntryTypes(2))
+        #         message.setField(fix.MDUpdateType(fix.MDUpdateType_INCREMENTAL_REFRESH))
+        #     else:
+        #         initiator.stop()
 
     except (fix.ConfigError, fix.RuntimeError) as e:
         print(e)
