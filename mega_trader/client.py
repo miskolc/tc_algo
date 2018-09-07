@@ -1,40 +1,55 @@
+import argparse
+import logging
+import time
 from datetime import datetime
 
 import quickfix as fix
 import sys
 
+_logger = logging.getLogger("mega_trader.client")
 
-class Application(fix.Application):
+
+# noinspection PyPep8Naming
+class ClientApplication(fix.Application, fix.Message):
     orderID = 0
     execID = 0
+    session_id = None
+    initiator = None
 
     def gen_ord_id(self):
         global orderID
         orderID += 1
         return orderID
 
-    def onCreate(self, sessionID):
+    def onCreate(self, sessionID: fix.SessionID):
+        self.session_id = sessionID
+        print("Session created: %s" % sessionID)
         return
 
-    def onLogon(self, sessionID):
-        self.sessionID = sessionID
-        print("Successful Logon to session '%s'." % sessionID.toString())
+    def onLogon(self, sessionID: fix.SessionID):
+        self.session_id = sessionID
+        _logger.info(sessionID)
+        print("Successful Logon to session(Active Session) '%s'." % sessionID)
         return
 
-    def onLogout(self, sessionID):
+    def onLogout(self, sessionID: fix.SessionID):
+        print("Logout from session: %s" % sessionID)
         return
 
-    def toAdmin(self, sessionID, message):
+    def toAdmin(self, message: fix.Message, sessionID: fix.SessionID):
+        print("To admin: %s" % message)
         return
 
-    def fromAdmin(self, sessionID, message):
+    def fromAdmin(self, message: fix.Message, sessionID: fix.SessionID):
+        print("From admin: %s" % message)
         return
 
-    def toApp(self, sessionID, message):
-        print("Recieved the following message: %s" % message.toString())
+    def toApp(self, message: fix.Message, sessionID: fix.SessionID):
+        print("Recieved the following message: %s" % message)
         return
 
-    def fromApp(self, message, sessionID):
+    def fromApp(self, message: fix.Message, sessionID: fix.SessionID):
+        print("Response: %s" % message)
         return
 
     def genOrderID(self):
@@ -45,59 +60,32 @@ class Application(fix.Application):
         self.execID = self.execID + 1
         return repr(self.execID)
 
-    def put_order(self):
-        print("Creating the following order: ")
-        trade = fix.Message()
-        print("Trade1: %s" % trade)
-        trade.getHeader().setField(fix.BeginString(fix.BeginString_FIXT11))  #
-        print("Trade2: %s" % trade)
-        trade.getHeader().setField(fix.MsgType(fix.MsgType_Logon))  # 35=A
-        print("Trade3: %s" % trade)
-        trade.setField(fix.ClOrdID(self.genExecID()))  # 11=Unique order
-        print("Trade4: %s" % trade)
-        trade.setField(fix.HandlInst(fix.HandlInst_MANUAL_ORDER_BEST_EXECUTION))  # 21=3 (Manual order, best executions)
-        print("Trade5: %s" % trade)
-        trade.setField(fix.Symbol('HDFCBANK'))  # 55=SMBL ?
-        print("Trade6: %s" % trade)
-        trade.setField(fix.Side(fix.Side_BUY))  # 43=1 Buy
-        print("Trade7: %s" % trade)
-        trade.setField(fix.OrdType(fix.OrdType_LIMIT))  # 40=2 Limit order
-        print("Trade8: %s" % trade)
-        trade.setField(fix.OrderQty(100))  # 38=100
-        print("Trade9: %s" % trade)
-        trade.setField(fix.Price(10))
-        print("Trade10: %s" % trade)
-        trade.setField(fix.TransactTime(int(datetime.utcnow().timestamp())))
-        print("Trade11: %s " % trade)
-        fix.Session_sendToTarget(trade)
-
-    def main(self, config_file):
-        try:
-            settings = fix.SessionSettings(config_file)
-            application = Application()
-            storeFactory = fix.FileStoreFactory(settings)
-            logFactory = fix.FileLogFactory(settings)
-            initiator = fix.SocketInitiator(application, storeFactory, settings, logFactory)
-            initiator.start()
-
-            while 1:
-                init_input = input()
-                if init_input == '1':
-                    print("Putin Order")
-                    application.put_order()
-                if init_input == '2':
-                    sys.exit(0)
-                if init_input == 'd':
-                    import pdb
-                    pdb.set_trace()
-                else:
-                    print("Valid input is 1 for order, 2 for exit")
-                    continue
-        except (fix.ConfigError, fix.RuntimeError) as e:
-            print(e)
-
 
 if __name__ == '__main__':
-    file_name = "client.cfg"
-    application = Application()
-    application.main(file_name)
+    try:
+        file_name = "client.cfg"
+        settings = fix.SessionSettings(file_name)
+        store_factory = fix.FileStoreFactory(settings)
+        log_factory = fix.FileLogFactory(settings)
+        _client = ClientApplication()
+        initiator = fix.SocketInitiator(_client, store_factory, settings, log_factory)
+        initiator.start()
+        # _client.onLogon(_client.session_id)
+        while 1:
+            input_value = int(input())
+            if input_value == 1:
+                if initiator.isLoggedOn():
+                    print("logged")
+                else:
+                    print(initiator)
+                logon = fix.Message()
+                logon.getHeader().setField(fix.BeginString(fix.BeginString_FIXT11))
+                logon.getHeader().setField(fix.MsgType(fix.MsgType_Logon))
+                print(_client.session_id)
+                fix.Session.sendToTarget(logon, _client.session_id)
+            else:
+                initiator.stop()
+                break
+
+    except (fix.ConfigError, fix.RuntimeError) as e:
+        print(e)

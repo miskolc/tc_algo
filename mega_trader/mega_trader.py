@@ -1,12 +1,12 @@
 import quickfix
-from client import Application
+from mega_trader.client import ClientApplication
 
 filename = "client.cfg"
 
 if __name__ == '__main__':
     try:
         settings = quickfix.SessionSettings(filename)
-        application = quickfix.Application
+        application = ClientApplication
         storeFactory = quickfix.FileStoreFactory(settings)
         logFactory = quickfix.FileLogFactory(settings)
         acceptor = quickfix.SocketAcceptor(application, storeFactory, settings, logFactory)
