@@ -12,11 +12,33 @@ PRECISION = Decimal(10) ** -2
 
 
 class Symbol:
+    """
+    This class is to be only used with quandl API
+    """
 
     def __init__(self, scrip: str, api_key: str, size: int):
         self.scrip = scrip
         self.api_key = api_key
         self.size = size
+
+
+class Scrip:
+    """
+    This is used with broadcast related operations.
+    """
+
+    def __init__(self, symbol: str, exchange: str, gateway_id: int, token_no: int, instrument: str,
+                 symbol_desc: str, lot_size: int, isin_number: str, series: str, strike_price: float):
+        self.symbol = symbol
+        self.exchange = exchange
+        self.gatewayID = gateway_id
+        self.token_no = token_no
+        self.instrument = instrument
+        self.symbol_desc = symbol_desc
+        self.lot_size = lot_size
+        self.ISIN_number = isin_number
+        self.series = series
+        self.strike_price = strike_price
 
 
 class DataObject:
@@ -220,6 +242,7 @@ class ChartElement:
     """
     This class is used to define a Charting element which needs to be plotted on the chart
     """
+
     def __init__(self, data: Union[list, dict], label: str, chart_type: ChartType, plot: Union[int, ChartAxis],
                  color: Union[ChartColor, str]):
         """
