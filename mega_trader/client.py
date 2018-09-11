@@ -4,13 +4,14 @@ import time
 from datetime import datetime
 
 import quickfix as fix
+import quickfix50sp2 as fix50
 import sys
 
 _logger = logging.getLogger("mega_trader.client")
 
 
 # noinspection PyPep8Naming
-class ClientApplication(fix.Application, fix.Message):
+class ClientApplication(fix.Application, fix50.Message):
     orderID = 0
     execID = 0
     session_id = None
@@ -26,29 +27,31 @@ class ClientApplication(fix.Application, fix.Message):
         print("Session created: %s" % sessionID)
         return
 
-    def onLogon(self, sessionID: fix.SessionID):
-        self.session_id = sessionID
-        _logger.info(sessionID)
-        print("Successful Logon to session(Active Session) '%s'." % sessionID)
+    def onLogon(self, session_id):
+        self.session_id = session_id
+        _logger.info(session_id)
+        print("Successful Logon to session(Active Session) '%s'." % session_id)
         return
 
-    def onLogout(self, sessionID: fix.SessionID):
-        print("Logout from session: %s" % sessionID)
+    def onLogout(self, session_id):
+        print("Logout from session: %s" % session_id)
         return
 
-    def toAdmin(self, message: fix.Message, sessionID: fix.SessionID):
+    def toAdmin(self, message: fix.Message, session_id):
         print("To admin: %s" % message)
         return
 
-    def fromAdmin(self, message: fix.Message, sessionID: fix.SessionID):
+    def fromAdmin(self, message: fix.Message, session_id):
+        TradeID = fix.TradingSessionID
+        message.getField(TradeID)
         print("From admin: %s" % message)
         return
 
-    def toApp(self, message: fix.Message, sessionID: fix.SessionID):
+    def toApp(self, message: fix.Message, session_id):
         print("Recieved the following message: %s" % message)
         return
 
-    def fromApp(self, message: fix.Message, sessionID: fix.SessionID):
+    def fromApp(self, message: fix.Message, session_id):
         print("Response: %s" % message)
         return
 
@@ -60,6 +63,43 @@ class ClientApplication(fix.Application, fix.Message):
         self.execID = self.execID + 1
         return repr(self.execID)
 
+    def onMessage(self, message, sessionID):
+        print(message)
+
+    def logon_msg(self):
+        logon_req = fix.Message()
+        logon_req.getHeader().setField(fix.BeginString(fix.BeginString_FIXT11))
+        logon_req.getHeader().setField(fix.MsgType(fix.MsgType_Logon))
+        logon_req.setField(fix.SenderCompID("AP"))
+        logon_req.setField(fix.TargetCompID("MTBM"))
+        logon_req.setField(fix.MsgSeqNum(1))
+        logon_req.setField(fix.UserRequestType(1))
+        logon_req.setField(fix.HeartBtInt(1))
+        logon_req.setField(fix.Username("AP"))
+        logon_req.setField(932, "14")
+        logon_req.setField(fix.DefaultApplVerID(fix.ApplVerID_FIX50SP2))
+        logon_req.setField(1701, "1")
+        group = fix50.MarketDataSnapshotFullRefresh
+        logon_req.setField(1301, "1")
+        # group.setField(1301, "2")
+        # group.setField(1301, "4")
+        # group.setField(1301, "16")
+        # group.setField(1301, "2048")
+        # group.setField(1301, "32768")
+        # logon_req.setField(1301, "16777216")
+        # logon_req.addGroup(group)
+        logon_req.setField(1137, "FIX.5.0SP2")
+        print(logon_req)
+        logon_req = bytes(logon_req.toString(), encoding="UTF-8")
+        return logon_req
+
+    def run(self):
+        print("run")
+        fix.Session_sendToTarget(self.logon_msg(), _client.session_id)
+        print("message send")
+        while True:
+            print("Reading...")
+
 
 if __name__ == '__main__':
     try:
@@ -69,44 +109,10 @@ if __name__ == '__main__':
         log_factory = fix.FileLogFactory(settings)
         _client = ClientApplication()
         initiator = fix.SocketInitiator(_client, store_factory, settings, log_factory)
+        print("initiated")
         initiator.start()
-        logon = fix.Message()
-        logon.getHeader().setField(fix.BeginString(fix.BeginString_FIXT11))
-        logon.getHeader().setField(fix.MsgType(fix.MsgType_Logon))
-        logon.setField(fix.Username("AP"))
-        logon.setField(fix.EncryptMethod(0))
-        fix.Session.sendToTarget(logon, _client.session_id)
-        # _client.onLogon(_client.session_id)
-        # while True:
-        #     input_value = int(input())
-        #     if input_value == 1:
-        #         if initiator.isLoggedOn():
-        #             print("logged")
-        #         else:
-        #             print(initiator)
-        #         logon = fix.Message()
-        #         logon.getHeader().setField(fix.BeginString(fix.BeginString_FIXT11))
-        #         logon.getHeader().setField(fix.MsgType(fix.MsgType_Logon))
-        #         logon.setField(fix.Username("AP"))
-        #         logon.setField(fix.EncryptMethod(0))
-        #         message = logon.toString()
-        #         print(_client.session_id)
-        #         fix.Session.sendToTarget(logon, _client.session_id)
-        #     else:
-        #         initiator.stop()
-        #         break
-
-        # while True:
-        #     in_res = int(input())
-        #     if in_res == 1:
-        #         message = fix.Message()
-        #         message.setField(fix.MDReqID('1'))
-        #         message.setField(fix.SubscriptionRequestType(fix.SubscriptionRequestType_SNAPSHOT_PLUS_UPDATES))
-        #         message.setField(fix.MarketDepth(0))
-        #         message.setField(fix.NoMDEntryTypes(2))
-        #         message.setField(fix.MDUpdateType(fix.MDUpdateType_INCREMENTAL_REFRESH))
-        #     else:
-        #         initiator.stop()
+        _client.run()
+        initiator.stop()
 
     except (fix.ConfigError, fix.RuntimeError) as e:
         print(e)

@@ -1,69 +1,86 @@
 import socket
+import sys
+
 import quickfix as fix
+import quickfix50sp2 as fix50
+import logging
+
+logging.basicConfig(level=logging.DEBUG, filename="./broadcast.log", filemode="w",
+                    format="%(asctime)s:%(message)s")
+_logger = logging.getLogger("test")
+
+
+def test_msg():
+    test = fix.Message()
+    test.getHeader().setField(fix.BeginString(fix.BeginString_FIXT11))
 
 
 def logon_msg():
-    logon = fix.Message()
-    logon.getHeader().setField(fix.BeginString(fix.BeginString_FIXT11))
-    logon.getHeader().setField(fix.MsgType(fix.MsgType_Logon))
-    logon.setField(fix.Username("AP"))
-    logon.setField(fix.EncryptMethod(0))
-    logon = logon.toString()
-    logon = bytes(logon, encoding="utf-8")
-    return logon
+    logon_req = fix.Message()
+    logon_req.getHeader().setField(fix.BeginString(fix.BeginString_FIXT11))
+    logon_req.getHeader().setField(fix.MsgType(fix.MsgType_Logon))
+    logon_req.setField(fix.SenderCompID("AP"))
+    logon_req.setField(fix.TargetCompID("MTBM"))
+    logon_req.setField(fix.MsgSeqNum(1))
+    logon_req.setField(fix.UserRequestType(1))
+    logon_req.setField(fix.HeartBtInt(1))
+    logon_req.setField(fix.Username("AP"))
+    logon_req.setField(fix.NetworkResponseID("14"))
+    logon_req.setField(fix.DefaultApplVerID(fix.ApplVerID_FIX50SP2))
+    logon_req.setField(1701, "1")
+    logon_req.getTrailer().setField(fix.MarketID("2"))
+    logon_req.setField(fix.DefaultApplVerID("FIX.5.0SP2"))
+    logon_req = bytes(logon_req.toString(), encoding="UTF-8")
+    return logon_req
+
+
+def scrip_msg():
+    scrip = fix.Message()
+    scrip.getHeader().setField(fix.BeginString(fix.BeginString_FIXT11))
+    scrip.getHeader().setField(fix.MsgType(fix.MsgType_MarketDataRequest))
+    scrip.getHeader().setField(fix.SenderCompID("AP"))
+    scrip.getHeader().setField(fix.TargetCompID("MTBM"))
+    scrip.setField(fix.MsgSeqNum(1))
+    scrip.setField(fix.SenderSubID("NSECM"))
+    scrip.setField(fix.UserRequestType(1))
+    scrip.setField(115, "1")
+    scrip.setField(fix.Symbol("RELIANCE"))
+    scrip.setField(1775, "0")
+    scrip.setField(167, "")
+    scrip.setField(48, "2885")
+    scrip.setField(263, "0")
+    print(scrip)
+    scrip = bytes(scrip.toString(), encoding="UTF-8")
+    return scrip
 
 
 TCP_IP = '192.168.6.107'
 TCP_PORT = 2002
 BUFFER_SIZE = 1024
+address = (TCP_IP, TCP_PORT)
 
-msg = logon_msg()
-print("send %s" % msg)
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.connect((TCP_IP, TCP_PORT))
-s.sendto(msg, (TCP_IP, TCP_PORT))
-data, addr = s.recvfrom(BUFFER_SIZE)
-print("received %s" % data)
-# s.close()
+s.connect(address)
 
-# print("received data: %s" % data)
-# 8=FIXT.1.1\x019=50\x0135=A\x0149=BM\x0156=MT\x0134=1\x01924=1\x01108=1\x011137=FIX.5.0SP2\x0110=041\x01
-import socket
-#
-# UDP_IP = "127.0.0.1"
-# UDP_PORT = 5005
-# MESSAGE = "Hello, World!"
-#
-# print("UDP target IP:", UDP_IP)
-# print("UDP target port:", UDP_PORT)
-# print("message:", MESSAGE)
-#
-# sock = socket.socket(socket.AF_INET,  # Internet
-#                      socket.SOCK_DGRAM)  # UDP
-# sock.sendto(MESSAGE, (UDP_IP, UDP_PORT))
-import sys
+logon = logon_msg()
+s.sendto(logon, address)
 
-# UDP_IP_ADDRESS = "192.168.6.107"
-# UDP_PORT_NO = 2002
-# Message = "8=FIXT.1.1DSOH 9=6935=A34=19949=ap52=20180907-06:49:00.00056=mtm98=0108=201137=910=036"
-# address = (UDP_IP_ADDRESS, UDP_PORT_NO)
-#
-#
-# def receive():
-#     sock = socket.socket(socket.AF_INET,  # Internet
-#                          socket.SOCK_DGRAM)  # UDP
-#     sock.bind(("127.0.0.1", 9990))
-#
-#     while True:
-#         data, addr = sock.recvfrom(1024)  # buffer size is 1024 bytes
-#         print("received message:", data)
-#
-#
-# def send():
-#     clientSock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-#     clientSock.send(bytes(Message, encoding="utf-8"),)
-#     clientSock.close()
-#
-#
-# # receive()
-# send()
+# token = "8=FIXT.1.1 9=80 35=V 49=MTC 56=MTBM 34=1 50=NSECM 924=1 115=2 48=10580 1775=0 263=0 55=TCI 167= 10=013"
+# token = token.replace(" ", "\x01")
+# print(token)
+# token = bytes(token, encoding="utf-8")
+# print(token)
+token = scrip_msg()
+_logger.debug("sending msg %s" % token)
+# symbol = "8=FIXT.1.19=8435=V49=MTC56=MTBM34=150=NSECM924=1115=248=28851775=0263=055=RELIANCE167=10=077"
+# symbol = bytes(symbol, encoding="utf-8")
+s.sendto(token, address)
+print("send %s" % token)
+
+while True:
+    data = s.recv(BUFFER_SIZE)
+    if data:
+        _logger.debug("received %s" % str(data, encoding="utf-8"))
+    else:
+        s.close()
+        break
