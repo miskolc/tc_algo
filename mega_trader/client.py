@@ -1,118 +1,130 @@
-import argparse
 import logging
-import time
-from datetime import datetime
+import socket
 
 import quickfix as fix
-import quickfix50sp2 as fix50
-import sys
 
-_logger = logging.getLogger("mega_trader.client")
+from model import *
+
+logging.basicConfig(level=logging.DEBUG, format="%(asctime)s:%(message)s")
+_logger = logging.getLogger("client")
+
+broadcast_handler = logging.FileHandler(filename="./log/broadcast.log", mode="w")
+fmt = logging.Formatter("%(message)s")
+broadcast_handler.setFormatter(fmt)
+_broadcast_logger = logging.getLogger("client.broadcast")
+_broadcast_logger.addHandler(broadcast_handler)
+
+message_handler = logging.FileHandler(filename="./log/messages.log", mode="w")
+fmt = logging.Formatter("%(message)s")
+message_handler.setFormatter(fmt)
+_message_log = logging.getLogger("client.message")
+_message_log.addHandler(message_handler)
+
+TCP_IP = '192.168.6.107'
+TCP_PORT = 2002
+BUFFER_SIZE = 1024 * 10
+address = (TCP_IP, TCP_PORT)
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+sender_id = "TC"
+target_id = "MTM"
+user = "TC"
+response = 0
 
 
-# noinspection PyPep8Naming
-class ClientApplication(fix.Application, fix50.Message):
-    orderID = 0
-    execID = 0
-    session_id = None
-    initiator = None
-
-    def gen_ord_id(self):
-        global orderID
-        orderID += 1
-        return orderID
-
-    def onCreate(self, sessionID: fix.SessionID):
-        self.session_id = sessionID
-        print("Session created: %s" % sessionID)
-        return
-
-    def onLogon(self, session_id):
-        self.session_id = session_id
-        _logger.info(session_id)
-        print("Successful Logon to session(Active Session) '%s'." % session_id)
-        return
-
-    def onLogout(self, session_id):
-        print("Logout from session: %s" % session_id)
-        return
-
-    def toAdmin(self, message: fix.Message, session_id):
-        print("To admin: %s" % message)
-        return
-
-    def fromAdmin(self, message: fix.Message, session_id):
-        TradeID = fix.TradingSessionID
-        message.getField(TradeID)
-        print("From admin: %s" % message)
-        return
-
-    def toApp(self, message: fix.Message, session_id):
-        print("Recieved the following message: %s" % message)
-        return
-
-    def fromApp(self, message: fix.Message, session_id):
-        print("Response: %s" % message)
-        return
-
-    def genOrderID(self):
-        self.orderID = self.orderID + 1
-        return repr(self.orderID)
-
-    def genExecID(self):
-        self.execID = self.execID + 1
-        return repr(self.execID)
-
-    def onMessage(self, message, sessionID):
-        print(message)
-
-    def logon_msg(self):
+def client_logon(sender: str, target: str, username: str, scrips: list = None, response_id: int = None):
+    def logon_msg(sender_comp_id, target_comp_id, username_client, response_id_network):
+        if response_id_network is None:
+            response_id_network = int((numpy.random.random()) * 10000)
+        _logger.debug("Logon with response id: %s" % response_id_network)
+        _logger.debug("Building logon message")
         logon_req = fix.Message()
         logon_req.getHeader().setField(fix.BeginString(fix.BeginString_FIXT11))
         logon_req.getHeader().setField(fix.MsgType(fix.MsgType_Logon))
-        logon_req.setField(fix.SenderCompID("AP"))
-        logon_req.setField(fix.TargetCompID("MTBM"))
+        logon_req.setField(fix.SenderCompID(sender_comp_id))
+        logon_req.setField(fix.TargetCompID(target_comp_id))
         logon_req.setField(fix.MsgSeqNum(1))
         logon_req.setField(fix.UserRequestType(1))
         logon_req.setField(fix.HeartBtInt(1))
-        logon_req.setField(fix.Username("AP"))
-        logon_req.setField(932, "14")
+        logon_req.setField(fix.Username(username_client))
+        logon_req.setField(fix.NetworkResponseID("%s" % response_id_network))
         logon_req.setField(fix.DefaultApplVerID(fix.ApplVerID_FIX50SP2))
         logon_req.setField(1701, "1")
-        group = fix50.MarketDataSnapshotFullRefresh
-        logon_req.setField(1301, "1")
-        # group.setField(1301, "2")
-        # group.setField(1301, "4")
-        # group.setField(1301, "16")
-        # group.setField(1301, "2048")
-        # group.setField(1301, "32768")
-        # logon_req.setField(1301, "16777216")
-        # logon_req.addGroup(group)
-        logon_req.setField(1137, "FIX.5.0SP2")
-        print(logon_req)
+        logon_req.getTrailer().setField(fix.MarketID("2"))
+        logon_req.setField(fix.DefaultApplVerID("FIX.5.0SP2"))
         logon_req = bytes(logon_req.toString(), encoding="UTF-8")
+        _logger.debug("Logon messsage built")
         return logon_req
 
-    def run(self):
-        print("run")
-        fix.Session_sendToTarget(self.logon_msg(), _client.session_id)
-        print("message send")
-        while True:
-            print("Reading...")
+    def scrip_msg(scrip: Scrip):
+        scrip_subscription = fix.Message()
+        # 8, BeginString
+        scrip_subscription.getHeader().setField(fix.BeginString(fix.BeginString_FIXT11))
+        # 35, Message Type
+        scrip_subscription.getHeader().setField(fix.MsgType(fix.MsgType_MarketDataRequest))
+        # 49, SenderCompId
+        scrip_subscription.getHeader().setField(fix.SenderCompID(sender_id))
+        # 56, TargetCompId
+        scrip_subscription.getHeader().setField(fix.TargetCompID(target_id))
+        # 34, Message SeqNumber
+        scrip_subscription.setField(fix.MsgSeqNum(1))
+        # 50, SenderSubID
+        scrip_subscription.setField(fix.SenderSubID(scrip.exchange))
+        # 924, UserRequestType
+        scrip_subscription.setField(fix.UserRequestType(1))
+        # 115 ,doubtful, but may be gateway id according to examples
+        # NSECM = 2, NSEFO = 1
+        scrip_subscription.setField(115, "%s" % scrip.gatewayID)
+        # 55, Symbol
+        scrip_subscription.setField(fix.Symbol(scrip.symbol))
+        # 1775, price divisor
+        scrip_subscription.setField(1775, "0")
+        # 167, Instrument
+        scrip_subscription.setField(167, scrip.instrument)
+        # 48, Token No.
+        scrip_subscription.setField(48, "%s" % scrip.token_no)
+        # 263, Broadcast type
+        scrip_subscription.setField(263, "0")
+        scrip_subscription = bytes(scrip_subscription.toString(), encoding="UTF-8")
+        return scrip_subscription
 
+    def send(message: bytes):
+        s.sendto(message, address)
 
-if __name__ == '__main__':
+    s.connect(address)
+    logon = logon_msg(sender, target, username, response_id)
+    send(logon)
+
+    if scrips is not None:
+        for scrip in scrips:
+            _logger.debug("Sending %s" % scrip)
+            token = scrip_msg(scrip)
+            s.sendto(token, address)
+            _logger.debug("Send %s" % scrip)
+
+    arr = []
+    long_str = ""
+    i = 0
     try:
-        file_name = "client.cfg"
-        settings = fix.SessionSettings(file_name)
-        store_factory = fix.FileStoreFactory(settings)
-        log_factory = fix.FileLogFactory(settings)
-        _client = ClientApplication()
-        initiator = fix.SocketInitiator(_client, store_factory, settings, log_factory)
-        print("initiated")
-        initiator.start()
-        _client.run()
-        initiator.stop()
-
-    except (fix.ConfigError, fix.RuntimeError) as e:
+        while i < 300:
+            data = s.recv(BUFFER_SIZE)
+            if data:
+                temp = str(data, encoding="UTF-8")
+                arr.append(temp)
+                long_str = long_str + temp
+                i += 1
+                _broadcast_logger.debug("%s" % str(data, encoding="utf-8"))
+            else:
+                s.close()
+                break
+    except socket.error as e:
+        print("Following error occurred:")
         print(e)
+    finally:
+        s.close()
+    s.close()
+
+    long_str = long_str.replace("8=FIXT.1.1", "*&8=FIXT.1.1")
+    arr1 = long_str.split("*&")
+    for j in arr1:
+        _message_log.debug(j)

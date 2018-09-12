@@ -40,6 +40,9 @@ class Scrip:
         self.series = series
         self.strike_price = strike_price
 
+    def __str__(self) -> str:
+        return "%s_%s_%s" % (self.exchange, self.symbol, self.token_no)
+
 
 class DataObject:
     """

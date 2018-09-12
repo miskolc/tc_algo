@@ -1,35 +1,15 @@
 import logging
-from argparse import ArgumentParser
-from datetime import *
-
-import quickfix
-
-import api
-import charting
-import indicators
-import data_parser
-import pattern_hunter
-from mega_trader.client import ClientApplication
-from pattern_hunter import Pattern
-from model import *
-import strategy
-from strategy import Strategies
 
 # TODO: Following are under development order:
-# TODO: 1. Add command line interface
-
+# TODO: 1. Live Broadcast
+# TODO: 2. Add command line interface
+from contracts import NSECM, NSECD, NSEFO, BSECD, MCX
+import scrips
+from mega_trader import client
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
-    filename = "mega_trader/client.cfg"
-    try:
-        settings = quickfix.SessionSettings(filename)
-        application = ClientApplication
-        storeFactory = quickfix.FileStoreFactory(settings)
-        logFactory = quickfix.FileLogFactory(settings)
-        initiator = quickfix.SocketInitiator(application, storeFactory, settings, logFactory)
-        initiator.start()
-        # while condition == true: do something
-        initiator.stop()
-    except quickfix.ConfigError as e:
-        print(e)
+    # scrips.generate_contracts()
+    scrips = NSECM.all_scrips
+    # print(len(scrips))
+    client.client_logon("TC", "MTM", "TC", scrips=scrips)

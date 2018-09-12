@@ -44,14 +44,14 @@ class Gateway(Enum):
 
 
 class MessageType(Enum):
-    Heartbeat = 0
-    Test_Request = 1
-    Resend_Request = 2
-    Reject = 3
-    Sequence_Reset = 4
-    Logout = 5
-    Execution_Report = 8
-    Order_cancel_reject = 9
+    Heartbeat = "0"
+    Test_Request = "1"
+    Resend_Request = "2"
+    Reject = "3"
+    Sequence_Reset = "4"
+    Logout = "5"
+    Execution_Report = "8"
+    Order_cancel_reject = "9"
     Logon = "A"
     News = "B"
     New_Order_Single = "D"
