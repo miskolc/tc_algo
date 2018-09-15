@@ -5,20 +5,22 @@ import quickfix as fix
 
 from model import *
 
-logging.basicConfig(level=logging.DEBUG, format="%(asctime)s:%(message)s")
+logging.basicConfig(level=ct.log_level, format="%(asctime)s:%(message)s")
 _logger = logging.getLogger("client")
 
 broadcast_handler = logging.FileHandler(filename="./log/broadcast.log", mode="w")
-fmt = logging.Formatter("%(message)s")
+fmt = logging.Formatter("%(asctime)s:%(message)s")
 broadcast_handler.setFormatter(fmt)
+broadcast_handler.setLevel(logging.DEBUG)
 _broadcast_logger = logging.getLogger("client.broadcast")
 _broadcast_logger.addHandler(broadcast_handler)
 
 message_handler = logging.FileHandler(filename="./log/messages.log", mode="w")
 fmt = logging.Formatter("%(message)s")
 message_handler.setFormatter(fmt)
-_message_log = logging.getLogger("client.message")
-_message_log.addHandler(message_handler)
+message_handler.setLevel(logging.DEBUG)
+_message_logger = logging.getLogger("client.message")
+_message_logger.addHandler(message_handler)
 
 TCP_IP = '192.168.6.107'
 TCP_PORT = 2002
@@ -33,11 +35,12 @@ response = 0
 
 
 def client_logon(sender: str, target: str, username: str, scrips: list = None, response_id: int = None):
+    # noinspection PyArgumentList
     def logon_msg(sender_comp_id, target_comp_id, username_client, response_id_network):
         if response_id_network is None:
-            response_id_network = int((numpy.random.random()) * 10000)
-        _logger.debug("Logon with response id: %s" % response_id_network)
-        _logger.debug("Building logon message")
+            response_id_network = int((numpy.random.random()) * 100000)
+        _logger.info("Logon with response id: %s" % response_id_network)
+        _broadcast_logger.debug("Building logon message")
         logon_req = fix.Message()
         logon_req.getHeader().setField(fix.BeginString(fix.BeginString_FIXT11))
         logon_req.getHeader().setField(fix.MsgType(fix.MsgType_Logon))
@@ -53,10 +56,11 @@ def client_logon(sender: str, target: str, username: str, scrips: list = None, r
         logon_req.getTrailer().setField(fix.MarketID("2"))
         logon_req.setField(fix.DefaultApplVerID("FIX.5.0SP2"))
         logon_req = bytes(logon_req.toString(), encoding="UTF-8")
-        _logger.debug("Logon messsage built")
+        _broadcast_logger.debug("Logon message built")
         return logon_req
 
-    def scrip_msg(scrip: Scrip):
+    # noinspection PyArgumentList
+    def scrip_msg(scrip_element: Scrip):
         scrip_subscription = fix.Message()
         # 8, BeginString
         scrip_subscription.getHeader().setField(fix.BeginString(fix.BeginString_FIXT11))
@@ -69,20 +73,20 @@ def client_logon(sender: str, target: str, username: str, scrips: list = None, r
         # 34, Message SeqNumber
         scrip_subscription.setField(fix.MsgSeqNum(1))
         # 50, SenderSubID
-        scrip_subscription.setField(fix.SenderSubID(scrip.exchange))
+        scrip_subscription.setField(fix.SenderSubID(scrip_element.exchange))
         # 924, UserRequestType
         scrip_subscription.setField(fix.UserRequestType(1))
         # 115 ,doubtful, but may be gateway id according to examples
         # NSECM = 2, NSEFO = 1
-        scrip_subscription.setField(115, "%s" % scrip.gatewayID)
+        scrip_subscription.setField(115, "%s" % scrip_element.gatewayID)
         # 55, Symbol
-        scrip_subscription.setField(fix.Symbol(scrip.symbol))
+        scrip_subscription.setField(fix.Symbol(scrip_element.symbol))
         # 1775, price divisor
         scrip_subscription.setField(1775, "0")
         # 167, Instrument
-        scrip_subscription.setField(167, scrip.instrument)
+        scrip_subscription.setField(167, scrip_element.instrument)
         # 48, Token No.
-        scrip_subscription.setField(48, "%s" % scrip.token_no)
+        scrip_subscription.setField(48, "%s" % scrip_element.token_no)
         # 263, Broadcast type
         scrip_subscription.setField(263, "0")
         scrip_subscription = bytes(scrip_subscription.toString(), encoding="UTF-8")
@@ -127,4 +131,4 @@ def client_logon(sender: str, target: str, username: str, scrips: list = None, r
     long_str = long_str.replace("8=FIXT.1.1", "*&8=FIXT.1.1")
     arr1 = long_str.split("*&")
     for j in arr1:
-        _message_log.debug(j)
+        _message_logger.debug(j)
