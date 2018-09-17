@@ -1,12 +1,13 @@
 """
 Constants used in the modules
-Don't change these values. It may break the code.
+Don't change these values. It might break the code.
 """
 import logging
 from enum import Enum
 
 default = "null"
 log_level = logging.INFO
+
 
 class Keys:
     daily = 'daily'

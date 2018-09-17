@@ -1,6 +1,10 @@
 <fix type='FIX' major='5' minor='0' servicepack='2'>
     <header/>
     <messages>
+        <message name='IndexBroadcast' msgtype="IB" msgcat="app">
+            <field name="NumberOfRecords" required="N"/>
+            <component name="NoIndexRecord" required="N"/>
+        </message>
         <message name='IOI' msgtype='6' msgcat='app'>
             <component name='ApplicationSequenceControl' required='N'/>
             <field name='IOIID' required='Y'/>
@@ -3055,6 +3059,24 @@
     </messages>
     <trailer/>
     <components>
+        <component name="NoIndexRecord">
+            <group name='NoIndexRecords' required='N'>
+                <field name='IndexName' required='Y'/>
+                <field name='SecurityID' required='N'/>
+                <field name='OpenIndex' required='N'/>
+                <field name='HighIndex' required='N'/>
+                <field name='LowIndex' required='N'/>
+                <field name='CloseIndex' required='N'/>
+                <field name='IndexValue' required='N'/>
+                <field name='MarketCapitalization' required='N'/>
+                <field name='NoOfDownMoves' required='N'/>
+                <field name='NoOfUpMoves' required='N'/>
+                <field name='PercentageChange' required='N'/>
+                <field name='YearlyHigh' required='N'/>
+                <field name='YearlyLow' required='N'/>
+                <field name='NetChangeIndicator' required='N'/>
+            </group>
+        </component>
         <component name='CommissionData'>
             <field name='Commission' required='N'/>
             <field name='CommType' required='N'/>
@@ -3243,12 +3265,7 @@
             </group>
         </component>
         <component name='NestedParties'>
-            <group name='NoNestedPartyIDs' required='N'>
-                <field name='NestedPartyID' required='N'/>
-                <field name='NestedPartyIDSource' required='N'/>
-                <field name='NestedPartyRole' required='N'/>
-                <component name='NstdPtysSubGrp' required='N'/>
-            </group>
+            C
         </component>
         <component name='OrderQtyData'>
             <field name='OrderQty' required='N'/>
@@ -5617,6 +5634,7 @@
             <value enum='F' description='ORDERCANCELREQUEST'/>
             <value enum='G' description='ORDERCANCELREPLACEREQUEST'/>
             <value enum='H' description='ORDERSTATUSREQUEST'/>
+            <value enum='IB' description='INDEXBROADCAST'/>
             <value enum='J' description='ALLOCATIONINSTRUCTION'/>
             <value enum='K' description='LISTCANCELREQUEST'/>
             <value enum='L' description='LISTEXECUTE'/>
@@ -10036,5 +10054,21 @@
             <value enum='2' description='REJECTED'/>
             <value enum='3' description='TERMINATE_UNASSIGN'/>
         </field>
+        <field number='1815' name="OpenIndex" type="PRICE"/>
+        <field number='1816' name="HighIndex" type="PRICE"/>
+        <field number='1817' name="LowIndex" type="PRICE"/>
+        <field number='1818' name="CloseIndex" type="PRICE"/>
+        <field number='1819' name="IndexValue" type="PRICE"/>
+        <field number='1820' name="MarketCapitalization" type="DOUBLE"/>
+        <field number='1821' name="NoOfDownMoves" type="INT"/>
+        <field number='1822' name="NoOfUpMoves" type="INT"/>
+        <field number='1823' name="PercentageChange" type="DECIMAL"/>
+        <field number='1824' name="YearlyHigh" type="PRICE"/>
+        <field number='1825' name="YearlyLow" type="PRICE"/>
+        <field number='1826' name="IndexName" type="STRING"/>
+        <field number='1827' name="NetChangeIndicator" type="CHAR"/>
+        <field number='1828' name="NumberOfRecords" type="INT"/>
+        <field number='8288' name='NoIndexRecords' type='NUMINGROUP'/>
+
     </fields>
 </fix>
