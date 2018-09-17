@@ -44,6 +44,27 @@ class Scrip:
         return "%s_%s_%s" % (self.exchange, self.symbol, self.token_no)
 
 
+class ScripData:
+
+    def __init__(self, token: int, open: float, high: float, low: float, close: float, ltp: float, volume: int,
+                 turnover: float, year_high: float, year_low: float, time: str, per_change: float):
+        self.token = token
+        self.open = open
+        self.high = high
+        self.low = low
+        self.close = close
+        self.ltp = ltp
+        self.volume = volume
+        self.turnover = turnover
+        self.year_high = year_high
+        self.year_low = year_low
+        self.time = time
+        self.per_change = per_change
+
+    def __str__(self) -> str:
+        return "Token: %s\nLTP: %s\nTime: %s" % (self.token, self.ltp, self.time)
+
+
 class DataObject:
     """
     A class for creating an object which contains candle data.
