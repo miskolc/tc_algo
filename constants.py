@@ -79,6 +79,8 @@ class Keys:
 
 
 class MsgType(Enum):
+    # Unwanted Messages
+    BCD = "BCD"
     # ADMINISTRATIVE MESSAGE
     HEARTBEAT = "0"
     LOGON = "A"
@@ -141,7 +143,7 @@ class MsgType(Enum):
     NO_UNDERLYING = ""
     TOP_GAINER_LOSER_INSTRUMENT_INFO = ""
     # AUCTION
-    AUCTION_ACTIVITY_MESSAGE = ""
+    AUCTION_ACTIVITY_MESSAGE = "AAM"
     AUCTION_ENQUIRY_DATA = ""
     AUCTION_ENQUIRY_REQUEST = ""
     AUCTION_STATUS = ""

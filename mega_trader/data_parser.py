@@ -1,3 +1,4 @@
+import asyncio
 import logging
 
 import quickfix as fix
@@ -23,6 +24,7 @@ gateway_id = fix.MarketID()
 orig_sending_time = fix.OrigSendingTime()
 sending_time = fix.SendingTime()
 on_behalf_id = fix.OnBehalfOfCompID()
+check_sum = fix.CheckSum()
 
 
 def read_header(message):
@@ -76,7 +78,6 @@ def read_header(message):
 
 
 def read_trailer(message):
-    check_sum = fix.CheckSum()
     if message.getTrailer().isSetField(check_sum):
         msg_element = message.getTrailer().getField(check_sum)
         _logger.debug(msg_element)
@@ -85,21 +86,21 @@ def read_trailer(message):
 def read_admin_msg(message):
     msg_type = read_header(message)
     if msg_type == ct.MsgType.HEARTBEAT:
-        _logger.info(msg_type)
+        _logger.debug(msg_type)
     elif ct.MsgType(msg_type) == ct.MsgType.LOGON:
-        _logger.info(msg_type)
+        _logger.debug(msg_type)
     elif msg_type == ct.MsgType.LOGOUT:
-        _logger.info(msg_type)
+        _logger.debug(msg_type)
     elif msg_type == ct.MsgType.REJECT_SESSION_LEVEL:
-        _logger.info(msg_type)
+        _logger.debug(msg_type)
     elif msg_type == ct.MsgType.RESEND_REQUEST:
-        _logger.info(msg_type)
+        _logger.debug(msg_type)
     elif msg_type == ct.MsgType.SEQUENCE_RESET:
-        _logger.info(msg_type)
+        _logger.debug(msg_type)
     elif msg_type == ct.MsgType.SESSION_REJECT:
-        _logger.info(msg_type)
+        _logger.debug(msg_type)
     elif msg_type == ct.MsgType.TEST_REQUEST:
-        _logger.info(msg_type)
+        _logger.debug(msg_type)
     else:
         _logger.warning("Not found")
         _logger.info(msg_type)
@@ -109,40 +110,44 @@ def read_app_msg(message):
     try:
         msg_type = read_header(message)
         _logger.debug(msg_type)
-        if msg_type == ct.MsgType.INDEX_BROADCAST:
+        if (msg_type == ct.MsgType.AUCTION_ACTIVITY_MESSAGE) | (msg_type == ct.MsgType.BCD):
+            _logger.debug("Unwanted message not parsed")
+            pass
+        elif msg_type == ct.MsgType.INDEX_BROADCAST:
+            pass
             # No. of Records, 1828
-            noIndexRecords = int(message.getField(1828))
-            if noIndexRecords > 0:
-                group = fix.Group(8288, 1826, )
-            #     # group = fix.Group(1828, 1827, [1826,1815,1816,1817,1818,1819,1820,1821,1822,1823,1824,1825,1827])
+            # noIndexRecords = int(message.getField(1828))
+            # if noIndexRecords > 0:
+            #     group = fix.Group(1828, 1826, )
+            #     #     # group = fix.Group(1828, 1827, [1826,1815,1816,1817,1818,1819,1820,1821,1822,1823,1824,1825,1827])
             #     message.getGroup(num=1, group=group)
-
-            # Index Name, 1826
-            message.getField(1826)
-            # Open Index, 1815
-            message.getField(1815)
-            # High Index, 1816
-            message.getField(1816)
-            # Low Index, 1817
-            message.getField(1817)
-            # Close Index, 1818
-            message.getField(1818)
-            # Index Value, 1819
-            message.getField(1819)
-            # Market Capitalization, 1820
-            message.getField(1820)
-            # No. of Down Moves, 1821
-            message.getField(1821)
-            # No. of Up Moves, 1822
-            message.getField(1822)
-            # Percentage Change, 1823
-            message.getField(1823)
-            # Yearly High, 1824
-            message.getField(1824)
-            # Yearly Low, 1825
-            message.getField(1825)
-            # Net Change Indicator, 1827
-            message.getField(1827)
+            #
+            # # Index Name, 1826
+            # message.getField(1826)
+            # # Open Index, 1815
+            # message.getField(1815)
+            # # High Index, 1816
+            # message.getField(1816)
+            # # Low Index, 1817
+            # message.getField(1817)
+            # # Close Index, 1818
+            # message.getField(1818)
+            # # Index Value, 1819
+            # message.getField(1819)
+            # # Market Capitalization, 1820
+            # message.getField(1820)
+            # # No. of Down Moves, 1821
+            # message.getField(1821)
+            # # No. of Up Moves, 1822
+            # message.getField(1822)
+            # # Percentage Change, 1823
+            # message.getField(1823)
+            # # Yearly High, 1824
+            # message.getField(1824)
+            # # Yearly Low, 1825
+            # message.getField(1825)
+            # # Net Change Indicator, 1827
+            # message.getField(1827)
         elif msg_type == ct.MsgType.MARKET_PICTURE:
             # Token No.
             token_no = int(message.getField(48))
@@ -207,8 +212,94 @@ def read_msg(message):
         rec = fix.Message(message, dd, False)
         if rec.isAdmin():
             read_admin_msg(rec)
-        else:
+        elif rec.isApp():
             read_app_msg(rec)
     except fix.InvalidMessage as e:
         _logger.warning("Error %s" % e)
         _logger.info("Error while reading message: %s" % message)
+
+
+residue = None
+begin_string_str = "8=FIXT.1.1"
+splitter = "*&"
+check_sum_str = "10="
+
+
+# def read_broadcast_msg(broadcast_message: str):
+#     global residue
+#     if broadcast_message.__contains__(begin_string_str):
+#         broadcast_message.replace(begin_string_str, splitter + begin_string_str)
+#         msgs = broadcast_message.split(splitter)
+#
+#         if residue is None:
+#             # Do Nothing
+#             pass
+#         else:
+#             msgs[0] = residue + msgs[0]
+#             print(msgs[0])
+#             residue = None
+#
+#         try:
+#             if len(msgs) == 1:
+#                 print(msgs[0])
+#                 # read_msg(msgs[0])
+#             elif len(msgs) > 1:
+#                 for cmpl_msg in msgs:
+#                     try:
+#                         print(cmpl_msg)
+#                         fix.Message(cmpl_msg, dd, False)
+#                         read_msg(cmpl_msg)
+#                     except fix.InvalidMessage:
+#                         residue = cmpl_msg
+#         except fix.InvalidMessage:
+#             pass
+#     else:
+#         if residue is not None:
+#             residue += residue
+#
+
+
+async def read_broadcast_msg(broadcast_message: str):
+    global residue
+    if broadcast_message.__contains__(begin_string_str):
+        broadcast_message = broadcast_message.replace(begin_string_str, splitter + begin_string_str)
+        msgs = broadcast_message.split(splitter)
+
+        if residue is not None:
+            msgs[0] = residue + msgs[0]
+            print("Residue and first of next: %s" % msgs[0])
+            residue = None
+
+        try:
+            if len(msgs) == 1:
+                print(msgs[0])
+                read_msg(msgs[0])
+            elif len(msgs) > 1:
+                for cmpl_msg in msgs:
+                    if cmpl_msg == '':
+                        pass
+                    else:
+                        try:
+                            print("Created: %s" % cmpl_msg)
+                            fix.Message(cmpl_msg, dd, False)
+                            read_msg(cmpl_msg)
+                        except fix.InvalidMessage:
+                            residue = cmpl_msg
+        except fix.InvalidMessage:
+            print("Invalid Message")
+    else:
+        print("residue is not none: %s" % broadcast_message)
+        if residue is not None:
+            residue += residue
+
+
+async def run():
+    f = open("C:/Users/sb/PycharmProjects/MyProject/log/msgs.log")
+    lines = f.readlines()
+    for line in lines:
+        line = line.replace("\n", "")
+        print("Original: %s" % line)
+        await read_broadcast_msg(line)
+
+
+asyncio.run(run())

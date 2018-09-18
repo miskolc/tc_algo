@@ -4,6 +4,7 @@ import socket
 import quickfix as fix
 
 from model import *
+from mega_trader import data_parser
 
 logging.basicConfig(level=ct.log_level, format="%(asctime)s:%(message)s")
 _logger = logging.getLogger("client")
@@ -106,18 +107,17 @@ def client_logon(sender: str, target: str, username: str, scrips: list = None, r
             s.sendto(token, address)
             _logger.debug("Send %s" % scrip)
 
-    arr = []
     long_str = ""
     i = 0
     try:
-        while i < 300:
+        while True:
             data = s.recv(BUFFER_SIZE)
             if data:
-                temp = str(data, encoding="UTF-8")
-                arr.append(temp)
-                long_str = long_str + temp
+                msg = str(data, encoding="UTF-8")
+                long_str = long_str + msg
                 i += 1
                 _broadcast_logger.debug("%s" % str(data, encoding="utf-8"))
+                data_parser.read_broadcast_msg(msg)
             else:
                 s.close()
                 break
@@ -128,7 +128,7 @@ def client_logon(sender: str, target: str, username: str, scrips: list = None, r
         s.close()
     s.close()
 
-    long_str = long_str.replace("8=FIXT.1.1", "*&8=FIXT.1.1")
-    arr1 = long_str.split("*&")
-    for j in arr1:
-        _message_logger.debug(j)
+    # long_str = long_str.replace("8=FIXT.1.1", "*&8=FIXT.1.1")
+    # arr1 = long_str.split("*&")
+    # for j in arr1:
+    #     _message_logger.debug(j)
