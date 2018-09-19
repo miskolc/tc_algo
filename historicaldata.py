@@ -12,7 +12,7 @@ data = {
     "Symbol": "RELIANCE",
     "StartTime": "01/08/2018 9:15am",
     "EndTime": "07/09/2018 3:15pm",
-    "minute": "1"
+    "minute": "15"
 }
 # sending post request and saving response as response object
 r = requests.post(url=API_ENDPOINT, data=data)
