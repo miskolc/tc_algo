@@ -6,6 +6,7 @@ import pytz
 import logging
 
 import definitions
+from model import ct
 
 _logger = logging.getLogger("contract_manager")
 
@@ -21,28 +22,63 @@ SERIES = "Series"
 STRIKE = "StrikePrice"
 
 
-def create_contract_file(contract: str, filename: str, path: str = None):
-    tree = ET.parse(contract)
-    root = tree.getroot()
-
+def create_contract_file(contract: str, gateway_id: ct.Gateway, path: str = None):
     symbol, exchange, gateway, token, instrument, desc, lot, isin, series, strike = [], [], [], [], [], [], [], [], [], []
 
-    _logger.debug("Reading contract file")
-    for child in root:
-        symb = child.findtext(SYMBOL)
-        if symb is not None:
-            symbol.append(child.findtext(SYMBOL))
-            exchange.append(child.findtext(EXCHANGE))
-            gateway.append(int(child.findtext(GATEWAY)))
-            token.append(int(child.findtext(TOKEN)))
-            instrument.append(child.findtext(INSTRUMENT))
-            desc.append(child.findtext(DESC))
-            lot.append(int(child.findtext(LOT)))
-            isin.append(child.findtext(ISIN))
-            series.append(child.findtext(SERIES))
-            strike.append(float(child.findtext(STRIKE)))
-    _logger.debug("Reading contract file complete")
-
+    # Read File according to type
+    if contract.__contains__(".xml"):
+        # MultiChart XML File
+        tree = ET.parse(contract)
+        root = tree.getroot()
+        _logger.debug("Reading contract file")
+        for child in root:
+            symb = child.findtext(SYMBOL)
+            if symb is not None:
+                symbol.append(child.findtext(SYMBOL))
+                exchange.append(child.findtext(EXCHANGE))
+                gateway.append(int(child.findtext(GATEWAY)))
+                token.append(int(child.findtext(TOKEN)))
+                instrument.append(child.findtext(INSTRUMENT))
+                desc.append(child.findtext(DESC))
+                lot.append(int(child.findtext(LOT)))
+                isin.append(child.findtext(ISIN))
+                series.append(child.findtext(SERIES))
+                strike.append(float(child.findtext(STRIKE)))
+        _logger.debug("Reading contract file complete")
+    elif contract.__contains__(".txt"):
+        # NEAT from NSE FTP
+        f = open(contract, "r")
+        lines = f.readlines()
+        for line in lines:
+            arr = line.split("|")
+            if len(arr) == 54:
+                # NSECM security
+                if str(arr[2]) == "EQ":
+                    symbol.append(str(arr[1]))
+                    exchange.append(str(gateway_id.name))
+                    gateway.append(int(gateway_id.value))
+                    token.append(int(arr[0]))
+                    instrument.append(str(ct.default))
+                    desc.append(str(arr[21]))
+                    lot.append(int(arr[19]))
+                    isin_part = str(arr[53])
+                    isin_part = isin_part.replace("\n", "")
+                    isin.append(isin_part)
+                    series.append(arr[2])
+                    strike.append(float("0"))
+            elif len(arr) == 69:
+                # NSEFO contract
+                symbol.append(str(arr[3]))
+                exchange.append(str(gateway_id.name))
+                gateway.append(int(gateway_id.value))
+                token.append(int(arr[0]))
+                instrument.append(str(arr[2]))
+                desc.append(str(arr[53]))
+                lot.append(int(arr[30]))
+                isin.append(str(ct.default))
+                series.append(arr[8])
+                strike.append(float(arr[7]))
+    # Create py file
     if path is None:
         path = definitions.CONTRACTS
     init = "__init__.py"
@@ -62,13 +98,9 @@ def create_contract_file(contract: str, filename: str, path: str = None):
         f.close()
         _logger.debug("File created")
 
-    if filename.__contains__(".py"):
-        pass
-    else:
-        filename = filename + ".py"
-
-    filename = path + filename
-    f = open(filename, "w", )
+    gateway_id = gateway_id.name + ".py"
+    gateway_id = path + gateway_id
+    f = open(gateway_id, "w", )
     f.write("""
     \n\"\"\"
     \nThis file was generated on %s IST
@@ -76,6 +108,7 @@ def create_contract_file(contract: str, filename: str, path: str = None):
     """ % (datetime.now(tz=pytz.timezone('Asia/Kolkata'))))
     f.write("\nfrom model import Scrip \n\n")
 
+    token_symbol = "token_symbol = {"
     all_scrips = "all_scrips = ["
     for i in range(len(symbol)):
         if symbol[i].__contains__(" "):
@@ -92,30 +125,31 @@ def create_contract_file(contract: str, filename: str, path: str = None):
             strike[i] = "-1"
         name = "_%s_%s" % (symbol[i], token[i])
         all_scrips += "%s, " % name
+
+        token_symbol_element = "%s: \"%s\", " % (token[i], str(symbol[i] + "^" + desc[i]))
+        token_symbol += token_symbol_element
         f.write(
             "%s = Scrip(symbol=\"%s\", exchange=\"%s\", gateway_id=%d, token_no=%d, instrument=\"%s\", symbol_desc=\"%s\", lot_size=%d, isin_number=\"%s\", series=\"%s\", strike_price=%.2f)\n"
             % (name, symbol[i], exchange[i], gateway[i], token[i], instrument[i], desc[i],
                lot[i], isin[i], series[i], strike[i]))
 
+    token_symbol += "}"
     all_scrips += "]"
     _logger.debug(all_scrips)
-    f.write("\n")
-    f.write(all_scrips)
+    f.write("\n%s" % token_symbol)
+    f.write("\n%s" % all_scrips)
+    # f.write(all_scrips)
     f.close()
 
 
 def generate_contracts(path: str = None):
-    contracts = ["C:/Users/sb/Downloads/Contract/NSECM.xml",
-                 "C:/Users/sb/Downloads/Contract/NSEFO.xml",
-                 "C:/Users/sb/Downloads/Contract/NSECD.xml",
-                 "C:/Users/sb/Downloads/Contract/BSECD.xml",
-                 "C:/Users/sb/Downloads/Contract/MCX.xml"]
-    filenames = ["NSECM", "NSEFO", "NSECD", "BSECD", "MCX"]
-    # contracts = ["C:/Users/sb/Downloads/Contract/NSECD.xml"]
-    # filenames = ["NSECD"]
+    contracts_raw = [definitions.CONTRACT_NSECM,
+                     definitions.CONTRACT_NSEFO]
+    gateways = [ct.Gateway.NSECM,
+                ct.Gateway.NSEFO]
 
-    for i in range(len(contracts)):
-        create_contract_file(contracts[i], filenames[i], path)
+    for i in range(len(contracts_raw)):
+        create_contract_file(contracts_raw[i], gateways[i], path)
     _logger.info("Contracts generated")
 
 

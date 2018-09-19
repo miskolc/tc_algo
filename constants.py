@@ -201,3 +201,45 @@ class ValidityType(Enum):
     EOS = "6"
     FOK = "7"
     GTT = "8"
+
+
+class InfoMessage(Enum):
+    MessageType = 1473
+    Message = 1830
+    ApplId = 1180
+    ApplSeqNum = 1181
+    Headline = 148
+    LastRepRequested = 912
+    OrigTime = 42
+    Urgency = 61
+
+
+class Gateway(Enum):
+    NSEFO = 1
+    NSECM = 2
+    eFips = 3
+    NSECD = 4
+    BSEINX = 5
+    NCDEX = 8
+    BSE = 16
+    BSEFO = 32
+    MCX = 64
+    MCXSX = 128
+    MCXSXFO = 256
+    MCXSXCM = 512
+    ICEX = 1024
+    DGCX = 2048
+    VERTEX = 2049
+    BFX = 4096
+    SMX = 8192
+    GBOT = 16384
+    TTFIX = 32768
+    XTRADER = 65536
+    NDF = 131072
+    CME = 262144
+    SGX = 524288
+    MT = 1048576
+    FXCM = 2097152
+    RTS = 4194304
+    CTP = 8388608
+    BSECD = 16777216

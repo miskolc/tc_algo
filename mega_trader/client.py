@@ -107,15 +107,15 @@ def client_logon(sender: str, target: str, username: str, scrips: list = None, r
             s.sendto(token, address)
             _logger.debug("Send %s" % scrip)
 
-    long_str = ""
-    i = 0
+    # long_str = ""
+    # i = 0
     try:
         while True:
             data = s.recv(BUFFER_SIZE)
             if data:
                 msg = str(data, encoding="UTF-8")
-                long_str = long_str + msg
-                i += 1
+                # long_str = long_str + msg
+                # i += 1
                 _broadcast_logger.debug("%s" % str(data, encoding="utf-8"))
                 mt_data_parser.analyse(msg)
             else:
