@@ -67,24 +67,25 @@ if __name__ == '__main__':
                            color=ChartColor.GREEN)
     chart_9 = ChartElement(data=pivot2, label="daily_pivot", chart_type=ChartType.JUMPLINE, plot=ChartAxis.SAME_AXIS,
                            color=ChartColor.GREEN)
-    # charts = [chart_1, chart_2, chart_3, chart_4, chart_5, chart_6, chart_7]
-    charts = [chart_5, chart_8, chart_9]
+    charts = [chart_4, chart_6]
+    # charts = [chart_5]
     buy = Condition(data1=sma, data2=ema, operation=Operation.CROSSOVER)
     buy1 = Condition(data1=Pattern.closing_marubozu, data2=[-100, -50], operation=Operation.BEAR_RANGE)
     sell = Condition(data1=rsi, data2=70, operation=Operation.GREATER_THAN)
-    # result = strategy.strategy_builder(data_properties=data_prop, data_list=data, charts=charts, buy=[buy, buy1],
-    #                                    sell=sell, target=1.0, sl=0.5, strategy=strategy.BUY, )
+    result = strategy.strategy_builder(data_properties=data_prop, data_list=data, charts=charts, buy=[buy, buy1],
+                                       sell=sell, target=1.0, sl=0.5, strategy=strategy.BUY,
+                                       backtest_chart=ChartType.COLUMN)
     # strategy.strategy_optimizations(data_properties=data_prop, data_list=data, charts=charts, buy=[buy, buy1],
     #                                 sell=sell, target_range=[1.0, 1.3, 1.9, 2.2],
     #                                 sl_range=[0.3, 0.5, 0.6, 0.8], strategy=strategy.BUY, )
     # strategy.strategy_optimizations(data_properties=data_prop, data_list=data, charts=charts, buy=[buy, buy1],
     #                                 sell=sell, target_range=numpy.arange(0.3, 1.8, 0.2),
     #                                 sl_range=numpy.arange(0.1, 0.9, 0.1), strategy=strategy.BUY,)
-    strategy.strategy_optimizations(data_properties=data_prop, data_list=data, charts=charts, buy=[buy, buy1],
-                                    sell=sell, target_range=numpy.arange(0.3, 1.8, 0.2),
-                                    sl_range=0.3, strategy=strategy.BUY, )
-    # app = charting.create_app(result)
-    # app.run()
+    # strategy.strategy_optimizations(data_properties=data_prop, data_list=data, charts=charts, buy=[buy, buy1],
+    #                                 sell=sell, target_range=numpy.arange(0.3, 1.8, 0.2),
+    #                                 sl_range=0.3, strategy=strategy.BUY, )
+    app = charting.create_app(result)
+    app.run()
     # strategy.show_back_testing_reports(result)
     # result = pattern_hunter.pattern_hunter(data, pattern=Pattern.doji)
     # pattern_hunter.analyse_pattern(result)
