@@ -1,5 +1,5 @@
 from typing import Union
-from decimal import *
+from decimal import Decimal
 from dateutil import parser
 from enum import Enum
 

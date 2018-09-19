@@ -4,7 +4,7 @@ import socket
 import quickfix as fix
 
 from model import *
-from mega_trader import data_parser
+from mega_trader import mt_data_parser
 
 logging.basicConfig(level=ct.log_level, format="%(asctime)s:%(message)s")
 _logger = logging.getLogger("client")
@@ -117,7 +117,7 @@ def client_logon(sender: str, target: str, username: str, scrips: list = None, r
                 long_str = long_str + msg
                 i += 1
                 _broadcast_logger.debug("%s" % str(data, encoding="utf-8"))
-                data_parser.analyse(msg)
+                mt_data_parser.analyse(msg)
             else:
                 s.close()
                 break

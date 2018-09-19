@@ -3,6 +3,8 @@ import logging
 
 import quickfix as fix
 import quickfix50sp2 as fix50
+
+from mega_trader import meghdoot
 from model import *
 
 logging.basicConfig(level=ct.log_level, filename="./log/broadcast.log", format="%(asctime)s.%(msecs)03d %(message)s",
@@ -143,6 +145,7 @@ def read_admin_msg(message):
     else:
         _logger.warning("Not found")
         _logger.info(msg_type)
+    return None
 
 
 def read_app_msg(message):
@@ -151,9 +154,9 @@ def read_app_msg(message):
         _logger.debug(msg_type)
         if (msg_type == ct.MsgType.AUCTION_ACTIVITY_MESSAGE) | (msg_type == ct.MsgType.BCD):
             _logger.debug("Unwanted message not parsed")
-            pass
+            return None
         elif msg_type == ct.MsgType.INDEX_BROADCAST:
-            pass
+            return None
             # print("Index Broadcast")
             # No. of Records, 1828
             # noIndexRecords = int(message.getField(1828))
@@ -243,23 +246,25 @@ def read_app_msg(message):
             data = ScripData(token=token_no, open=scrip_open, high=scrip_high, low=scrip_low, close=scrip_close,
                              ltp=ltp, time=ltt, turnover=turnover, volume=volume, per_change=per_change,
                              year_high=year_high, year_low=year_low)
-            print(data)
+            return data
 
     except (ValueError, fix.FieldNotFound) as e:
         _logger.warning("Error %s" % e)
         _logger.info("Error occured for message type: %s" % message.getHeader().getField(35))
+        return None
 
 
 def read_msg(message):
     try:
         rec = fix.Message(message, dd, False)
         if rec.isAdmin():
-            read_admin_msg(rec)
+            return read_admin_msg(rec)
         elif rec.isApp():
-            read_app_msg(rec)
+            return read_app_msg(rec)
     except fix.InvalidMessage as e:
         _logger.warning("Error %s" % e)
         _logger.info("Error while reading message: %s" % message)
+        return None
 
 
 residue = None
@@ -281,7 +286,7 @@ async def read_broadcast_msg(broadcast_message: str):
         try:
             if len(msgs) == 1:
                 _logger.info(msgs[0])
-                read_msg(msgs[0])
+                meghdoot.ramadhir(read_msg(msgs[0]))
             elif len(msgs) > 1:
                 for cmpl_msg in msgs:
                     if cmpl_msg == '':
@@ -290,7 +295,7 @@ async def read_broadcast_msg(broadcast_message: str):
                         try:
                             _logger.info("Created: %s" % cmpl_msg)
                             fix.Message(cmpl_msg, dd, False)
-                            read_msg(cmpl_msg)
+                            meghdoot.ramadhir(read_msg(cmpl_msg))
                         except fix.InvalidMessage:
                             residue = cmpl_msg
         except fix.InvalidMessage:
