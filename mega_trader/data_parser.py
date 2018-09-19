@@ -5,7 +5,8 @@ import quickfix as fix
 import quickfix50sp2 as fix50
 from model import *
 
-logging.basicConfig(level=ct.log_level)
+logging.basicConfig(level=ct.log_level, filename="./log/broadcast.log", format="%(asctime)s.%(msecs)03d %(message)s",
+                    filemode="w")
 _logger = logging.getLogger("mega_trader.data_parser")
 
 dd = fix.DataDictionary("./spec/FIX50SP2.xml")
@@ -25,6 +26,21 @@ orig_sending_time = fix.OrigSendingTime()
 sending_time = fix.SendingTime()
 on_behalf_id = fix.OnBehalfOfCompID()
 check_sum = fix.CheckSum()
+
+TOKEN_NO = 48
+LTP = 1835
+LTQ = 1843
+LTT = 1844
+AVG_TP = 1845
+OPEN = 1861
+CLOSE = 1809
+HIGH = 1802
+LOW = 1801
+YEAR_HIGH = 1824
+YEAR_LOW = 1825
+VOLUME = 387
+TURNOVER = 1840
+PERC_CHANGE = 1823
 
 
 def read_header(message):
@@ -83,6 +99,29 @@ def read_trailer(message):
         _logger.debug(msg_element)
 
 
+def read_tag(message, tag):
+    try:
+        if message.isSetField(tag):
+            msg_value = message.getField(tag)
+            # msg_value = message.getField(tag).getString()
+            # _logger.debug(msg_element)
+            return msg_value
+        elif message.getHeader().isSetField(tag):
+            msg_element = message.getHeader().getField(tag)
+            msg_value = message.getHeader().getField(tag).getString()
+            _logger.debug(msg_element)
+            return msg_value
+        elif message.getTrailer().isSetField(tag):
+            msg_element = message.getTrailer().getField(tag)
+            msg_value = message.getTrailer().getField(tag).getString()
+            _logger.debug(msg_element)
+            return msg_value
+        else:
+            return "0"
+    except fix.FieldNotFound:
+        return "0"
+
+
 def read_admin_msg(message):
     msg_type = read_header(message)
     if msg_type == ct.MsgType.HEARTBEAT:
@@ -115,6 +154,7 @@ def read_app_msg(message):
             pass
         elif msg_type == ct.MsgType.INDEX_BROADCAST:
             pass
+            # print("Index Broadcast")
             # No. of Records, 1828
             # noIndexRecords = int(message.getField(1828))
             # if noIndexRecords > 0:
@@ -150,36 +190,39 @@ def read_app_msg(message):
             # message.getField(1827)
         elif msg_type == ct.MsgType.MARKET_PICTURE:
             # Token No.
-            token_no = int(message.getField(48))
+            token_no = int(read_tag(message, TOKEN_NO))
             # LTP
-            ltp = float(message.getField(1835))
+            ltp = float(read_tag(message, LTP))
             # Last Traded Quantity
-            ltq = int(message.getField(1843))
+            ltq = int(read_tag(message, LTQ))
             # Last Traded Time
-            ltt = str(message.getField(1844))
+            ltt = str(read_tag(message, LTT))
             # Average Traded Price
-            avg_tp = float(message.getField(1845))
+            avg_tp = float(read_tag(message, AVG_TP))
             # Open
-            scrip_open = float(message.getField(1861))
+            scrip_open = float(read_tag(message, OPEN))
             # Close
-            scrip_close = float(message.getField(1809))
+            scrip_close = float(read_tag(message, CLOSE))
             # High
-            scrip_high = float(message.getField(1802))
+            scrip_high = float(read_tag(message, HIGH))
             # Low
-            scrip_low = float(message.getField(1801))
+            scrip_low = float(read_tag(message, LOW))
             # Yearly High
-            year_high = float(message.getField(1824))
+            year_high = float(read_tag(message, YEAR_HIGH))
             # Yearly Low
-            year_low = float(message.getField(1825))
+            year_low = float(read_tag(message, YEAR_LOW))
             # Total Quantity Traded
-            volume = int(message.getField(387))
+            volume = int(read_tag(message, VOLUME))
             # Total Trade Value
-            turnover = float(message.getField(1840))
+            turnover = float(read_tag(message, TURNOVER))
             # Percentage Change
-            if message.isSetField(1823):
-                per_change = (message.getField(1823))
+            if message.isSetField(PERC_CHANGE):
+                per_change = (message.getField(PERC_CHANGE))
             else:
-                per_change = ((ltp - scrip_close) / scrip_close) * 100
+                try:
+                    per_change = ((ltp - scrip_close) / scrip_close) * 100
+                except (ValueError, TypeError, ZeroDivisionError):
+                    per_change = None
             # noMDEntries = fix.NoMDEntries()
             # entries = int(message.getField(noMDEntries).getString())
             # group = fix50.MarketDataSnapshotFullRefresh.NoMDEntries()
@@ -222,41 +265,6 @@ def read_msg(message):
 residue = None
 begin_string_str = "8=FIXT.1.1"
 splitter = "*&"
-check_sum_str = "10="
-
-
-# def read_broadcast_msg(broadcast_message: str):
-#     global residue
-#     if broadcast_message.__contains__(begin_string_str):
-#         broadcast_message.replace(begin_string_str, splitter + begin_string_str)
-#         msgs = broadcast_message.split(splitter)
-#
-#         if residue is None:
-#             # Do Nothing
-#             pass
-#         else:
-#             msgs[0] = residue + msgs[0]
-#             print(msgs[0])
-#             residue = None
-#
-#         try:
-#             if len(msgs) == 1:
-#                 print(msgs[0])
-#                 # read_msg(msgs[0])
-#             elif len(msgs) > 1:
-#                 for cmpl_msg in msgs:
-#                     try:
-#                         print(cmpl_msg)
-#                         fix.Message(cmpl_msg, dd, False)
-#                         read_msg(cmpl_msg)
-#                     except fix.InvalidMessage:
-#                         residue = cmpl_msg
-#         except fix.InvalidMessage:
-#             pass
-#     else:
-#         if residue is not None:
-#             residue += residue
-#
 
 
 async def read_broadcast_msg(broadcast_message: str):
@@ -267,12 +275,12 @@ async def read_broadcast_msg(broadcast_message: str):
 
         if residue is not None:
             msgs[0] = residue + msgs[0]
-            print("Residue and first of next: %s" % msgs[0])
+            _logger.debug("Residue and first of next: %s" % msgs[0])
             residue = None
 
         try:
             if len(msgs) == 1:
-                print(msgs[0])
+                _logger.info(msgs[0])
                 read_msg(msgs[0])
             elif len(msgs) > 1:
                 for cmpl_msg in msgs:
@@ -280,15 +288,15 @@ async def read_broadcast_msg(broadcast_message: str):
                         pass
                     else:
                         try:
-                            print("Created: %s" % cmpl_msg)
+                            _logger.info("Created: %s" % cmpl_msg)
                             fix.Message(cmpl_msg, dd, False)
                             read_msg(cmpl_msg)
                         except fix.InvalidMessage:
                             residue = cmpl_msg
         except fix.InvalidMessage:
-            print("Invalid Message")
+            _logger.warning("Invalid Message")
     else:
-        print("residue is not none: %s" % broadcast_message)
+        _logger.debug("residue is not none: %s" % broadcast_message)
         if residue is not None:
             residue += residue
 
@@ -298,8 +306,9 @@ async def run():
     lines = f.readlines()
     for line in lines:
         line = line.replace("\n", "")
-        print("Original: %s" % line)
+        _logger.info("Original: %s" % line)
         await read_broadcast_msg(line)
 
 
-asyncio.run(run())
+def analyse(broadcast_message):
+    asyncio.run(read_broadcast_msg(broadcast_message))

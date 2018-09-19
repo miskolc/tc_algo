@@ -117,7 +117,7 @@ def client_logon(sender: str, target: str, username: str, scrips: list = None, r
                 long_str = long_str + msg
                 i += 1
                 _broadcast_logger.debug("%s" % str(data, encoding="utf-8"))
-                data_parser.read_broadcast_msg(msg)
+                data_parser.analyse(msg)
             else:
                 s.close()
                 break

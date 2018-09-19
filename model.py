@@ -62,7 +62,7 @@ class ScripData:
         self.per_change = per_change
 
     def __str__(self) -> str:
-        return "Token: %s\nLTP: %s\nTime: %s" % (self.token, self.ltp, self.time)
+        return "Token: %s LTP: %s Time: %s" % (self.token, self.ltp, self.time)
 
 
 class DataObject:

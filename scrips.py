@@ -5,6 +5,8 @@ from datetime import datetime
 import pytz
 import logging
 
+import definitions
+
 _logger = logging.getLogger("contract_manager")
 
 SYMBOL = "Symbol"
@@ -42,7 +44,7 @@ def create_contract_file(contract: str, filename: str, path: str = None):
     _logger.debug("Reading contract file complete")
 
     if path is None:
-        path = "./contracts/"
+        path = definitions.CONTRACTS
     init = "__init__.py"
     init_file = path + init
 
@@ -119,5 +121,4 @@ def generate_contracts(path: str = None):
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
-    generate_contracts()
     generate_contracts()
