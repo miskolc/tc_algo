@@ -44,6 +44,26 @@ fo = ["ACC", "ADANIENT", "ADANIPORTS", "ADANIPOWER", "AJANTPHARM", "ALBK", "AMAR
       "UNIONBANK", "UPL", "VEDL", "VGUARD", "VOLTAS", "WIPRO", "WOCKPHARMA", "YESBANK", "ZEEL"]
 
 
+def get_fo_symbols():
+    result = []
+    print(len(fo))
+    for scrip in fo:
+        result.append(rectify_symbol(scrip))
+    return result
+
+
+def get_fo__scrip_tokens():
+    from contracts import NSECM
+    fo_symbols = get_fo_symbols()
+    tokens = []
+    for symbol in fo_symbols:
+        for scrip in NSECM.all_scrips:
+            if scrip.symbol == symbol:
+                tokens.append(scrip)
+
+    return tokens
+
+
 def create_contract_file(contract: str, gateway_id: ct.Gateway, path: str = None):
     symbol, exchange, gateway, token, instrument, desc, lot, isin, series, strike = [], [], [], [], [], [], [], [], [], []
 
