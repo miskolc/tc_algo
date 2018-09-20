@@ -21,6 +21,28 @@ ISIN = "ISINNumber"
 SERIES = "Series"
 STRIKE = "StrikePrice"
 
+fo = ["ACC", "ADANIENT", "ADANIPORTS", "ADANIPOWER", "AJANTPHARM", "ALBK", "AMARAJABAT", "AMBUJACEM", "ANDHRABANK",
+      "APOLLOHOSP", "APOLLOTYRE", "ARVIND", "ASHOKLEY", "ASIANPAINT", "AUROPHARMA", "AXISBANK", "BAJAJ-AUTO",
+      "BAJAJFINSV", "BAJFINANCE", "BALKRISIND", "BALRAMCHIN", "BANKBARODA", "BANKINDIA", "BATAINDIA", "BEL", "BEML",
+      "BERGEPAINT", "BHARATFIN", "BHARATFORG", "BHARTIARTL", "BHEL", "BIOCON", "BOSCHLTD", "BPCL", "BRITANNIA",
+      "CADILAHC", "CANBK", "CANFINHOME", "CAPF", "CASTROLIND", "CEATLTD", "CENTURYTEX", "CESC", "CGPOWER", "CHENNPETRO",
+      "CHOLAFIN", "CIPLA", "COALINDIA", "COLPAL", "CONCOR", "CUMMINSIND", "DABUR", "DALMIABHA", "DCBBANK", "DHFL",
+      "DISHTV", "DIVISLAB", "DLF", "DRREDDY", "EICHERMOT", "ENGINERSIN", "EQUITAS", "ESCORTS", "EXIDEIND", "FEDERALBNK",
+      "GAIL", "GLENMARK", "GMRINFRA", "GODFRYPHLP", "GODREJCP", "GODREJIND", "GRANULES", "GRASIM", "GSFC", "HAVELLS",
+      "HCC", "HCLTECH", "HDFC", "HDFCBANK", "HEROMOTOCO", "HEXAWARE", "HINDALCO", "HINDPETRO", "HINDUNILVR", "HINDZINC",
+      "IBULHSGFIN", "ICICIBANK", "ICICIPRULI", "IDBI", "IDEA", "IDFC", "IDFCBANK", "IFCI", "IGL", "INDIACEM", "INDIANB",
+      "INDIGO", "INDUSINDBK", "INFIBEAM", "INFRATEL", "INFY", "IOC", "IRB", "ITC", "JETAIRWAYS", "JINDALSTEL",
+      "JISLJALEQS", "JPASSOCIAT", "JSWSTEEL", "JUBLFOOD", "JUSTDIAL", "KAJARIACER", "KOTAKBANK", "KPIT", "KSCL",
+      "KTKBANK", "L&TFH", "LICHSGFIN", "LT", "LUPIN", "M&M", "M&MFIN", "MANAPPURAM", "MARICO", "MARUTI", "MCDOWELL-N",
+      "MCX", "MFSL", "MGL", "MINDTREE", "MOTHERSUMI", "MRF", "MRPL", "MUTHOOTFIN", "NATIONALUM", "NBCC", "NCC",
+      "NESTLEIND", "NHPC", "NIITTECH", "NMDC", "NTPC", "OFSS", "OIL", "ONGC", "ORIENTBANK", "PAGEIND", "PCJEWELLER",
+      "PEL", "PETRONET", "PFC", "PIDILITIND", "PNB", "POWERGRID", "PTC", "PVR", "RAMCOCEM", "RAYMOND", "RBLBANK",
+      "RCOM", "RECLTD", "RELCAPITAL", "RELIANCE", "RELINFRA", "REPCOHOME", "RPOWER", "SAIL", "SBIN", "SHREECEM",
+      "SIEMENS", "SOUTHBANK", "SREINFRA", "SRF", "SRTRANSFIN", "STAR", "SUNPHARMA", "SUNTV", "SUZLON", "SYNDIBANK",
+      "TATACHEM", "TATACOMM", "TATAELXSI", "TATAGLOBAL", "TATAMOTORS", "TATAMTRDVR", "TATAPOWER", "TATASTEEL", "TCS",
+      "TECHM", "TITAN", "TORNTPHARM", "TORNTPOWER", "TV18BRDCST", "TVSMOTOR", "UBL", "UJJIVAN", "ULTRACEMCO",
+      "UNIONBANK", "UPL", "VEDL", "VGUARD", "VOLTAS", "WIPRO", "WOCKPHARMA", "YESBANK", "ZEEL"]
+
 
 def create_contract_file(contract: str, gateway_id: ct.Gateway, path: str = None):
     symbol, exchange, gateway, token, instrument, desc, lot, isin, series, strike = [], [], [], [], [], [], [], [], [], []
@@ -111,15 +133,7 @@ def create_contract_file(contract: str, gateway_id: ct.Gateway, path: str = None
     token_symbol = "token_symbol = {"
     all_scrips = "all_scrips = ["
     for i in range(len(symbol)):
-        if symbol[i].__contains__(" "):
-            symbol[i] = symbol[i].replace(" ", "_")
-        if symbol[i].__contains__("."):
-            symbol[i] = symbol[i].replace(".", "_")
-        if symbol[i].__contains__("&"):
-            symbol[i] = symbol[i].replace("&", "_and")
-        if symbol[i].__contains__("-"):
-            symbol[i] = symbol[i].replace("-", "_")
-
+        symbol[i] = rectify_symbol(symbol[i])
         if strike[i] == "-01":
             print(symbol[i])
             strike[i] = "-1"
@@ -140,6 +154,18 @@ def create_contract_file(contract: str, gateway_id: ct.Gateway, path: str = None
     f.write("\n%s" % all_scrips)
     # f.write(all_scrips)
     f.close()
+
+
+def rectify_symbol(symbol):
+    if symbol.__contains__(" "):
+        symbol = symbol.replace(" ", "_")
+    if symbol.__contains__("."):
+        symbol = symbol.replace(".", "_")
+    if symbol.__contains__("&"):
+        symbol = symbol.replace("&", "_and")
+    if symbol.__contains__("-"):
+        symbol = symbol.replace("-", "_")
+    return symbol
 
 
 def generate_contracts(path: str = None):
