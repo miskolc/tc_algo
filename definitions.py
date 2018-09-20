@@ -8,6 +8,14 @@ REPORTS = os.path.join(ROOT_DIR, 'reports/')
 SPEC = os.path.join(ROOT_DIR, "spec/")
 LOG = os.path.join(ROOT_DIR, 'log/')
 
+security = "security"
+contract = "contract"
+ext = ".txt"
+nsecm = security + ext
+nsefo = contract + ext
+CONTRACT_NSECM = os.path.join(CONTRACTS, nsecm)
+CONTRACT_NSEFO = os.path.join(CONTRACTS, nsefo)
+
 BROADCAST_LOG = os.path.join(LOG, 'broadcast.log')
 MESSAGE_LOG = os.path.join(LOG, 'messages.log')
 MSG_LOG = os.path.join(LOG, 'msg.log')
