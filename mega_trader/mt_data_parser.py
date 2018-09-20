@@ -11,7 +11,7 @@ logging.basicConfig(level=ct.log_level, filename="./log/broadcast.log", format="
                     filemode="w")
 _logger = logging.getLogger("mega_trader.data_parser")
 
-dd = fix.DataDictionary("./spec/FIX50SP2.xml")
+dd = fix.DataDictionary(definitions.FIX50SP02)
 
 begin_string = fix.BeginString()
 body_length = fix.BodyLength()

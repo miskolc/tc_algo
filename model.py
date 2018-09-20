@@ -5,6 +5,7 @@ from enum import Enum
 
 import numpy
 
+import definitions
 import constants as ct
 from constants import Keys
 

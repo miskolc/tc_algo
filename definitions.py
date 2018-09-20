@@ -2,29 +2,29 @@ import logging
 import os
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
+
+CONTRACTS = os.path.join(ROOT_DIR, 'contracts/')
+REPORTS = os.path.join(ROOT_DIR, 'reports/')
+SPEC = os.path.join(ROOT_DIR, "spec/")
 LOG = os.path.join(ROOT_DIR, 'log/')
+
 BROADCAST_LOG = os.path.join(LOG, 'broadcast.log')
 MESSAGE_LOG = os.path.join(LOG, 'messages.log')
 MSG_LOG = os.path.join(LOG, 'msg.log')
-CONTRACTS = os.path.join(ROOT_DIR, 'contracts/')
-REPORTS = os.path.join(ROOT_DIR, 'reports/')
+FIX50SP02 = os.path.join(SPEC + "FIX50SP2.xml")
 
-nsecm = "security"
-nsefo = "contract"
-ext = ".txt"
-CONTRACT_NSECM = os.path.join(CONTRACTS, nsecm + ext)
-CONTRACT_NSEFO = os.path.join(CONTRACTS, nsefo + ext)
+MEGA_TRADER = os.path.join(ROOT_DIR, "mega_trader/")
 
-MEGA_TRADER = os.path.join("mega_trader/")
+MEGA_TRADER_LOG = os.path.join(MEGA_TRADER, "log")
 CLIENT_CONFIG = os.path.join(MEGA_TRADER, 'client.cfg')
 
-directory = [LOG, CONTRACTS, REPORTS]
+directories = [LOG, CONTRACTS, REPORTS, MEGA_TRADER_LOG]
 
-for dir in directory:
-    if not os.path.exists(dir):
+for directory in directories:
+    if not os.path.exists(directory):
         try:
-            logging.debug("Creating directory: %s" % dir)
-            os.makedirs(dir)
-            logging.debug("Directory created: %s" % dir)
+            logging.debug("Creating directory: %s" % directory)
+            os.makedirs(directory)
+            logging.debug("Directory created: %s" % directory)
         except OSError as e:
             print(e)
