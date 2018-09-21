@@ -46,7 +46,7 @@ fo = ["ACC", "ADANIENT", "ADANIPORTS", "ADANIPOWER", "AJANTPHARM", "ALBK", "AMAR
 
 def get_fo_symbols():
     result = []
-    print(len(fo))
+    print("FO symbols %s" % len(fo))
     for scrip in fo:
         result.append(rectify_symbol(scrip))
     return result

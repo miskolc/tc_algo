@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="e8e6d9ca-4800-4a51-9684-12e5ec5cd86c" name="Default" comment="Add: File Definitions">
+    <list default="true" id="e8e6d9ca-4800-4a51-9684-12e5ec5cd86c" name="Default" comment="Add: FO stocks subscription">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mega_trader/contracts.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/mega_trader/mt_data_parser.py" beforeDir="false" afterPath="$PROJECT_DIR$/mega_trader/mt_data_parser.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/scrips.py" beforeDir="false" afterPath="$PROJECT_DIR$/scrips.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -51,9 +53,9 @@
           <entry key="header" value="1" />
           <entry key="html" value="18" />
           <entry key="ipynb" value="19" />
-          <entry key="log" value="9" />
+          <entry key="log" value="12" />
           <entry key="md" value="1" />
-          <entry key="py" value="382" />
+          <entry key="py" value="385" />
           <entry key="pyi" value="6" />
           <entry key="session" value="1" />
           <entry key="strategy" value="1" />
@@ -67,26 +69,26 @@
           <entry key="cfg" value="144" />
           <entry key="dummy" value="44" />
           <entry key="html" value="6" />
-          <entry key="py" value="73435" />
-          <entry key="txt" value="2146" />
+          <entry key="py" value="73781" />
+          <entry key="txt" value="2168" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
           <entry key="HTML" value="6" />
           <entry key="Ini" value="144" />
-          <entry key="PLAIN_TEXT" value="2190" />
-          <entry key="Python" value="73447" />
+          <entry key="PLAIN_TEXT" value="2212" />
+          <entry key="Python" value="73793" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.open">
         <counts>
           <entry key="HTML" value="18" />
           <entry key="IPNB" value="19" />
-          <entry key="Log" value="5" />
+          <entry key="Log" value="8" />
           <entry key="Markdown" value="1" />
           <entry key="PLAIN_TEXT" value="27" />
-          <entry key="Python" value="383" />
+          <entry key="Python" value="386" />
           <entry key="PythonStub" value="6" />
           <entry key="XML" value="2" />
         </counts>
@@ -107,7 +109,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/mega_trader/client.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1428">
+            <state relative-caret-position="393">
               <caret line="90" column="29" selection-start-line="90" selection-start-column="29" selection-end-line="90" selection-end-column="29" />
               <folding>
                 <element signature="e#0#14#0" expanded="true" />
@@ -116,20 +118,30 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/scrips.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="650">
-              <caret line="42" selection-start-line="42" selection-end-line="42" />
+            <state relative-caret-position="-69">
+              <caret line="87" column="37" lean-forward="true" selection-start-line="87" selection-start-column="37" selection-end-line="87" selection-end-column="37" />
               <folding>
                 <element signature="e#0#9#0" expanded="true" />
-                <marker date="1537449446172" expanded="true" signature="7267:7591" ph="..." />
+                <marker date="1537530270701" expanded="true" signature="3003:3252" ph="..." />
+                <marker date="1537530270701" expanded="true" signature="7704:8028" ph="..." />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/mega_trader/__init__.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="34">
+              <caret line="5" lean-forward="true" selection-start-line="5" selection-end-line="5" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/definitions.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="272">
@@ -141,8 +153,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/mega_trader/mt_data_parser.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="102">
-              <caret line="13" column="45" selection-start-line="13" selection-start-column="45" selection-end-line="13" selection-end-column="45" />
+            <state relative-caret-position="287">
+              <caret line="297" column="42" selection-start-line="297" selection-start-column="42" selection-end-line="297" selection-end-column="42" />
               <folding>
                 <element signature="e#0#14#0" expanded="true" />
               </folding>
@@ -162,8 +174,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/main.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="204">
-              <caret line="17" selection-start-line="17" selection-end-line="17" />
+            <state relative-caret-position="255">
+              <caret line="15" column="33" selection-start-line="15" selection-start-column="33" selection-end-line="15" selection-end-column="33" />
               <folding>
                 <element signature="e#0#14#0" expanded="true" />
               </folding>
@@ -279,7 +291,6 @@
         <option value="$PROJECT_DIR$/mega_trader/mega_trader.py" />
         <option value="$PROJECT_DIR$/mega_trader/data_parser.py" />
         <option value="$PROJECT_DIR$/mega_trader/__init__.py" />
-        <option value="$PROJECT_DIR$/main.py" />
         <option value="$PROJECT_DIR$/mega_trader/meghdoot.py" />
         <option value="$PROJECT_DIR$/mega_trader/client.py" />
         <option value="$PROJECT_DIR$/historicaldata.py" />
@@ -288,9 +299,10 @@
         <option value="$PROJECT_DIR$/constants.py" />
         <option value="$PROJECT_DIR$/mega_trader/test.py" />
         <option value="$PROJECT_DIR$/contracts/NSECM.py" />
-        <option value="$PROJECT_DIR$/mega_trader/mt_data_parser.py" />
         <option value="$PROJECT_DIR$/model.py" />
         <option value="$PROJECT_DIR$/definitions.py" />
+        <option value="$PROJECT_DIR$/main.py" />
+        <option value="$PROJECT_DIR$/mega_trader/mt_data_parser.py" />
         <option value="$PROJECT_DIR$/scrips.py" />
       </list>
     </option>
@@ -496,11 +508,11 @@
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.main" />
         <item itemvalue="Python.scrips" />
         <item itemvalue="Python.definitions" />
         <item itemvalue="Python.data_parser" />
         <item itemvalue="Python.test" />
-        <item itemvalue="Python.main" />
       </list>
     </recent_temporary>
   </component>
@@ -514,13 +526,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1530960242599</updated>
-    </task>
-    <task id="LOCAL-00001" summary="added TODO">
-      <created>1533044753138</created>
-      <option name="number" value="00001" />
-      <option name="presentableId" value="LOCAL-00001" />
-      <option name="project" value="LOCAL" />
-      <updated>1533044753138</updated>
     </task>
     <task id="LOCAL-00002" summary="Add: Quandl data fetch, indicators, data model">
       <created>1533121444448</created>
@@ -851,7 +856,21 @@
       <option name="project" value="LOCAL" />
       <updated>1537436457713</updated>
     </task>
-    <option name="localTasksCounter" value="49" />
+    <task id="LOCAL-00049" summary="Add: FO stocks">
+      <created>1537449600012</created>
+      <option name="number" value="00049" />
+      <option name="presentableId" value="LOCAL-00049" />
+      <option name="project" value="LOCAL" />
+      <updated>1537449600012</updated>
+    </task>
+    <task id="LOCAL-00050" summary="Add: FO stocks subscription">
+      <created>1537450636482</created>
+      <option name="number" value="00050" />
+      <option name="presentableId" value="LOCAL-00050" />
+      <option name="project" value="LOCAL" />
+      <updated>1537450636482</updated>
+    </task>
+    <option name="localTasksCounter" value="51" />
     <servers />
   </component>
   <component name="TodoView">
@@ -865,14 +884,13 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1616" height="876" extended-state="6" />
-    <editor active="true" />
     <layout>
       <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.49444443" visible="true" weight="0.13244614" />
       <window_info id="Favorites" order="1" sideWeight="0.5011338" side_tool="true" weight="0.24304539" />
       <window_info id="Structure" order="2" sideWeight="0.50555557" weight="0.21166033" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" sideWeight="0.49936628" weight="0.32916668" />
-      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.49619773" weight="0.3402778" />
+      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.49619773" visible="true" weight="0.3402778" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -957,8 +975,6 @@
     <option name="myLimit" value="2678400000" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Bug: Error when profit/sl in percentage" />
-    <MESSAGE value="Add: Sample Strategy with new format" />
     <MESSAGE value="Update: requirements.txt" />
     <MESSAGE value="Add: Annotations in strategy result" />
     <MESSAGE value="Update: Data for annotations" />
@@ -982,7 +998,9 @@
     <MESSAGE value="Update: Data Parsing for txt file" />
     <MESSAGE value="Update: Minor Changes" />
     <MESSAGE value="Add: File Definitions" />
-    <option name="LAST_COMMIT_MESSAGE" value="Add: File Definitions" />
+    <MESSAGE value="Add: FO stocks" />
+    <MESSAGE value="Add: FO stocks subscription" />
+    <option name="LAST_COMMIT_MESSAGE" value="Add: FO stocks subscription" />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
   </component>
   <component name="XDebuggerManager">
@@ -1006,18 +1024,6 @@
     </expressions>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/templates/chart.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-515" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/charting.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="272">
-          <caret line="17" column="7" selection-start-line="17" selection-start-column="7" selection-end-line="17" selection-end-column="7" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$APPLICATION_HOME_DIR$/helpers/typeshed/stdlib/3/typing.pyi">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="224">
@@ -1180,28 +1186,11 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/mega_trader/meghdoot.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="85">
-          <caret line="5" column="12" selection-start-line="5" selection-start-column="12" selection-end-line="5" selection-end-column="12" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/mega_trader/system_message.py" />
     <entry file="file://$PROJECT_DIR$/contracts/security.txt">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
     <entry file="file://$PROJECT_DIR$/contracts/NSEFO.py">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/mega_trader/__init__.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="34">
-          <caret line="5" lean-forward="true" selection-start-line="5" selection-end-line="5" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/mega_trader/contracts.py">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
     <entry file="file://$PROJECT_DIR$/contracts/NSECM.py">
@@ -1214,30 +1203,10 @@
     <entry file="file://$PROJECT_DIR$/historicaldata.py">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/mega_trader/mt_data_parser.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="102">
-          <caret line="13" column="45" selection-start-line="13" selection-start-column="45" selection-end-line="13" selection-end-column="45" />
-          <folding>
-            <element signature="e#0#14#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/model.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="119">
           <caret line="7" column="18" selection-start-line="7" selection-start-column="18" selection-end-line="7" selection-end-column="18" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/main.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="204">
-          <caret line="17" selection-start-line="17" selection-end-line="17" />
-          <folding>
-            <element signature="e#0#14#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1258,16 +1227,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/mega_trader/client.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1428">
-          <caret line="90" column="29" selection-start-line="90" selection-start-column="29" selection-end-line="90" selection-end-column="29" />
-          <folding>
-            <element signature="e#0#14#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/data_parser.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="2986">
@@ -1275,21 +1234,75 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/definitions.py">
+    <entry file="file://$PROJECT_DIR$/main.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="272">
-          <caret line="17" selection-start-line="17" selection-end-line="17" />
+        <state relative-caret-position="255">
+          <caret line="15" column="33" selection-start-line="15" selection-start-column="33" selection-end-line="15" selection-end-column="33" />
+          <folding>
+            <element signature="e#0#14#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/mega_trader/client.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="393">
+          <caret line="90" column="29" selection-start-line="90" selection-start-column="29" selection-end-line="90" selection-end-column="29" />
+          <folding>
+            <element signature="e#0#14#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/log/messages.log">
+      <provider selected="true" editor-type-id="LogFileEditorProvider" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/log/broadcast.log">
+      <provider selected="true" editor-type-id="LogFileEditorProvider" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/mega_trader/mt_data_parser.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="287">
+          <caret line="297" column="42" selection-start-line="297" selection-start-column="42" selection-end-line="297" selection-end-column="42" />
+          <folding>
+            <element signature="e#0#14#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/mega_trader/contracts.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/mega_trader/meghdoot.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="17">
+          <caret line="1" lean-forward="true" selection-start-line="1" selection-end-line="1" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/mega_trader/__init__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="34">
+          <caret line="5" lean-forward="true" selection-start-line="5" selection-end-line="5" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/scrips.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="650">
-          <caret line="42" selection-start-line="42" selection-end-line="42" />
+        <state relative-caret-position="-69">
+          <caret line="87" column="37" lean-forward="true" selection-start-line="87" selection-start-column="37" selection-end-line="87" selection-end-column="37" />
           <folding>
             <element signature="e#0#9#0" expanded="true" />
-            <marker date="1537449446172" expanded="true" signature="7267:7591" ph="..." />
+            <marker date="1537530270701" expanded="true" signature="3003:3252" ph="..." />
+            <marker date="1537530270701" expanded="true" signature="7704:8028" ph="..." />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/definitions.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="272">
+          <caret line="17" selection-start-line="17" selection-end-line="17" />
         </state>
       </provider>
     </entry>

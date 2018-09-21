@@ -9,7 +9,7 @@ from model import *
 
 logging.basicConfig(level=ct.log_level, filename="./log/broadcast.log", format="%(asctime)s.%(msecs)03d %(message)s",
                     filemode="w")
-_logger = logging.getLogger("mega_trader.data_parser")
+_logger = logging.getLogger("mega_trader.mt_data_parser")
 
 dd = fix.DataDictionary(definitions.FIX50SP02)
 
@@ -246,6 +246,8 @@ def read_app_msg(message):
             data = ScripData(token=token_no, open=scrip_open, high=scrip_high, low=scrip_low, close=scrip_close,
                              ltp=ltp, time=ltt, turnover=turnover, volume=volume, per_change=per_change,
                              year_high=year_high, year_low=year_low)
+            _logger.debug(data)
+            # print(data)
             return data
 
     except (ValueError, fix.FieldNotFound) as e:
@@ -293,7 +295,7 @@ async def read_broadcast_msg(broadcast_message: str):
                         pass
                     else:
                         try:
-                            _logger.info("Created: %s" % cmpl_msg)
+                            _logger.debug("Created: %s" % cmpl_msg)
                             fix.Message(cmpl_msg, dd, False)
                             meghdoot.ramadhir(read_msg(cmpl_msg))
                         except fix.InvalidMessage:
