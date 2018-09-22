@@ -1,18 +1,14 @@
 import logging
-from argparse import ArgumentParser
-from datetime import *
-import api
-import charting
-import indicators
-import data_parser
-import pattern_hunter
-from pattern_hunter import Pattern
+import definitions
 from model import *
-import strategy
-from strategy import Strategies
+from contracts import NSECM, NSECD, NSEFO, BSECD, MCX
+
+from mega_trader import client
+import scrips
 
 # TODO: Following are under development order:
-# TODO: 1. Add command line interface
+# TODO: 1. Live Broadcast
+# TODO: 2. Add command line interface
 
 
 if __name__ == '__main__':
@@ -89,3 +85,4 @@ if __name__ == '__main__':
     # strategy.show_back_testing_reports(result)
     # result = pattern_hunter.pattern_hunter(data, pattern=Pattern.doji)
     # pattern_hunter.analyse_pattern(result)
+

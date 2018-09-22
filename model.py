@@ -1,10 +1,11 @@
 from typing import Union
-from decimal import *
+from decimal import Decimal
 from dateutil import parser
 from enum import Enum
 
 import numpy
 
+import definitions
 import constants as ct
 from constants import Keys
 
@@ -12,11 +13,57 @@ PRECISION = Decimal(10) ** -2
 
 
 class Symbol:
+    """
+    This class is to be only used with quandl API
+    """
 
     def __init__(self, scrip: str, api_key: str, size: int):
         self.scrip = scrip
         self.api_key = api_key
         self.size = size
+
+
+class Scrip:
+    """
+    This is used with broadcast related operations.
+    """
+
+    def __init__(self, symbol: str, exchange: str, gateway_id: int, token_no: int, instrument: str,
+                 symbol_desc: str, lot_size: int, isin_number: str, series: str, strike_price: float):
+        self.symbol = symbol
+        self.exchange = exchange
+        self.gatewayID = gateway_id
+        self.token_no = token_no
+        self.instrument = instrument
+        self.symbol_desc = symbol_desc
+        self.lot_size = lot_size
+        self.ISIN_number = isin_number
+        self.series = series
+        self.strike_price = strike_price
+
+    def __str__(self) -> str:
+        return "%s_%s_%s" % (self.exchange, self.symbol, self.token_no)
+
+
+class ScripData:
+
+    def __init__(self, token: int, open: float, high: float, low: float, close: float, ltp: float, volume: int,
+                 turnover: float, year_high: float, year_low: float, time: str, per_change: float):
+        self.token = token
+        self.open = open
+        self.high = high
+        self.low = low
+        self.close = close
+        self.ltp = ltp
+        self.volume = volume
+        self.turnover = turnover
+        self.year_high = year_high
+        self.year_low = year_low
+        self.time = time
+        self.per_change = per_change
+
+    def __str__(self) -> str:
+        return "Token: %s LTP: %s Time: %s" % (self.token, self.ltp, self.time)
 
 
 class DataObject:
@@ -220,6 +267,7 @@ class ChartElement:
     """
     This class is used to define a Charting element which needs to be plotted on the chart
     """
+
     def __init__(self, data: Union[list, dict], label: str, chart_type: ChartType, plot: Union[int, ChartAxis],
                  color: Union[ChartColor, str]):
         """
