@@ -1,5 +1,5 @@
 import asyncio
-import logging
+import logging.handlers
 
 import quickfix as fix
 import quickfix50sp2 as fix50
@@ -7,9 +7,14 @@ import quickfix50sp2 as fix50
 from mega_trader import meghdoot
 from model import *
 
-logging.basicConfig(level=ct.log_level, filename="./log/broadcast.log", format="%(asctime)s.%(msecs)03d %(message)s",
-                    filemode="w")
-_logger = logging.getLogger("mega_trader.mt_data_parser")
+parser_handler = logging.handlers.RotatingFileHandler(filename="./log/parser.log", mode="a", maxBytes=5 * 1024 * 1024,
+                                                      backupCount=50)
+fmt = logging.Formatter("%(asctime)s.%(msecs)03d %(message)s")
+parser_handler.setFormatter(fmt)
+parser_handler.setLevel(logging.DEBUG)
+_parser_logger = logging.getLogger("mega_trader.mt_data_parser")
+_parser_logger.propagate = False
+_parser_logger.addHandler(parser_handler)
 
 dd = fix.DataDictionary(definitions.FIX50SP02)
 
@@ -47,58 +52,58 @@ PERC_CHANGE = 1823
 
 def read_header(message):
     msg_type = None
-    _logger.debug("Reading Header")
+    _parser_logger.debug("Reading Header")
     if message.getHeader().isSetField(begin_string):
         msg_element = message.getHeader().getField(begin_string)
-        _logger.debug(msg_element)
+        # _parser_logger.debug(msg_element)
     if message.getHeader().isSetField(body_length):
         msg_element = message.getHeader().getField(body_length)
-        _logger.debug(msg_element)
+        # _parser_logger.debug(msg_element)
     if message.getHeader().isSetField(message_type):
         msg_element = message.getHeader().getField(message_type)
         msg_type = message.getHeader().getField(message_type).getString()
-        _logger.debug(msg_element)
+        _parser_logger.debug(msg_element)
     if message.getHeader().isSetField(sender_id):
         msg_element = message.getHeader().getField(sender_id)
-        _logger.debug(msg_element)
+        # _parser_logger.debug(msg_element)
     if message.getHeader().isSetField(target_id):
         msg_element = message.getHeader().getField(target_id)
-        _logger.debug(msg_element)
+        # _parser_logger.debug(msg_element)
     if message.getHeader().isSetField(msg_seq):
         msg_element = message.getHeader().getField(msg_seq)
-        _logger.debug(msg_element)
+        # _parser_logger.debug(msg_element)
     if message.getHeader().isSetField(sender_sub_id):
         msg_element = message.getHeader().getField(sender_sub_id)
-        _logger.debug(msg_element)
+        # _parser_logger.debug(msg_element)
     if message.getHeader().isSetField(target_sub_id):
         msg_element = message.getHeader().getField(target_sub_id)
-        _logger.debug(msg_element)
+        # _parser_logger.debug(msg_element)
     if message.getHeader().isSetField(duplicate_flag):
         msg_element = message.getHeader().getField(duplicate_flag)
-        _logger.debug(msg_element)
+        # _parser_logger.debug(msg_element)
     if message.getHeader().isSetField(user_req_type):
         msg_element = message.getHeader().getField(user_req_type)
-        _logger.debug(msg_element)
+        # _parser_logger.debug(msg_element)
     if message.getHeader().isSetField(gateway_id):
         msg_element = message.getHeader().getField(gateway_id)
-        _logger.debug(msg_element)
+        # _parser_logger.debug(msg_element)
     if message.getHeader().isSetField(orig_sending_time):
         msg_element = message.getHeader().getField(orig_sending_time)
-        _logger.debug(msg_element)
+        # _parser_logger.debug(msg_element)
     if message.getHeader().isSetField(sending_time):
         msg_element = message.getHeader().getField(sending_time)
-        _logger.debug(msg_element)
+        # _parser_logger.debug(msg_element)
     if message.getHeader().isSetField(on_behalf_id):
         msg_element = message.getHeader().getField(on_behalf_id)
-        _logger.debug(msg_element)
-    _logger.debug("Header Read")
+        # _parser_logger.debug(msg_element)
+    # _parser_logger.debug("Header Read")
     return ct.MsgType(msg_type)
 
 
 def read_trailer(message):
     if message.getTrailer().isSetField(check_sum):
         msg_element = message.getTrailer().getField(check_sum)
-        _logger.debug(msg_element)
+        _parser_logger.debug(msg_element)
 
 
 def read_tag(message, tag):
@@ -111,12 +116,12 @@ def read_tag(message, tag):
         elif message.getHeader().isSetField(tag):
             msg_element = message.getHeader().getField(tag)
             msg_value = message.getHeader().getField(tag).getString()
-            _logger.debug(msg_element)
+            _parser_logger.debug(msg_element)
             return msg_value
         elif message.getTrailer().isSetField(tag):
             msg_element = message.getTrailer().getField(tag)
             msg_value = message.getTrailer().getField(tag).getString()
-            _logger.debug(msg_element)
+            _parser_logger.debug(msg_element)
             return msg_value
         else:
             return "0"
@@ -127,33 +132,33 @@ def read_tag(message, tag):
 def read_admin_msg(message):
     msg_type = read_header(message)
     if msg_type == ct.MsgType.HEARTBEAT:
-        _logger.debug(msg_type)
+        _parser_logger.debug(msg_type)
     elif ct.MsgType(msg_type) == ct.MsgType.LOGON:
-        _logger.debug(msg_type)
+        _parser_logger.debug(msg_type)
     elif msg_type == ct.MsgType.LOGOUT:
-        _logger.debug(msg_type)
+        _parser_logger.debug(msg_type)
     elif msg_type == ct.MsgType.REJECT_SESSION_LEVEL:
-        _logger.debug(msg_type)
+        _parser_logger.debug(msg_type)
     elif msg_type == ct.MsgType.RESEND_REQUEST:
-        _logger.debug(msg_type)
+        _parser_logger.debug(msg_type)
     elif msg_type == ct.MsgType.SEQUENCE_RESET:
-        _logger.debug(msg_type)
+        _parser_logger.debug(msg_type)
     elif msg_type == ct.MsgType.SESSION_REJECT:
-        _logger.debug(msg_type)
+        _parser_logger.debug(msg_type)
     elif msg_type == ct.MsgType.TEST_REQUEST:
-        _logger.debug(msg_type)
+        _parser_logger.debug(msg_type)
     else:
-        _logger.warning("Not found")
-        _logger.info(msg_type)
+        _parser_logger.warning("Not found")
+        _parser_logger.info(msg_type)
     return None
 
 
 def read_app_msg(message):
     try:
         msg_type = read_header(message)
-        _logger.debug(msg_type)
+        _parser_logger.debug(msg_type)
         if (msg_type == ct.MsgType.AUCTION_ACTIVITY_MESSAGE) | (msg_type == ct.MsgType.BCD):
-            _logger.debug("Unwanted message not parsed")
+            _parser_logger.debug("Unwanted message not parsed")
             return None
         elif msg_type == ct.MsgType.INDEX_BROADCAST:
             return None
@@ -246,13 +251,13 @@ def read_app_msg(message):
             data = ScripData(token=token_no, open=scrip_open, high=scrip_high, low=scrip_low, close=scrip_close,
                              ltp=ltp, time=ltt, turnover=turnover, volume=volume, per_change=per_change,
                              year_high=year_high, year_low=year_low)
-            _logger.debug(data)
+            _parser_logger.debug(data)
             # print(data)
             return data
 
     except (ValueError, fix.FieldNotFound) as e:
-        _logger.warning("Error %s" % e)
-        _logger.info("Error occured for message type: %s" % message.getHeader().getField(35))
+        _parser_logger.warning("Error %s" % e)
+        _parser_logger.info("Error occured for message type: %s" % message.getHeader().getField(35))
         return None
 
 
@@ -264,8 +269,8 @@ def read_msg(message):
         elif rec.isApp():
             return read_app_msg(rec)
     except fix.InvalidMessage as e:
-        _logger.warning("Error %s" % e)
-        _logger.info("Error while reading message: %s" % message)
+        _parser_logger.warning("Error %s" % e)
+        _parser_logger.info("Error while reading message: %s" % message)
         return None
 
 
@@ -282,12 +287,12 @@ async def read_broadcast_msg(broadcast_message: str):
 
         if residue is not None:
             msgs[0] = residue + msgs[0]
-            _logger.debug("Residue and first of next: %s" % msgs[0])
+            # _parser_logger.debug("Residue and first of next: %s" % msgs[0])
             residue = None
 
         try:
             if len(msgs) == 1:
-                _logger.info(msgs[0])
+                _parser_logger.info(msgs[0])
                 meghdoot.ramadhir(read_msg(msgs[0]))
             elif len(msgs) > 1:
                 for cmpl_msg in msgs:
@@ -295,26 +300,17 @@ async def read_broadcast_msg(broadcast_message: str):
                         pass
                     else:
                         try:
-                            _logger.debug("Created: %s" % cmpl_msg)
+                            # _parser_logger.debug("Created: %s" % cmpl_msg)
                             fix.Message(cmpl_msg, dd, False)
                             meghdoot.ramadhir(read_msg(cmpl_msg))
                         except fix.InvalidMessage:
                             residue = cmpl_msg
         except fix.InvalidMessage:
-            _logger.warning("Invalid Message")
+            _parser_logger.warning("Invalid Message")
     else:
-        _logger.debug("residue is not none: %s" % broadcast_message)
+        _parser_logger.debug("residue is not none: %s" % broadcast_message)
         if residue is not None:
             residue += residue
-
-
-async def run():
-    f = open("C:/Users/sb/PycharmProjects/MyProject/log/msgs.log")
-    lines = f.readlines()
-    for line in lines:
-        line = line.replace("\n", "")
-        _logger.info("Original: %s" % line)
-        await read_broadcast_msg(line)
 
 
 def analyse(broadcast_message):

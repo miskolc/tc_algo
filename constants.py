@@ -6,7 +6,7 @@ import logging
 from enum import Enum
 
 default = "null"
-log_level = logging.INFO
+log_level = logging.DEBUG
 
 
 class Keys:

@@ -52,7 +52,7 @@ def get_fo_symbols():
     return result
 
 
-def get_fo__scrip_tokens():
+def get_fo_scrip_tokens():
     from contracts import NSECM
     fo_symbols = get_fo_symbols()
     tokens = []
