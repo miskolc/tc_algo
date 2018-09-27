@@ -66,6 +66,7 @@ class Keys:
     data_prop = 'data_properties'
     data = 'data'
     params = 'params'
+    patterns = "patterns"
     all = 'all'
     long = 'long'
     short = 'short'

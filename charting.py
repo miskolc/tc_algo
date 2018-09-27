@@ -43,6 +43,7 @@ def chart_template():
             main_chart.append([key, values])
         params = result[Keys.params]
         data_list = result[Keys.data]
+        pattern_data = result[Keys.patterns]
         return render_template("chart.html", chartData=data_list, chart_params=params, main_chart_properties=main_chart)
     else:
         return render_template("404.html")
@@ -63,6 +64,7 @@ def back_test_template():
         params = result[Keys.params]
         data_list = result[Keys.data]
         annotations = result[Keys.annotations]
+        pattern_data = result[Keys.patterns]
         return render_template("backtest.html", chartData=data_list, chart_params=params,
                                main_chart_properties=main_chart, chart_annotations=annotations)
     else:

@@ -6,6 +6,7 @@ import quandl
 from dateutil.relativedelta import relativedelta
 
 import api
+import strategy
 from api import *
 from model import *
 
@@ -363,7 +364,7 @@ def current_month(timestamp=""):
     return current
 
 
-def data_builder(data: list, data_properties: dict, charts: list = None):
+def data_builder(data: list, data_properties: dict, charts: list = None, patterns: list = None):
     """
     Data builder is used to get data for charting.
     It formats data for charting of candle and indicators.
@@ -372,6 +373,8 @@ def data_builder(data: list, data_properties: dict, charts: list = None):
                 Data properties returned from get_data function
     :param charts: list[ChartElement]
                 A chart element contains data to be plotted on chart. For e.g. indicators
+    :param patterns: list[Pattern]
+                Patterns to be analysed for the given data
     :return: tuple
         A tuple of the form data_properties, params, data_list.
         data_properties: dict
@@ -380,6 +383,8 @@ def data_builder(data: list, data_properties: dict, charts: list = None):
                     All the properties related to the indicator or other than candle data
         data_list: list
                     A 2D list of data for charting
+        pattern_data: list
+                    A 2D list of date and high where pattern(s) is True
     """
     params = [Keys.date, Keys.open, Keys.high, Keys.low, Keys.close, Keys.volume]
     data_list = _append_data(data)
@@ -390,8 +395,8 @@ def data_builder(data: list, data_properties: dict, charts: list = None):
         _logger.debug("Charts specified")
         for chart_element in charts:
             if type(chart_element) == ChartElement:
-                parameter = "%s^%s^%s^%s" % (
-                    chart_element.type, chart_element.axis, chart_element.color, chart_element.label)
+                parameter = "%s^%s^%s" % (
+                    chart_element.type, chart_element.axis, chart_element.label)
                 item = chart_element.data
                 if type(item) == list:
                     _logger.debug("list")
@@ -405,10 +410,29 @@ def data_builder(data: list, data_properties: dict, charts: list = None):
                 else:
                     _logger.warning("Unknown data format or type")
 
+    pattern_data = []
+    if patterns is None:
+        _logger.debug("No Pattern(s) specified")
+    elif type(patterns) == list:
+        _logger.debug("Pattern(s) specified")
+        open, high, low, close = get_ohlc(data)
+        eval_pattern = strategy._evaluate_patterns(open, high, low, close, patterns, pattern_range=[-100, 100])
+        if not eval_pattern:
+            _logger.warning("Patterns couldn't be processed")
+        else:
+            dates = get_date(data)
+            for m in range(len(high)):
+                if eval_pattern[m] is True:
+                    pattern_data.append(
+                        ["%s-%s-%s" % (dates[m].year, dates[m].month, dates[m].day), high[m], "pattern"])
+    else:
+        _logger.warning("Patterns need to be given in a list")
+
     data_list = _append_indicators(indicators, data_list)
     _logger.debug("Params are: %s" % params)
     _logger.debug("Data properties: %s" % data_properties)
-    return data_properties, params, data_list
+    print("APP %s", pattern_data)
+    return data_properties, params, data_list, pattern_data
 
 
 def _append_data(data):

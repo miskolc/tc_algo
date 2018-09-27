@@ -180,14 +180,11 @@ pending_order = False
 first_order = True
 
 
-def strategy_builder(data_properties: dict, data_list: list, charts: list = None,
+def strategy_builder(data_properties: dict, data_list: list, charts: list = None, patterns: list = None,
                      buy: Union[Condition, ConditionsLogic, List[Condition], List[ConditionsLogic]] = None,
                      sell: Union[Condition, ConditionsLogic, List[Condition], List[ConditionsLogic]] = None,
-                     target: Union[float, Condition, list] = None,
-                     sl: Union[float, Condition, list] = None,
-                     strategy: str = BUY,
-                     qty: int = 1,
-                     backtest_chart: ChartType = ChartType.LINE) -> dict:
+                     target: Union[float, Condition, list] = None, sl: Union[float, Condition, list] = None,
+                     strategy: str = BUY, qty: int = 1, backtest_chart: ChartType = ChartType.LINE) -> dict:
     """
     It is used to build strategy based on different conditions.
     :param data_properties: dict
@@ -196,6 +193,8 @@ def strategy_builder(data_properties: dict, data_list: list, charts: list = None
                 list[DataObject]
     :param charts: list
                 list[ChartElement]
+    :param patterns: list
+                list[Pattern]
     :param buy: Union[Condition, ConditionsLogic]
                 It can be a Condition, ConditionLogic or a list of Condition or ConditionLogic or both
     :param sell: Union[Condition, ConditionsLogic]
@@ -221,6 +220,7 @@ def strategy_builder(data_properties: dict, data_list: list, charts: list = None
                     data_properties=dict,
                     data=list,
                     params=list,
+                    patterns = list,
                     all=dict,
                     long=dict,
                     short=dict,
@@ -233,7 +233,8 @@ def strategy_builder(data_properties: dict, data_list: list, charts: list = None
     order_sl = None
     pending_order = False
     first_order = True
-    data_prop, params, data = data_parser.data_builder(data_list, charts=charts, data_properties=data_properties)
+    data_prop, params, data, pattern_data = data_parser.data_builder(data_list, charts=charts,
+                                                                     data_properties=data_properties, patterns=patterns)
     if (backtest_chart == ChartType.LINE) | (backtest_chart == ChartType.COLUMN):
         data_prop.update({Keys.bt_chart: backtest_chart.value})
     else:
@@ -456,6 +457,7 @@ def strategy_builder(data_properties: dict, data_list: list, charts: list = None
         Keys.data_prop: data_prop,
         Keys.data: data,
         Keys.params: params,
+        Keys.patterns: pattern_data,
         Keys.all: bt_all,
         Keys.long: bt_long,
         Keys.short: bt_short,
@@ -552,11 +554,16 @@ def _calc_condition(condition=Condition) -> list:
     """
     result = []
     offset = 0
-    if type(condition.data1) == Pattern:
+    if (type(condition.data1) == Pattern) | (type(condition.data1[0]) == Pattern):
         if (condition.operation == Operation.BULL_RANGE) | (condition.operation == Operation.BEAR_RANGE):
             open, high, low, close = data_parser.get_ohlc(data_objects)
+            if condition.data2 is not None:
+                pattern_range = condition.data2
+            else:
+                pattern_range = condition.operation.value
+
             result = _evaluate_patterns(open, high, low, close, pattern=condition.data1,
-                                        pattern_range=condition.operation.value)
+                                        pattern_range=pattern_range)
             return result
         else:
             _logger.warning("Operation for pattern can be either a BULL_RANGE or BEAR_RANGE")

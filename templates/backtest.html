@@ -56,7 +56,7 @@
     mapping.addField('high', 2);
     mapping.addField('low', 3);
     mapping.addField('close', 4);
-    mapping.addField('value', 5);
+    mapping.addField('value', 4);
 
     // create stock chart
     var chart = anychart.stock();
@@ -122,8 +122,7 @@
         var semi_chart_split = semi_chartParameter.split("^");
         var semi_chart_type = semi_chart_split[0];
         var semi_chart_plot = semi_chart_split[1];
-        var semi_chart_colour = semi_chart_split[2];
-        var semi_chart_name = semi_chart_split[3];
+        var semi_chart_name = semi_chart_split[2];
 
         var mapping01 = dataTable.mapAs();
         mapping01.addField('value', i);
