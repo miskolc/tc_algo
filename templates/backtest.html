@@ -9,7 +9,6 @@
     <script src="/static/js/anychart-annotations.min.js"></script>
     <link rel="stylesheet" href="/static/css/anychart-ui.min.css"/>
     <link rel="stylesheet" href="/static/css/anychart-font.min.css"/>
-
     <style>
     html, body, #container {
       width: 100%;
@@ -17,8 +16,6 @@
       margin: 0;
       padding: 0;
     }
-
-
     </style>
     <title>Back Testing</title>
 </head>
@@ -39,7 +36,7 @@
 
     //candle pattern
     var candle_pattern = {{candle_pattern|safe}};
-    console.log(candle_pattern);
+    //console.log(candle_pattern);
 
     //chart parameters
     var chartParameter = {{chart_params|safe}};
@@ -88,42 +85,43 @@
           var colour="";
        if(annotations_text=="BR"){
        colour = "#128D12";
-
+       stroke = "0.5 #128D12";
         }
         if(annotations_text=="BP"){
-        colour = "#A6ECA6";
-
+        colour = "#062D06";
+        stroke = "0.5 #062D06";
         }
         if(annotations_text=="BSL"){
          colour = "#00BF2C";
-
+         stroke = "0.5 #00BF2C";
         }
         if(annotations_text=="SSL"){
          colour = "#FB9A9A";
-
+         stroke = "0.5 #FB9A9A";
         }
         if(annotations_text=="SR"){
          colour = "#FF0000";
-
+         stroke = "0.5 #FF0000";
         }
-        if(annotations_text=="SSP"){
-         colour = "#BF360C";
-
+        if(annotations_text=="SP"){
+         colour = "#530000";
+         stroke = "0.5 #530000";
         }
         var annotationPlot ={"enabled":true,"type":"label","xAnchor":String(annotations_date),"valueAnchor":annotations_value,
-        "text":annotations_text,"background":colour,"fontColor":"white"};
+        "text":annotations_text,"offsetX":-15,"offsetY":3,"background":({"fill": colour,"stroke": stroke,"corners": 7}),
+        "fontColor":"white","allowEdit":false};
         annotationPlotArray.push(annotationPlot);
      }
     var annotationsAtServer = {"annotationsList":annotationPlotArray};
 
     plot.annotations().fromJson(annotationsAtServer);
 
-    var j;
-    for (j = 0; j < candle_pattern.length; j++)
+    var k;
+    for (k = 0; k < candle_pattern.length; k++)
     {
-        var candle_pattern_date = candle_pattern[j][0];
-        var candle_pattern_value = candle_pattern[j][1];
-        var candle_pattern_text = candle_pattern[j][2];
+        var candle_pattern_date = candle_pattern[k][0];
+        var candle_pattern_value = candle_pattern[k][1];
+        var candle_pattern_text = candle_pattern[k][2];
         //console.log(candle_pattern_date,candle_pattern_value,candle_pattern_text);
 
         // create annotation
@@ -135,14 +133,14 @@
             .valueAnchor(candle_pattern_value)
             .stroke('2 #F44336')
             .markerType('arrow-down')
-            .offsetX(25)
-            .offsetY(-40)
+            .offsetX(30)
+            .offsetY(-20)
             .allowEdit(false);
         // create first label annotation and set settings
         annotation.label()
             .xAnchor(candle_pattern_date)
             .valueAnchor(candle_pattern_value)
-            .anchor('right-top')
+            .anchor('left-top')
             .offsetX(25)
             .offsetY(-50)
             .padding(6)
