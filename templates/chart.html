@@ -35,6 +35,10 @@
     var chartParameter = {{chart_params|safe}};
     //console.log(chartParameter);
 
+    //candle pattern
+    var candle_pattern = {{candle_pattern|safe}};
+    console.log(candle_pattern);
+
     //main_chart_proper
     var main_chart = {{main_chart_properties|safe}};
     //console.log(main_chart);
@@ -67,6 +71,45 @@
     var mapping_volume = dataTable.mapAs();
     mapping_volume.addField('volume', 5);
     mapping_volume.addField('value', 5);
+
+    var j;
+    for (j = 0; j < candle_pattern.length; j++)
+    {
+        var candle_pattern_date = candle_pattern[j][0];
+        var candle_pattern_value = candle_pattern[j][1];
+        var candle_pattern_text = candle_pattern[j][2];
+        //console.log(candle_pattern_date,candle_pattern_value,candle_pattern_text);
+
+        // create annotation
+        var annotation = plot.annotations();
+
+        // create first marker annotation and set settings
+        annotation.marker()
+            .xAnchor(candle_pattern_date)
+            .valueAnchor(candle_pattern_value)
+            .stroke('2 #F44336')
+            .markerType('arrow-down')
+            .offsetX(25)
+            .offsetY(-40)
+            .allowEdit(false);
+        // create first label annotation and set settings
+        annotation.label()
+            .xAnchor(candle_pattern_date)
+            .valueAnchor(candle_pattern_value)
+            .anchor('right-top')
+            .offsetX(25)
+            .offsetY(-50)
+            .padding(6)
+            .text(candle_pattern_text)
+            .fontColor('#fff')
+            .background({
+                fill: 'red 0.75',
+                stroke: '0.5 #455a64',
+                corners: 7
+            })
+            .allowEdit(false);
+     }
+
 
   var i;
     for (i = 6; i < data[0].length; i++) {
