@@ -6,6 +6,7 @@ import quandl
 from dateutil.relativedelta import relativedelta
 
 import api
+import pattern_hunter
 import strategy
 from api import *
 from model import *
@@ -416,22 +417,15 @@ def data_builder(data: list, data_properties: dict, charts: list = None, pattern
     elif type(patterns) == list:
         _logger.debug("Pattern(s) specified")
         open, high, low, close = get_ohlc(data)
-        eval_pattern = strategy._evaluate_patterns(open, high, low, close, patterns, pattern_range=[-100, 100])
-        if not eval_pattern:
-            _logger.warning("Patterns couldn't be processed")
-        else:
-            dates = get_date(data)
-            for m in range(len(high)):
-                if eval_pattern[m] is True:
-                    pattern_data.append(
-                        ["%s-%s-%s" % (dates[m].year, dates[m].month, dates[m].day), high[m], "pattern"])
+        dates = get_date(data)
+        # noinspection PyTypeChecker
+        pattern_data = _get_patterns(dates, open, high, low, close, patterns)
     else:
         _logger.warning("Patterns need to be given in a list")
 
     data_list = _append_indicators(indicators, data_list)
     _logger.debug("Params are: %s" % params)
     _logger.debug("Data properties: %s" % data_properties)
-    print("APP %s", pattern_data)
     return data_properties, params, data_list, pattern_data
 
 
@@ -471,6 +465,59 @@ def _append_indicators(indicators, father):
         for i in range(len(father)):
             father[i].append(item[i])
     return father
+
+
+def _get_patterns(dates: list, open: list, high: list, low: list, close: list, pattern: Union[Pattern, list]) -> list:
+    """
+    Evaluate patterns and return data for charting
+    :param dates: list
+                list[date]
+    :param open: list
+                list[numeric]
+    :param high: list
+                list[numeric]
+    :param low: list
+                list[numeric]
+    :param close: list
+                list[numeric]
+    :param pattern: Union[Pattern, list]
+                Pattern or Patterns to be analysed along with the strategy. If a pattern is bullish and
+                Strategy is BUY then we will give a signal for a buy and similarly for SELL strategy and
+                bearish pattern sell signal will be generated.
+    :return: list
+    """
+    pattern_values, result = [], []
+    max_range, min_range = 100, -100
+    if type(pattern) == list:
+        for item in pattern:
+            if type(item) == Pattern:
+                y = pattern_hunter.pattern_hunter(open, high, low, close, item)
+                pattern_values.append(y)
+            else:
+                _logger.warning("Expected a type of %s got %s instead" % (type(Pattern), type(item)))
+    else:
+        _logger.debug("Invalid input in patterns for strategy_builder")
+        _logger.warning("Expected a list type of %s got %s instead" % (Pattern, type(pattern)))
+
+    for i in range(len(pattern_values)):
+        pattern_result = pattern_values[i]
+        name = pattern[i].name
+        # name_arr = name.split("_")
+        # x = ""
+        # for name_element in name_arr:
+        #     x += name_element[0]
+        # name = x
+        for j in range(len(pattern_result)):
+            val = False
+            m = pattern_result[j]
+            if m == 0:
+                val = False
+            elif min_range <= m <= max_range:
+                val = True
+
+            if val is True:
+                result.append(["%s-%s-%s" % (dates[j].year, dates[j].month, dates[j].day), high[j], name])
+    return result
 
 
 def round_float(number: float) -> float:

@@ -829,7 +829,9 @@ def _evaluate_patterns(open: list, high: list, low: list, close: list, pattern: 
     for k in range(len(pattern_arr)):
         val = False
         for m in pattern_arr[k]:
-            if min_range <= m <= max_range:
+            if m == 0:
+                val = False
+            elif min_range <= m <= max_range:
                 val = True
         result.append(val)
     return result
