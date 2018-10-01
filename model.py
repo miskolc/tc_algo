@@ -159,6 +159,7 @@ class Operation(Enum):
     CROSSOVER = "CROSSOVER"
     CROSSUNDER = "CROSSUNDER"
     RANGE_EQUAL = "<=  <="
+    # These are used with patterns only
     BULL_RANGE = [1, 100]
     BEAR_RANGE = [-1, -100]
 
@@ -174,7 +175,7 @@ class Condition:
     data2 = None
     operation = None
 
-    def __init__(self, data1=list, data2=list, operation=Operation):
+    def __init__(self, data1=None, data2=None, operation: Operation = None):
         """
         Initialize a Condition which can be between any list & list or list & constant.
         list should contain numeric values or default or None values.
@@ -268,8 +269,7 @@ class ChartElement:
     This class is used to define a Charting element which needs to be plotted on the chart
     """
 
-    def __init__(self, data: Union[list, dict], label: str, chart_type: ChartType, plot: Union[int, ChartAxis],
-                 color: Union[ChartColor, str]):
+    def __init__(self, data: Union[list, dict], label: str, chart_type: ChartType, plot: Union[int, ChartAxis]):
         """
         It initializes a ChartElement to be plotted on chart either through strategy or data_builder
         :param data: Union[list, dict]
@@ -285,7 +285,6 @@ class ChartElement:
         self.data = data
         self.type = chart_type
         self.axis = plot
-        self.color = color
         self.label = label
 
 

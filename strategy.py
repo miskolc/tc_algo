@@ -44,14 +44,12 @@ class Strategies:
             ma200 = indicators.sma(close, period=200)
         buy = Condition(data1=ma50, data2=ma200, operation=Operation.CROSSOVER)
         sell = Condition(data1=ma50, data2=ma200, operation=Operation.CROSSUNDER)
-        chart_1 = ChartElement(data=ma50, label="ma50", chart_type=ChartType.LINE, plot=ChartAxis.SAME_AXIS,
-                               color=ChartColor.GREEN)
-        chart_2 = ChartElement(data=ma200, label="ma200", chart_type=ChartType.LINE, plot=ChartAxis.SAME_AXIS,
-                               color=ChartColor.RED)
+        chart_1 = ChartElement(data=ma50, label="ma50", chart_type=ChartType.LINE, plot=ChartAxis.SAME_AXIS)
+        chart_2 = ChartElement(data=ma200, label="ma200", chart_type=ChartType.LINE, plot=ChartAxis.SAME_AXIS)
         charts = [chart_1, chart_2]
         result = strategy_builder(data_properties=data_properties, data_list=data, strategy=BUY, buy=buy, sell=sell,
                                   charts=charts)
-        show_back_testing_reports(result)
+
         return result
 
     @staticmethod
@@ -69,12 +67,11 @@ class Strategies:
         macd_signal = macd[Keys.macdsignal]
         buy = Condition(data1=macd_series, data2=macd_signal, operation=Operation.CROSSOVER)
         sell = Condition(data1=macd_series, data2=macd_signal, operation=Operation.CROSSUNDER)
-        chart_1 = ChartElement(data=macd, label="macd", chart_type=ChartType.LINE, plot=ChartAxis.SAME_AXIS,
-                               color=ChartColor.BLUE)
+        chart_1 = ChartElement(data=macd, label="macd", chart_type=ChartType.LINE, plot=ChartAxis.DIFFERENT_AXIS)
         charts = [chart_1]
         result = strategy_builder(data_properties=data_properties, data_list=data, strategy=BUY, buy=buy, sell=sell,
                                   charts=charts)
-        show_back_testing_reports(result)
+
         return result
 
     @staticmethod
@@ -91,13 +88,12 @@ class Strategies:
         buy = Condition(data1=rsi, data2=35, operation=Operation.LESS_THAN)
         # sell = Condition(data1=rsi, data2=80, operation=Operation.GREATER_THAN)
         sell_01 = Condition(data1=rsi, data2=28, operation=Operation.LESS_THAN)
-        chart_1 = ChartElement(data=rsi, label="rsi", chart_type=ChartType.LINE, plot=ChartAxis.DIFFERENT_AXIS,
-                               color=ChartColor.PINK)
+        chart_1 = ChartElement(data=rsi, label="rsi", chart_type=ChartType.LINE, plot=ChartAxis.DIFFERENT_AXIS)
         charts = [chart_1]
         result = strategy_builder(data_properties=data_properties, data_list=data, strategy=BUY, buy=buy, target=.5,
                                   sl=sell_01,
                                   charts=charts)
-        show_back_testing_reports(result)
+
         return result
 
     @staticmethod
@@ -118,11 +114,10 @@ class Strategies:
         buy = Condition(data1=fastk, data2=fastd, operation=Operation.CROSSOVER)
         sell = Condition(data1=fastk, data2=fastd, operation=Operation.CROSSUNDER)
         charts = [
-            ChartElement(data=stoch, label="STOCH", chart_type=ChartType.LINE, plot=ChartAxis.SAME_AXIS,
-                         color="#85FF45")]
+            ChartElement(data=stoch, label="STOCH", chart_type=ChartType.LINE, plot=ChartAxis.DIFFERENT_AXIS)]
         result = strategy_builder(data_properties=data_properties, data_list=data, strategy=BUY, buy=buy, sell=sell,
                                   charts=charts)
-        show_back_testing_reports(result)
+
         return result
 
     @staticmethod
@@ -141,12 +136,11 @@ class Strategies:
         lowerband = bbands[Keys.lowerband]
         buy = Condition(data1=close, data2=middleband, operation=Operation.LESS_THAN)
         sell = Condition(data1=close, data2=middleband, operation=Operation.GREATER_THAN)
-        chart_1 = ChartElement(data=bbands, label="bbands", chart_type=ChartType.LINE, plot=ChartAxis.SAME_AXIS,
-                               color="magenta")
+        chart_1 = ChartElement(data=bbands, label="bbands", chart_type=ChartType.LINE, plot=ChartAxis.SAME_AXIS)
         charts = [chart_1]
         result = strategy_builder(data_properties=data_properties, data_list=data, strategy=SELL, buy=buy, sell=sell,
                                   charts=charts, target=lowerband, sl=upperband)
-        show_back_testing_reports(result)
+
         return result
 
     @staticmethod
@@ -165,12 +159,11 @@ class Strategies:
         s1 = pivot[Keys.s1]
         buy = Condition(data1=close, data2=pp, operation=Operation.GREATER_THAN)
         sell = Condition(data1=close, data2=pp, operation=Operation.LESS_THAN)
-        chart_1 = ChartElement(data=pivot, label="pivot", chart_type=ChartType.LINE, plot=ChartAxis.SAME_AXIS,
-                               color=ChartColor.GREEN)
+        chart_1 = ChartElement(data=pivot, label="pivot", chart_type=ChartType.JUMPLINE, plot=ChartAxis.SAME_AXIS)
         charts = [chart_1]
         result = strategy_builder(data_properties=data_properties, data_list=data, strategy=BUY, buy=buy, sell=sell,
                                   charts=charts, target=r1, sl=s1, backtest_chart=ChartType.COLUMN)
-        show_back_testing_reports(result)
+
         return result
 
 
@@ -210,7 +203,7 @@ def strategy_builder(data_properties: dict, data_list: list, charts: list = None
     :param strategy: str
                 It can be either strategy.BUY or strategy.SELL
     :param qty: int
-                Any positive int value
+                Any positive int value. Lot size will be used for final quantity. (qty * lot size).
     :param backtest_chart: ChartType
                 Type of chart to be plotted for back testing results. By default: ChartType.LINE
                 It can be only of two types ChartType.LINE or ChartType.COLUMN
@@ -376,14 +369,16 @@ def strategy_builder(data_properties: dict, data_list: list, charts: list = None
                 order_sl = sl_condition[i]
 
             if strategy == BUY:
-                if (order_target is True) | (close >= order_target):
-                    _logger.debug("Target hit on %s" % date)
-                    bt_add_order(signal=TARGET + " in " + BUY)
-                    pending_order = False
-                elif (order_sl is True) | (close <= order_sl):
-                    _logger.debug("SL hit on %s" % date)
-                    bt_add_order(signal=SL + " in " + BUY)
-                    pending_order = False
+                if order_target is not None:
+                    if (order_target is True) | (close >= order_target):
+                        _logger.debug("Target hit on %s" % date)
+                        bt_add_order(signal=TARGET + " in " + BUY)
+                        pending_order = False
+                elif order_sl is not None:
+                    if (order_sl is True) | (close <= order_sl):
+                        _logger.debug("SL hit on %s" % date)
+                        bt_add_order(signal=SL + " in " + BUY)
+                        pending_order = False
 
                 if sell_signal:
                     if pending_order:
@@ -396,14 +391,16 @@ def strategy_builder(data_properties: dict, data_list: list, charts: list = None
                     strategy = SELL
 
             if strategy == SELL:
-                if (order_target is True) | (close <= order_target):
-                    _logger.debug("Target hit on %s" % date)
-                    bt_add_order(signal=TARGET + " in " + SELL)
-                    pending_order = False
-                elif (order_sl is True) | (close >= order_sl):
-                    _logger.debug("SL hit on %s" % date)
-                    bt_add_order(signal=SL + " in " + SELL)
-                    pending_order = False
+                if order_target is not None:
+                    if (order_target is True) | (close <= order_target):
+                        _logger.debug("Target hit on %s" % date)
+                        bt_add_order(signal=TARGET + " in " + SELL)
+                        pending_order = False
+                elif order_sl is not None:
+                    if (order_sl is True) | (close >= order_sl):
+                        _logger.debug("SL hit on %s" % date)
+                        bt_add_order(signal=SL + " in " + SELL)
+                        pending_order = False
 
                 if buy_signal:
                     if pending_order:
@@ -554,19 +551,26 @@ def _calc_condition(condition=Condition) -> list:
     """
     result = []
     offset = 0
-    if (type(condition.data1) == Pattern) | (type(condition.data1[0]) == Pattern):
-        if (condition.operation == Operation.BULL_RANGE) | (condition.operation == Operation.BEAR_RANGE):
-            open, high, low, close = data_parser.get_ohlc(data_objects)
-            if condition.data2 is not None:
-                pattern_range = condition.data2
-            else:
-                pattern_range = condition.operation.value
 
-            result = _evaluate_patterns(open, high, low, close, pattern=condition.data1,
-                                        pattern_range=pattern_range)
-            return result
+    def calc_patterns(cond):
+        global data_objects
+        open, high, low, close = data_parser.get_ohlc(data_objects)
+        if cond.data2 is not None:
+            pattern_range = cond.data2
+        elif (cond.operation == Operation.BULL_RANGE) | (cond.operation == Operation.BEAR_RANGE):
+            pattern_range = cond.operation.value
         else:
-            _logger.warning("Operation for pattern can be either a BULL_RANGE or BEAR_RANGE")
+            _logger.warning(
+                "No range defined for the pattern in data2 or operation. Taking range of all possible values")
+            pattern_range = [-100, 100]
+        calc = _evaluate_patterns(open, high, low, close, pattern=cond.data1,
+                                  pattern_range=pattern_range)
+        return calc
+
+    if type(condition.data1) == Pattern:
+        result = calc_patterns(condition)
+    elif type(condition.data1[0]) == Pattern:
+        result = calc_patterns(condition)
     else:
         if condition.data2 is not None:
             if _check_number(condition.data2):

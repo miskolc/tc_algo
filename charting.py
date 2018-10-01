@@ -67,7 +67,8 @@ def back_test_template():
         annotations = result[Keys.annotations]
         pattern_data = result[Keys.patterns]
         return render_template("backtest.html", chartData=data_list, chart_params=params,
-                               main_chart_properties=main_chart, chart_annotations=annotations,candle_pattern=pattern_data)
+                               main_chart_properties=main_chart, chart_annotations=annotations,
+                               candle_pattern=pattern_data)
     else:
         return render_template("404.html")
 
