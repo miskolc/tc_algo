@@ -213,7 +213,7 @@ class ConditionsLogic:
     cond1 = None
     cond2 = None
 
-    def __init__(self, condition1=Condition, condition2=Condition, logical=Logical):
+    def __init__(self, condition1: Condition, condition2: Condition, logical: Logical):
         """
         It initializes a ConditionLogic object.
         :param condition1: Condition

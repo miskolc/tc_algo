@@ -12,7 +12,7 @@ from mega_trader import client
 import scrips
 
 # TODO: Following are under development order:
-# TODO: 1. Live Broadcast,  Lesson5_2 correction
+# TODO: 1. Options Module
 # TODO: 2. Add command line interface
 
 
@@ -54,34 +54,44 @@ if __name__ == '__main__':
     pivot = indicators.pivot(data, interval=Keys.monthly)
     pivot1 = indicators.pivot(data, interval=Keys.weekly)
     pivot2 = indicators.pivot(data, interval=Keys.daily)
-    chart_1 = ChartElement(data=sma, label="sma", chart_type=ChartType.LINE, plot=ChartAxis.SAME_AXIS)
-    chart_2 = ChartElement(data=ema, label="ema", chart_type=ChartType.LINE, plot=ChartAxis.SAME_AXIS)
-    chart_3 = ChartElement(data=stoch, label="stoch", chart_type=ChartType.LINE, plot=ChartAxis.DIFFERENT_AXIS)
-    chart_4 = ChartElement(data=bbands, label="bbands", chart_type=ChartType.LINE, plot=ChartAxis.SAME_AXIS)
-    chart_5 = ChartElement(data=pivot, label="monthly_pivot", chart_type=ChartType.JUMPLINE, plot=ChartAxis.SAME_AXIS)
-    chart_6 = ChartElement(data=rsi, label="rsi", chart_type=ChartType.LINE, plot=ChartAxis.DIFFERENT_AXIS)
-    chart_7 = ChartElement(data=macd, label="macd", chart_type=ChartType.LINE, plot=ChartAxis.DIFFERENT_AXIS)
-    chart_8 = ChartElement(data=pivot1, label="weekly_pivot", chart_type=ChartType.JUMPLINE, plot=ChartAxis.SAME_AXIS)
-    chart_9 = ChartElement(data=pivot2, label="daily_pivot", chart_type=ChartType.JUMPLINE, plot=ChartAxis.SAME_AXIS)
-    charts = [chart_4, chart_7]
+    chart_sma = ChartElement(data=sma, label="sma", chart_type=ChartType.LINE, plot=ChartAxis.SAME_AXIS)
+    chart_ema = ChartElement(data=ema, label="ema", chart_type=ChartType.LINE, plot=ChartAxis.SAME_AXIS)
+    chart_stoch = ChartElement(data=stoch, label="stoch", chart_type=ChartType.LINE, plot=ChartAxis.DIFFERENT_AXIS)
+    chart_bbands = ChartElement(data=bbands, label="bbands", chart_type=ChartType.LINE, plot=ChartAxis.SAME_AXIS)
+    chart_pivot_month = ChartElement(data=pivot, label="monthly_pivot", chart_type=ChartType.JUMPLINE,
+                                     plot=ChartAxis.SAME_AXIS)
+    chart_rsi = ChartElement(data=rsi, label="rsi", chart_type=ChartType.LINE, plot=ChartAxis.DIFFERENT_AXIS)
+    chart_macd = ChartElement(data=macd, label="macd", chart_type=ChartType.LINE, plot=ChartAxis.DIFFERENT_AXIS)
+    chart_pivot_week = ChartElement(data=pivot1, label="weekly_pivot", chart_type=ChartType.JUMPLINE,
+                                    plot=ChartAxis.SAME_AXIS)
+    chart_pivot_daily = ChartElement(data=pivot2, label="daily_pivot", chart_type=ChartType.JUMPLINE,
+                                     plot=ChartAxis.SAME_AXIS)
+    charts = [chart_bbands, chart_macd]
     # charts = [chart_5]
-    buy = Condition(data1=sma, data2=ema, operation=Operation.CROSSOVER)
-    buy1 = Condition(data1=[Pattern.closing_marubozu], data2=[-100, -50], operation=Operation.BEAR_RANGE)
-    sell = Condition(data1=rsi, data2=70, operation=Operation.GREATER_THAN)
-    result = strategy.strategy_builder(data_properties=data_prop, data_list=data, charts=charts, buy=[buy],
-                                       sell=sell, target=1.0, sl=0.5, strategy=strategy.BUY,
-                                       backtest_chart=ChartType.COLUMN)
-    print(result[Keys.annotations])
-    # print("ABHI %s" % len(result[Keys.patterns]))
-    # strategy.strategy_optimizations(data_properties=data_prop, data_list=data, charts=charts, buy=[buy, buy1],
-    # #                                 sell=sell, target_range=[1.0, 1.3, 1.9, 2.2],
-    # #                                 sl_range=[0.3, 0.5, 0.6, 0.8], strategy=strategy.BUY, )
-    # # strategy.strategy_optimizations(data_properties=data_prop, data_list=data, charts=charts, buy=[buy, buy1],
-    # #                                 sell=sell, target_range=numpy.arange(0.3, 1.8, 0.2),
-    # #                                 sl_range=numpy.arange(0.1, 0.9, 0.1), strategy=strategy.BUY,)
-    # # strategy.strategy_optimizations(data_properties=data_prop, data_list=data, charts=charts, buy=[buy, buy1],
-    # #                                 sell=sell, target_range=numpy.arange(0.3, 1.8, 0.2),
-    # #                                 sl_range=0.3, strategy=strategy.BUY, )
+    # buy = Condition(data1=sma, data2=ema, operation=Operation.CROSSOVER)
+    # buy1 = Condition(data1=[Pattern.closing_marubozu], data2=[-100, -50], operation=Operation.BEAR_RANGE)
+    # sell = Condition(data1=rsi, data2=70, operation=Operation.GREATER_THAN)
+    # result = strategy.strategy_builder(data_properties=data_prop, data_list=data, charts=charts, buy=[buy],
+    #                                    sell=sell, target=1.0, sl=0.5, strategy=strategy.BUY,
+    #                                    backtest_chart=ChartType.COLUMN)
+    buy1 = Condition(data1=ema, data2=sma, operation=Operation.CROSSOVER)
+    buy2 = Condition(data1=[Pattern.closing_marubozu], data2=[50, 100])
+    buy = ConditionsLogic(condition1=buy1, condition2=buy2, logical=Logical.OR)
+    sell = Condition(data1=ema, data2=sma, operation=Operation.CROSSUNDER)
+    sell_1 = Condition(data1=[Pattern.doji_star], operation=Operation.BEAR_RANGE)
+
+    result = strategy.strategy_builder(data_properties=data_prop, data_list=data, charts=charts, buy=buy1,
+                                       sell=[sell, sell_1], target=1.8, sl=0.7, strategy=strategy.BUY,
+                                       backtest_chart=ChartType.COLUMN, )
+    # strategy.strategy_optimizations(data_properties=data_prop, data_list=data, buy=[buy, buy1],
+    #                                 sell=sell, target_range=[1.0, 1.3, 1.9, 2.2],
+    #                                 sl_range=[0.3, 0.5, 0.6, 0.8], strategy=strategy.BUY, )
+    # strategy.strategy_optimizations(data_properties=data_prop, data_list=data, buy=[buy, buy1],
+    #                                 sell=sell, target_range=numpy.arange(0.3, 1.8, 0.2),
+    #                                 sl_range=numpy.arange(0.1, 0.9, 0.1), strategy=strategy.BUY,)
+    # strategy.strategy_optimizations(data_properties=data_prop, data_list=data, buy=[buy, buy1],
+    #                                 sell=sell, target_range=numpy.arange(0.3, 1.8, 0.2),
+    #                                 sl_range=0.3, strategy=strategy.BUY, )
 
     # data_prop, data = data_parser.get_data(start_date="2012-03-01", interval=Keys.daily)
     # patterns = [Pattern.harami_pattern, Pattern.spinning_top, Pattern.tasuki_gap]

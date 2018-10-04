@@ -385,7 +385,8 @@ def strategy_builder(data_properties: dict, data_list: list, charts: list = None
                         _logger.debug("Date: %s Price: %s" % (date, close))
                         _logger.debug(SELL)
                         bt_add_order(signal=SELL)
-                        sell_order()
+                        # sell_order()
+                        pending_order = False
                     sell_order()
                     pending_order = True
                     strategy = SELL
@@ -723,7 +724,7 @@ def _evaluate_op(data_m, data_n, operation):
     return value
 
 
-def show_back_testing_reports(result: dict, auto_open: bool = True, strategy: str = ""):
+def generate_back_testing_reports(result: dict, auto_open: bool = True, strategy: str = ""):
     """
     Displays the back test reports in browser.
     :param result: dict returned by strategy_builder
@@ -732,12 +733,12 @@ def show_back_testing_reports(result: dict, auto_open: bool = True, strategy: st
             Name of the strategy
     :return: None
     """
-    show_results(result['all'], auto_open, filename="reports/%s_all_trades.html" % strategy)
-    show_results(result['long'], auto_open, filename="reports/%s_long_trades.html" % strategy)
-    show_results(result['short'], auto_open, filename="reports/%s_short_trades.html" % strategy)
+    _show_results(result['all'], auto_open, filename="reports/%s_all_trades.html" % strategy)
+    _show_results(result['long'], auto_open, filename="reports/%s_long_trades.html" % strategy)
+    _show_results(result['short'], auto_open, filename="reports/%s_short_trades.html" % strategy)
 
 
-def show_results(result: dict, auto_open: bool, filename: str = 'result_table.html'):
+def _show_results(result: dict, auto_open: bool, filename: str = 'result_table.html'):
     """
     Displays results in browser.
     :param result: dict
@@ -747,13 +748,18 @@ def show_results(result: dict, auto_open: bool, filename: str = 'result_table.ht
     """
     keys = []
     values = []
+    eliminate = False
 
-    if result.__contains__("DATE_CUM_PL"):
-        result.pop("DATE_CUM_PL")
-
+    if result.__contains__(Keys.date_cum_pl):
+        # result.pop(Keys.date_cum_pl)
+        eliminate = True
     for key, value in result.items():
         keys.append(key)
         values.append(value)
+
+    if eliminate:
+        keys.pop(-1)
+        values.pop(-1)
 
     trace = go.Table(
         header=dict(values=keys,
@@ -842,14 +848,39 @@ def _evaluate_patterns(open: list, high: list, low: list, close: list, pattern: 
 
 
 # noinspection PyTypeChecker
-def strategy_optimizations(data_properties: dict, data_list: list, charts: list = None,
-                           buy: Union[Condition, ConditionsLogic, List[Condition], List[ConditionsLogic]] = None,
-                           sell: Union[Condition, ConditionsLogic, List[Condition], List[ConditionsLogic]] = None,
-                           strategy: str = BUY,
+def strategy_optimizations(data_properties: dict, data_list: list,
+                           buy: Union[Condition, ConditionsLogic, List[Condition], List[ConditionsLogic]],
+                           sell: Union[Condition, ConditionsLogic, List[Condition], List[ConditionsLogic]],
+                           strategy: str = BUY, strategy_name: str = "",
                            qty: int = 1,
-                           backtest_chart: ChartType = ChartType.LINE,
                            target_range: Union[list, numpy.ndarray, float] = None,
                            sl_range: Union[list, numpy.ndarray, float] = None):
+    """
+    This function is used for performing strategy optimizations on profit and sl conditions.
+    :param data_properties: dict
+                Properties of the data given to the strategy.
+    :param data_list: list
+                list[DataObject]
+    :param buy: Union[Condition, ConditionsLogic]
+                It can be a Condition, ConditionLogic or a list of Condition or ConditionLogic or both
+    :param sell: Union[Condition, ConditionsLogic]
+                It can be a Condition, ConditionLogic or a list of Condition or ConditionLogic or both
+    :param strategy: str
+                It can be either strategy.BUY or strategy.SELL
+    :param strategy_name: str
+                Name of the strategy for optimizations
+    :param qty: int
+                Any positive int value. Lot size will be used for final quantity. (qty * lot size).
+    :param target_range: Union[list, numpy.ndarray, float]
+                Target or profit condition.
+                It can be a constant or a list of values or a numpy.arange() which returns a ndarray.
+    :param sl_range: Union[list, numpy.ndarray, float]
+                Stop loss or sl condition.
+                It can be a constant or a list of values or a numpy.arange() which returns a ndarray.
+                When target and sl both are list or ndarray then make sure that no. of entries or length of both is same
+    :return: None
+                It displays the result in a table in browser.
+    """
     _logger1 = logging.getLogger("strategy.optimizer")
     length = 0
     if not ((type(target_range) == float) & (type(sl_range) == float)):
@@ -878,10 +909,9 @@ def strategy_optimizations(data_properties: dict, data_list: list, charts: list 
                 for i in range(len(target_range)):
                     _logger1.debug("For target: %s" % target_range[i])
                     _logger1.debug("For sl: %s" % sl_range[i])
-                    result = strategy_builder(data_properties=data_properties, data_list=data_list, charts=charts,
-                                              buy=buy,
-                                              sell=sell, target=float(target_range[i]), sl=float(sl_range[i]),
-                                              strategy=strategy, qty=qty, backtest_chart=backtest_chart)
+                    result = strategy_builder(data_properties=data_properties, data_list=data_list, buy=buy, sell=sell,
+                                              target=float(target_range[i]), sl=float(sl_range[i]), strategy=strategy,
+                                              qty=qty, )
                     target.append(target_range[i])
                     sl.append(sl_range[i])
                     cum_pl.append(result[Keys.all][Keys.cum_pl][-1])
@@ -898,7 +928,7 @@ def strategy_optimizations(data_properties: dict, data_list: list, charts: list 
 
                 data = [trace]
                 fig = dict(data=data)
-                plotly.offline.plot(fig, filename="reports/optimize.html")
+                plotly.offline.plot(fig, filename="reports/%s_optimizer.html" % strategy_name)
             else:
                 _logger1.debug("Length differs for target and sl")
                 _logger1.info("Target Length: %s" % len(target_range))
