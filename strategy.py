@@ -772,7 +772,10 @@ def _show_results(result: dict, auto_open: bool, filename: str = 'result_table.h
                    align=['left'] * 5))
 
     data = [trace]
-    fig = dict(data=data)
+    layout = go.Layout(
+        title=filename
+    )
+    fig = dict(data=data, layout=layout)
     plotly.offline.plot(fig, filename=filename, auto_open=auto_open)
 
 
@@ -851,7 +854,7 @@ def _evaluate_patterns(open: list, high: list, low: list, close: list, pattern: 
 def strategy_optimizations(data_properties: dict, data_list: list,
                            buy: Union[Condition, ConditionsLogic, List[Condition], List[ConditionsLogic]],
                            sell: Union[Condition, ConditionsLogic, List[Condition], List[ConditionsLogic]],
-                           strategy: str = BUY, strategy_name: str = "",
+                           strategy: str = BUY, strategy_name: str = "Results",
                            qty: int = 1,
                            target_range: Union[list, numpy.ndarray, float] = None,
                            sl_range: Union[list, numpy.ndarray, float] = None):
@@ -883,6 +886,7 @@ def strategy_optimizations(data_properties: dict, data_list: list,
     """
     _logger1 = logging.getLogger("strategy.optimizer")
     length = 0
+    outputs = []
     if not ((type(target_range) == float) & (type(sl_range) == float)):
         if type(target_range) == list:
             length = len(target_range)
@@ -901,7 +905,8 @@ def strategy_optimizations(data_properties: dict, data_list: list,
                     target_range = [target_range] * length
                 elif type(sl_range) == float:
                     sl_range = [sl_range] * length
-
+        print("Length for target: %s" % len(target_range))
+        print("Length for sl: %s" % len(sl_range))
         if (type(target_range) == list) & (type(sl_range) == list):
             if len(target_range) == len(sl_range):
                 heads = ["target", "sl", "p&l"]
@@ -912,6 +917,7 @@ def strategy_optimizations(data_properties: dict, data_list: list,
                     result = strategy_builder(data_properties=data_properties, data_list=data_list, buy=buy, sell=sell,
                                               target=float(target_range[i]), sl=float(sl_range[i]), strategy=strategy,
                                               qty=qty, )
+                    outputs.append(result)
                     target.append(target_range[i])
                     sl.append(sl_range[i])
                     cum_pl.append(result[Keys.all][Keys.cum_pl][-1])
@@ -927,13 +933,50 @@ def strategy_optimizations(data_properties: dict, data_list: list,
                                align=['left'] * 5))
 
                 data = [trace]
-                fig = dict(data=data)
-                plotly.offline.plot(fig, filename="reports/%s_optimizer.html" % strategy_name)
+                layout = go.Layout(
+                    title=strategy_name,
+                )
+                fig = dict(data=data, layout=layout)
+                plotly.offline.plot(fig, filename="reports/%s_t_sl_optimizer.html" % strategy_name)
             else:
-                _logger1.debug("Length differs for target and sl")
-                _logger1.info("Target Length: %s" % len(target_range))
-                _logger1.info("SL Length: %s" % len(sl_range))
+                print("Length differs for target and sl")
+                print("Target Length: %s" % len(target_range))
+                print("SL Length: %s" % len(sl_range))
         else:
             _logger1.debug("The type for both target and sl should be %s" % list)
     else:
         _logger1.warning("Both values can't be float")
+    return outputs
+
+
+def eval_results(results: list, strategy_name: str = "", **kwargs):
+    p_l = []
+    for result in results:
+        p_l += [result[Keys.all][Keys.cum_pl][-1]]
+
+    keys, values = [], []
+    for key, value in kwargs.items():
+        keys.append(key)
+        values.append(value)
+
+    heads = keys + ['P&L']
+    cell_data = values + [p_l]
+    trace = go.Table(
+        name=strategy_name,
+        header=dict(values=heads,
+                    line=dict(color='#7D7F80'),
+                    fill=dict(color='#a1c3d1'),
+                    align=['center'] * 5),
+        cells=dict(values=cell_data,
+                   line=dict(color='#7D7F80'),
+                   fill=dict(color='#EDFAFF'),
+                   align=['left'] * 5))
+
+    data = [trace]
+    layout = go.Layout(
+        title="Results",
+    )
+    fig = dict(data=data, layout=layout)
+    # print(heads)
+    # print(cell_data)
+    plotly.offline.plot(fig, filename="reports/%s_strategy_optimizer.html" % strategy_name)

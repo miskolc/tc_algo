@@ -318,3 +318,22 @@ class Pattern(Enum):
 
     def __str__(self):
         return self.value
+
+
+class GreekValues:
+    def __init__(self, callPrice, callDelta, callDelta2, callTheta, callRho, putPrice, putDelta, putDelta2, putTheta,
+                 putRho, vega, gamma):
+        self.call = callPrice
+        self.call_delta = callDelta
+        self.call_dual_delta = callDelta2
+        self.call_theta = callTheta
+        self.call_rho = callRho
+
+        self.put = putPrice
+        self.put_delta = putDelta
+        self.put_dual_delta = putDelta2
+        self.put_theta = putTheta
+        self.put_rho = putRho
+
+        self.vega = vega
+        self.gamma = gamma
