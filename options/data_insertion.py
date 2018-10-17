@@ -67,10 +67,10 @@ def _read_row(row):
         # expiry = data_arr[2]
         expiry = (datetime.strptime(data_arr[2], "%d-%b-%Y")).strftime("%Y-%m-%d")
         strike = data_arr[3]
-        if strike != 'XX':
-            strike = int(0)
+        if strike == 'XX':
+            strike = float(0)
         else:
-            strike = int(strike)
+            strike = float(strike)
         option_typ = data_arr[4]
         open_price = float(data_arr[5])
         high = float(data_arr[6])
@@ -105,14 +105,18 @@ def insert_bulk_data(path: str = None, truncate: bool = True):
 
 
 def insert_bhavcopy(path: str, filename: str):
+    header = "INSERT INTO `%s`(`instrument`, `symbol`, `expiry`, `strike`, `option_typ`, `open`, `high`, `low`, " \
+             "`close`, `settle_pr`, `contracts`, `val`, `open_int`, `chg_in_oi`, `timestamp`) VALUES " % "fo_data2"
     zip_path = path + filename
     if zipfile.is_zipfile(zip_path):
         queries = []
         zp = zipfile.ZipFile(zip_path)
         csv_name = zp.namelist()[0]
-        print("Extracting...")
-        zp.extractall(path)
-        f = open(path + csv_name)
+        csv_file = path + csv_name
+        if not os.path.isfile(csv_file):
+            print("Extracting...")
+            zp.extractall(path)
+        f = open(csv_file)
         csv_reader = csv.reader(f)
         for rows in csv_reader:
             trailer = _read_row(rows)
@@ -122,4 +126,4 @@ def insert_bhavcopy(path: str, filename: str):
     else:
         print("Not a zip file")
 
-# insert_bulk_data()
+# insert_bhavcopy("C:/Users/sb/Downloads/", "fo15OCT2018bhav.zip")

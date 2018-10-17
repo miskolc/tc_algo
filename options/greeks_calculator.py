@@ -9,15 +9,19 @@ from model import GreekValues
 _logger = logging.getLogger("greeks_calculator")
 
 
-def days_to_expiry(expiry_date: date):
-    delta = expiry_date - date.today()
+def days_to_expiry(expiry_date: date, obs_date: date = None):
+    if obs_date is None:
+        delta = expiry_date - date.today()
+    else:
+        delta = expiry_date - obs_date
+    # print(delta.days)
     return delta.days
 
 
 def option_price(underlying_price: float, strike_price: float, interest: float, expiry_date: date,
-                 volatility: float):
+                 volatility: float, obs_data: date = None):
     # BS([underlyingPrice, strikePrice, interestRate, daysToExpiration], volatility=x, callPrice=y, putPrice=z)
-    days_to_exp = days_to_expiry(expiry_date)
+    days_to_exp = days_to_expiry(expiry_date, obs_data)
     if days_to_exp > 0:
         c = mibian.BS([underlying_price, strike_price, interest, days_to_exp], volatility=volatility)
         call = c.callPrice
@@ -37,10 +41,14 @@ def option_price(underlying_price: float, strike_price: float, interest: float, 
         greek_values = GreekValues(call, call_delta, call_dual_delta, call_theta, call_rho, put, put_delta,
                                    put_dual_delta, put_theta, put_rho, vega, gamma)
         return greek_values
+    elif days_to_exp == 0:
+        greek_values = GreekValues(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+        return greek_values
     else:
         _logger.warning("Enter a date greater than today")
         _logger.info("You entered: %s" % expiry_date)
-        return None
+        greek_values = GreekValues(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+        return greek_values
 
 
 def implied_vol(underlying_price: float, strike_price: float, interest: float, expiry_date: date,
@@ -55,8 +63,10 @@ def implied_vol(underlying_price: float, strike_price: float, interest: float, e
                 c = mibian.BS([underlying_price, strike_price, interest, days_expiry], callPrice=call_price)
             elif put_price is not None:
                 c = mibian.BS([underlying_price, strike_price, interest, days_expiry], putPrice=put_price)
-
-            return c.impliedVolatility
+            iv = c.impliedVolatility
+            if iv == float("1e-05"):
+                iv = 0.00001
+            return iv
     else:
         _logger.warning("Enter a date greater than today")
         _logger.info("You entered: %s" % expiry_date)
