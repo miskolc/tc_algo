@@ -52,8 +52,8 @@ def option_price(underlying_price: float, strike_price: float, interest: float, 
 
 
 def implied_vol(underlying_price: float, strike_price: float, interest: float, expiry_date: date,
-                call_price: float = None, put_price: float = None):
-    days_expiry = days_to_expiry(expiry_date)
+                timestamp: date = None, call_price: float = None, put_price: float = None):
+    days_expiry = days_to_expiry(expiry_date, obs_date=timestamp)
     if days_expiry > 0:
         if (call_price is None) & (put_price is None):
             _logger.warning("Either call or put price need to be given")

@@ -2,7 +2,9 @@ import time
 
 import mysql.connector
 
-from options import greeks_calculator
+import options
+from constants import Keys
+from options import greeks_calculator, test
 
 host = 'localhost'
 user = 'root'
@@ -203,29 +205,43 @@ def update_database_greeks():
             # cursor.execute(underlying_query)
             # key = "%s_%s_%s_%s" % ()
             key = "%s_%s_%s_%s" % (instrument[3:], symbol, expiry.month, expiry.year)
-            underlying_price = fut_data[key]
+            try:
+                underlying_price = fut_data[key]
+                # if option_type == 'CE':
+                #     iv = greeks_calculator.implied_vol(underlying_price, strike, interest, expiry, timestamp=timestamp, call_price=price)
+                #     # greeks = greeks_calculator.option_price()
+                # if option_type == 'PE':
+                #     iv = greeks_calculator.implied_vol(underlying_price, strike, interest, expiry, timestamp=timestamp, put_price=price)
+                #     # greeks = greeks_calculator.option_price(underlying_price, strike, interest, expiry, iv, timestamp)
+
+                # Keys.call if option_type == 'CE' else Keys.put
+                greeks = test.get_greeks(underlying_price, strike, expiry, option_type, price, timestamp,
+                                         volatility=13.65)
+                print(greeks)
+            except KeyError:
+                print("Couldn't find %s" % key)
             # print(underlying_price)
-            iv, theta, gamma, delta, vega = 0, 0, 0, 0, 0
-            if option_type == 'CE':
-                iv = greeks_calculator.implied_vol(underlying_price, strike, interest, expiry, call_price=price)
-                # greeks = greeks_calculator.option_price()
-            if option_type == 'PE':
-                iv = greeks_calculator.implied_vol(underlying_price, strike, interest, expiry, put_price=price)
-                # greeks = greeks_calculator.option_price(underlying_price, strike, interest, expiry, iv, timestamp)
-
-            greeks = greeks_calculator.option_price(underlying_price, strike, interest, expiry, iv, timestamp)
-            if greeks is not None:
-                theta = greeks.call_theta if option_type == 'CE' else greeks.put_theta
-                delta = greeks.call_delta if option_type == 'CE' else greeks.put_delta
-                gamma = greeks.gamma
-                vega = greeks.vega
-
-            # db_conn1.close()
-            print(index, symbol, strike, expiry, option_type, price, underlying_price, iv, theta, gamma, delta, vega)
-            update_query = "UPDATE `%s` SET `iv`=%s,`theta`=%s,`gamma`=%s,`delta`=%s,`vega`=%s WHERE id=%d" % (
-                "fo_data2", iv, theta, gamma, delta, vega, index)
-            queries.append(update_query)
-    print(len(queries))
+    #         iv, theta, gamma, delta, vega = 0, 0, 0, 0, 0
+    #         if option_type == 'CE':
+    #             iv = greeks_calculator.implied_vol(underlying_price, strike, interest, expiry, call_price=price)
+    #             # greeks = greeks_calculator.option_price()
+    #         if option_type == 'PE':
+    #             iv = greeks_calculator.implied_vol(underlying_price, strike, interest, expiry, put_price=price)
+    #             # greeks = greeks_calculator.option_price(underlying_price, strike, interest, expiry, iv, timestamp)
+    #
+    #         greeks = greeks_calculator.option_price(underlying_price, strike, interest, expiry, iv, timestamp)
+    #         if greeks is not None:
+    #             theta = greeks.call_theta if option_type == 'CE' else greeks.put_theta
+    #             delta = greeks.call_delta if option_type == 'CE' else greeks.put_delta
+    #             gamma = greeks.gamma
+    #             vega = greeks.vega
+    #
+    #         # db_conn1.close()
+    #         print(index, symbol, strike, expiry, option_type, price, underlying_price, iv, theta, gamma, delta, vega)
+    #         update_query = "UPDATE `%s` SET `iv`=%s,`theta`=%s,`gamma`=%s,`delta`=%s,`vega`=%s WHERE id=%d" % (
+    #             "fo_data2", iv, theta, gamma, delta, vega, index)
+    #         queries.append(update_query)
+    # print(len(queries))
     db_conn.close()
 
 

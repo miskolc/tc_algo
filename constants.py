@@ -78,6 +78,9 @@ class Keys:
     sell_book_profit = "SP"
     sell_book_sl = "SSL"
 
+    call = "CE"
+    put = "PE"
+
 
 class MsgType(Enum):
     # Unwanted Messages
