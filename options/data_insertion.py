@@ -94,8 +94,8 @@ def _read_row(row):
 def insert_bulk_data(path: str = None, truncate: bool = True):
     if path is None:
         path = default_path
-        print("Bulk entries started...")
         start_time = time.time()
+        print("Bulk entries started...")
         _extract_files(path)
         database_connection.bulk_entries(truncate)
         _read_data(path)

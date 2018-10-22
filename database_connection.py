@@ -4,7 +4,7 @@ import mysql.connector
 
 import options
 from constants import Keys
-from options import greeks_calculator, test
+from options import greeks_calculator, test, option_greeks
 
 host = 'localhost'
 user = 'root'
@@ -176,20 +176,24 @@ interest = 0.0
 
 
 def update_database_greeks():
-    queries = []
     db_conn = mysql.connector.connect(host=host, user=user, password=password, database=db_name)
     cursor = db_conn.cursor()
     # db_conn1 = mysql.connector.connect(host=host, user=user, password=password, database=db_name)
     # cursor1 = db_conn1.cursor()
-    timestamp_query = 'SELECT distinct timestamp from fo_data2 ORDER BY timestamp ASC'
+    table = 'fo_data1'
+    timestamp_query = 'SELECT distinct timestamp from %s ORDER BY timestamp ASC' % table
     cursor.execute(timestamp_query)
     x = cursor.fetchall()
     for ts in x:
+        date_time = time.time()
+        print(ts)
         data_date = ts[0]
         fut_data = get_fut_data(data_date)
-        opt_query = "SELECT * FROM `fo_data2` WHERE instrument LIKE 'OPT%%' AND timestamp='%s' ORDER BY id ASC Limit 300" % data_date
+        opt_query = "SELECT * FROM `%s` WHERE instrument LIKE 'OPT%%' AND timestamp='%s' ORDER BY id ASC " % (
+        table, data_date)
         cursor.execute(opt_query)
         opt_data = cursor.fetchall()
+        queries = []
         for row in opt_data:
             instrument = row[instrument_id]
             index = row[index_id]
@@ -207,20 +211,19 @@ def update_database_greeks():
             key = "%s_%s_%s_%s" % (instrument[3:], symbol, expiry.month, expiry.year)
             try:
                 underlying_price = fut_data[key]
-                # if option_type == 'CE':
-                #     iv = greeks_calculator.implied_vol(underlying_price, strike, interest, expiry, timestamp=timestamp, call_price=price)
-                #     # greeks = greeks_calculator.option_price()
-                # if option_type == 'PE':
-                #     iv = greeks_calculator.implied_vol(underlying_price, strike, interest, expiry, timestamp=timestamp, put_price=price)
-                #     # greeks = greeks_calculator.option_price(underlying_price, strike, interest, expiry, iv, timestamp)
-
-                # Keys.call if option_type == 'CE' else Keys.put
-                greeks = test.get_greeks(underlying_price, strike, expiry, option_type, price, timestamp,
-                                         volatility=13.65)
-                print(greeks)
+                iv, theta, gamma, delta, vega = option_greeks.get_greeks(underlying_price, strike, expiry, option_type,
+                                                                         price,
+                                                                         timestamp, volatility=0.13)
+                update_query = "UPDATE `%s` SET `iv`=%s,`theta`=%s,`gamma`=%s,`delta`=%s,`vega`=%s WHERE id=%d" % (
+                    table, iv, theta, gamma, delta, vega, index)
+                queries.append(update_query)
+                # print(iv, theta, gamma, delta, vega)
             except KeyError:
-                print("Couldn't find %s" % key)
-            # print(underlying_price)
+                pass
+                # print("Couldn't find %s" % key)
+        # insert_data(queries)
+        print("Time taken: %s secs" % (time.time() - date_time))
+        # print(underlying_price)
     #         iv, theta, gamma, delta, vega = 0, 0, 0, 0, 0
     #         if option_type == 'CE':
     #             iv = greeks_calculator.implied_vol(underlying_price, strike, interest, expiry, call_price=price)
@@ -242,6 +245,7 @@ def update_database_greeks():
     #             "fo_data2", iv, theta, gamma, delta, vega, index)
     #         queries.append(update_query)
     # print(len(queries))
+    # print(test.success, test.failure)
     db_conn.close()
 
 
@@ -267,4 +271,4 @@ def get_fut_data(timestamp):
 start_time = time.time()
 # add_greeks_column()
 update_database_greeks()
-print("Time Taken: %s" % (time.time() - start_time))
+print("Total Time Taken: %s" % (time.time() - start_time))
