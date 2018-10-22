@@ -1,4 +1,5 @@
 import time
+from datetime import date
 
 import mysql.connector
 
@@ -11,7 +12,7 @@ user = 'root'
 password = ''
 
 db_name = 'fo'
-table_name = 'fo_data'
+table_name = 'fo_data1'
 
 
 # db = mysql.connector.connect(host=host, user=user, password=password)
@@ -85,18 +86,20 @@ def bulk_entries(truncate: bool):
 def add_greeks_column():
     db_conn = mysql.connector.connect(host=host, user=user, password=password, database=db_name)
     cursor = db_conn.cursor()
-    check_query = "SELECT * FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = 'fo' AND TABLE_NAME = 'fo_data2' AND COLUMN_NAME LIKE 'iv'"
+    check_query = "SELECT * FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = '%s' AND TABLE_NAME = '%s' AND COLUMN_NAME LIKE 'iv'" % (
+        db_name, table_name)
     cursor.execute(check_query)
     check = cursor.fetchall()
     if len(check) == 0:
         print('Adding Columns to the table...')
-        query = "ALTER TABLE %s ADD (iv float, theta float, gamma float, delta float, vega float)" % "fo_data2"
+        query = "ALTER TABLE %s ADD (iv float, theta float, gamma float, delta float, vega float)" % table_name
         cursor.execute(query)
     else:
         print("Column already present")
     db_conn.close()
 
 
+# SELECT * FROM `fo_data1` WHERE timestamp = '2018-01-02' AND instrument LIKE 'OPT%'
 index_id = 0
 instrument_id = 1
 symbol_id = 2
@@ -117,139 +120,10 @@ timestamp_id = 15
 interest = 0.0
 
 
-#
-# def update_database_greeks():
-#     queries = []
-#     db_conn = mysql.connector.connect(host=host, user=user, password=password, database=db_name)
-#     cursor = db_conn.cursor()
-#     db_conn1 = mysql.connector.connect(host=host, user=user, password=password, database=db_name)
-#     cursor1 = db_conn1.cursor()
-#     # cursor1 = db_conn.cursor()
-#     # query = "SELECT distinct symbol FROM `fo_data2` where instrument='FUTIDX' order by timestamp asc"
-#     # query = "SELECT * FROM `fo_data2` WHERE instrument='OPTIDX' AND timestamp='2018-08-01' "
-#     query = "SELECT * FROM `fo_data2` WHERE instrument LIKE 'OPT%' ORDER BY id ASC LIMIT 1000"
-#     cursor.execute(query)
-#     for row in cursor:
-#         index = row[index_id]
-#         symbol = row[symbol_id]
-#         strike = (row[strike_id])
-#         expiry = row[expiry_id]
-#         option_type = row[option_type_id]
-#         price = row[close_id]
-#         timestamp = row[timestamp_id]
-#         # print(index, symbol, strike, expiry, option_type, price)
-#         underlying_query = "SELECT close FROM %s WHERE instrument LIKE 'FUT%%' AND symbol = '%s' AND MONTH(expiry) = %s" % (
-#             'fo_data2', symbol, expiry.month)
-#         # print(underlying_query)
-#         cursor1.execute(underlying_query)
-#         underlying_price = float(cursor1.fetchall()[0][0])
-#         # print(index, symbol, strike, expiry, option_type, price, underlying_price)
-#         # greeks = None
-#         iv, theta, gamma, delta, vega = 0, 0, 0, 0, 0
-#         if option_type == 'CE':
-#             iv = greeks_calculator.implied_vol(underlying_price, strike, interest, expiry, call_price=price)
-#             # greeks = greeks_calculator.option_price()
-#         if option_type == 'PE':
-#             iv = greeks_calculator.implied_vol(underlying_price, strike, interest, expiry, put_price=price)
-#             # greeks = greeks_calculator.option_price(underlying_price, strike, interest, expiry, iv, timestamp)
-#
-#         greeks = greeks_calculator.option_price(underlying_price, strike, interest, expiry, iv, timestamp)
-#         if greeks is not None:
-#             theta = greeks.call_theta if option_type == 'CE' else greeks.put_theta
-#             delta = greeks.call_delta if option_type == 'CE' else greeks.put_delta
-#             gamma = greeks.gamma
-#             vega = greeks.vega
-#
-#         # db_conn1.close()
-#         print(index, symbol, strike, expiry, option_type, price, underlying_price, iv, theta, gamma, delta, vega)
-#         update_query = "UPDATE `%s` SET `iv`=%s,`theta`=%s,`gamma`=%s,`delta`=%s,`vega`=%s WHERE id=%d" % (
-#             "fo_data2", iv, theta, gamma, delta, vega, index)
-#         queries.append(update_query)
-#     # print(type(row))
-#     # while True:
-#     #     print(cursor.fetchone())
-#     # cursor.close()
-#     # cursor1.execute(queries)
-#     print(len(queries))
-#     db_conn1.close()
-#     db_conn.close()
+# interest = 0.10 # For spot as per NSE
 
 
-def update_database_greeks():
-    db_conn = mysql.connector.connect(host=host, user=user, password=password, database=db_name)
-    cursor = db_conn.cursor()
-    # db_conn1 = mysql.connector.connect(host=host, user=user, password=password, database=db_name)
-    # cursor1 = db_conn1.cursor()
-    table = 'fo_data1'
-    timestamp_query = 'SELECT distinct timestamp from %s ORDER BY timestamp ASC' % table
-    cursor.execute(timestamp_query)
-    x = cursor.fetchall()
-    for ts in x:
-        date_time = time.time()
-        print(ts)
-        data_date = ts[0]
-        fut_data = get_fut_data(data_date)
-        opt_query = "SELECT * FROM `%s` WHERE instrument LIKE 'OPT%%' AND timestamp='%s' ORDER BY id ASC " % (
-        table, data_date)
-        cursor.execute(opt_query)
-        opt_data = cursor.fetchall()
-        queries = []
-        for row in opt_data:
-            instrument = row[instrument_id]
-            index = row[index_id]
-            symbol = row[symbol_id]
-            strike = (row[strike_id])
-            expiry = row[expiry_id]
-            option_type = row[option_type_id]
-            price = row[close_id]
-            timestamp = row[timestamp_id]
-            # print(index, symbol, strike, expiry, option_type, price)
-            # underlying_query = "SELECT close FROM %s WHERE instrument LIKE 'FUT%%' AND symbol = '%s' AND MONTH(expiry) = %s" % (
-            #     'fo_data2', symbol, expiry.month)
-            # cursor.execute(underlying_query)
-            # key = "%s_%s_%s_%s" % ()
-            key = "%s_%s_%s_%s" % (instrument[3:], symbol, expiry.month, expiry.year)
-            try:
-                underlying_price = fut_data[key]
-                iv, theta, gamma, delta, vega = option_greeks.get_greeks(underlying_price, strike, expiry, option_type,
-                                                                         price,
-                                                                         timestamp, volatility=0.13)
-                update_query = "UPDATE `%s` SET `iv`=%s,`theta`=%s,`gamma`=%s,`delta`=%s,`vega`=%s WHERE id=%d" % (
-                    table, iv, theta, gamma, delta, vega, index)
-                queries.append(update_query)
-                # print(iv, theta, gamma, delta, vega)
-            except KeyError:
-                pass
-                # print("Couldn't find %s" % key)
-        # insert_data(queries)
-        print("Time taken: %s secs" % (time.time() - date_time))
-        # print(underlying_price)
-    #         iv, theta, gamma, delta, vega = 0, 0, 0, 0, 0
-    #         if option_type == 'CE':
-    #             iv = greeks_calculator.implied_vol(underlying_price, strike, interest, expiry, call_price=price)
-    #             # greeks = greeks_calculator.option_price()
-    #         if option_type == 'PE':
-    #             iv = greeks_calculator.implied_vol(underlying_price, strike, interest, expiry, put_price=price)
-    #             # greeks = greeks_calculator.option_price(underlying_price, strike, interest, expiry, iv, timestamp)
-    #
-    #         greeks = greeks_calculator.option_price(underlying_price, strike, interest, expiry, iv, timestamp)
-    #         if greeks is not None:
-    #             theta = greeks.call_theta if option_type == 'CE' else greeks.put_theta
-    #             delta = greeks.call_delta if option_type == 'CE' else greeks.put_delta
-    #             gamma = greeks.gamma
-    #             vega = greeks.vega
-    #
-    #         # db_conn1.close()
-    #         print(index, symbol, strike, expiry, option_type, price, underlying_price, iv, theta, gamma, delta, vega)
-    #         update_query = "UPDATE `%s` SET `iv`=%s,`theta`=%s,`gamma`=%s,`delta`=%s,`vega`=%s WHERE id=%d" % (
-    #             "fo_data2", iv, theta, gamma, delta, vega, index)
-    #         queries.append(update_query)
-    # print(len(queries))
-    # print(test.success, test.failure)
-    db_conn.close()
-
-
-def get_fut_data(timestamp):
+def _get_fut_data(timestamp):
     data = {}
     db_conn = mysql.connector.connect(host=host, user=user, password=password, database=db_name)
     cursor = db_conn.cursor()
@@ -268,7 +142,47 @@ def get_fut_data(timestamp):
     return data
 
 
-start_time = time.time()
-# add_greeks_column()
-update_database_greeks()
-print("Total Time Taken: %s" % (time.time() - start_time))
+def update_database_greeks(ts: date):
+    db_conn = mysql.connector.connect(host=host, user=user, password=password, database=db_name)
+    cursor = db_conn.cursor()
+    if ts is not None:
+        timestamp_query = "SELECT distinct timestamp from %s where timestamp = '%s-%s-%s' ORDER BY timestamp ASC " % (
+            table_name, ts.year, ts.month, ts.day)
+    else:
+        timestamp_query = 'SELECT distinct timestamp from %s ORDER BY timestamp ASC' % table_name
+
+    cursor.execute(timestamp_query)
+    x = cursor.fetchall()
+    for ts in x:
+        date_time = time.time()
+        data_date = ts[0]
+        print(data_date)
+        fut_data = _get_fut_data(data_date)
+        opt_query = "SELECT * FROM `%s` WHERE instrument LIKE 'OPT%%' AND timestamp='%s' ORDER BY id ASC " % (
+            table_name, data_date)
+        cursor.execute(opt_query)
+        opt_data = cursor.fetchall()
+        queries = []
+        for row in opt_data:
+            instrument = row[instrument_id]
+            index = row[index_id]
+            symbol = row[symbol_id]
+            strike = (row[strike_id])
+            expiry = row[expiry_id]
+            option_type = row[option_type_id]
+            price = row[close_id]
+            timestamp = row[timestamp_id]
+
+            key = "%s_%s_%s_%s" % (instrument[3:], symbol, expiry.month, expiry.year)
+            try:
+                underlying_price = fut_data[key]
+                iv, theta, gamma, delta, vega = option_greeks.get_greeks(underlying_price, strike, expiry, option_type,
+                                                                         price, timestamp, volatility=0.13)
+                update_query = "UPDATE `%s` SET `iv`=%s,`theta`=%s,`gamma`=%s,`delta`=%s,`vega`=%s WHERE id=%d" % (
+                    table_name, iv, theta, gamma, delta, vega, index)
+                queries.append(update_query)
+            except KeyError:
+                pass
+        insert_data(queries)
+        print("Time taken: %s secs" % (time.time() - date_time))
+    db_conn.close()

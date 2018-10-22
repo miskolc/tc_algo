@@ -1,7 +1,7 @@
 import numpy as np
 import scipy.stats as si
 import sympy as sy
-from options import greeks_calculator
+from options import greeks_calculator, data_insertion, option_greeks
 
 # import sympy.statistics as systats
 

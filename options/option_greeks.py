@@ -115,25 +115,27 @@ def get_greeks(spot_price, strike_price, expiry_date: date, option_type: str, op
         iv = european_option.impliedVolatility(targetValue=option_price, process=bs_process, minVol=0.001, maxVol=1000,
                                                maxEvaluations=1000000)
         iv = iv * 100
+        flat_vol_ts = BlackVolTermStructureHandle(BlackConstantVol(calculation_date, calendar, iv, day_count))
+        bs_process = BlackScholesProcess(spot_handle, flat_ts, flat_vol_ts)
+
+        european_option.setPricingEngine(AnalyticEuropeanEngine(bs_process))
+        # bs_price = european_option.NPV()
+        theta = european_option.thetaPerDay()
+        gamma = european_option.gamma()
+        delta = european_option.delta()
+        vega = european_option.vega()
         # success += 1
         # flat_vol_ts = BlackVolTermStructureHandle(BlackConstantVol(calculation_date, calendar, iv, day_count))
         # bs_process = BlackScholesProcess(spot_handle, flat_ts, flat_vol_ts)
-    except RuntimeError as e:
-        iv = 13.65
+    except RuntimeError:
+        iv = 'NA'
         # failure += 1
         # print(e)
         # print(spot_price, strike_price, expiry_date, option_type, option_price, calculation_date)
-
-    #
-    flat_vol_ts = BlackVolTermStructureHandle(BlackConstantVol(calculation_date, calendar, iv, day_count))
-    bs_process = BlackScholesProcess(spot_handle, flat_ts, flat_vol_ts)
-
-    european_option.setPricingEngine(AnalyticEuropeanEngine(bs_process))
-    # bs_price = european_option.NPV()
-    theta = european_option.thetaPerDay()
-    gamma = european_option.gamma()
-    delta = european_option.delta()
-    vega = european_option.vega()
+        theta = 'NA'
+        gamma = 'NA'
+        delta = 'NA'
+        vega = 'NA'
 
     return iv, theta, gamma, delta, vega
 # ==============================================================

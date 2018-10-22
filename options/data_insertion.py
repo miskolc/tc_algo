@@ -3,7 +3,7 @@ import os
 import shutil
 import time
 import zipfile
-from datetime import datetime
+from datetime import datetime, date
 
 import database_connection
 
@@ -92,7 +92,7 @@ def _read_row(row):
 
 
 def insert_bulk_data(path: str = None, truncate: bool = True):
-    if path is None:
+    if path is not None:
         path = default_path
         start_time = time.time()
         print("Bulk entries started...")
@@ -100,11 +100,12 @@ def insert_bulk_data(path: str = None, truncate: bool = True):
         database_connection.bulk_entries(truncate)
         _read_data(path)
         print("Total time taken to execute bulk entries: %s seconds" % (time.time() - start_time))
-    # else:
-    #     print('No path specified')
+    else:
+        print('No path specified')
+        print(path)
 
 
-def insert_bhavcopy(path: str, filename: str):
+def insert_bhavcopy(path: str, filename: str, ):
     header = "INSERT INTO `%s`(`instrument`, `symbol`, `expiry`, `strike`, `option_typ`, `open`, `high`, `low`, " \
              "`close`, `settle_pr`, `contracts`, `val`, `open_int`, `chg_in_oi`, `timestamp`) VALUES " % "fo_data2"
     zip_path = path + filename
@@ -125,5 +126,11 @@ def insert_bhavcopy(path: str, filename: str):
         database_connection.insert_data(queries)
     else:
         print("Not a zip file")
+        print(zip_path)
 
-# insert_bhavcopy("C:/Users/sb/Downloads/", "fo15OCT2018bhav.zip")
+
+def update_option_greeks(timestamp: date = None):
+    start_time = time.time()
+    database_connection.add_greeks_column()
+    database_connection.update_database_greeks(timestamp)
+    print("Total Time Taken: %s" % (time.time() - start_time))
