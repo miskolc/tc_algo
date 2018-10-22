@@ -3,9 +3,7 @@ from datetime import date
 
 import mysql.connector
 
-import options
-from constants import Keys
-from options import greeks_calculator, test, option_greeks
+from options import option_greeks
 
 host = 'localhost'
 user = 'root'
@@ -13,13 +11,6 @@ password = ''
 
 db_name = 'fo'
 table_name = 'fo_data'
-
-
-# db = mysql.connector.connect(host=host, user=user, password=password)
-# mycursor = db.cursor()
-# mycursor.execute("SELECT VERSION()")
-# data = mycursor.fetchone()
-# db.close()
 
 
 def _check_database():
@@ -99,7 +90,6 @@ def add_greeks_column():
     db_conn.close()
 
 
-# SELECT * FROM `fo_data1` WHERE timestamp = '2018-01-02' AND instrument LIKE 'OPT%'
 index_id = 0
 instrument_id = 1
 symbol_id = 2
@@ -138,7 +128,6 @@ def _get_fut_data(timestamp):
         key = "%s_%s_%s_%s" % (instrument[3:], symbol, expiry.month, expiry.year)
         data.update({key: close})
     db_conn.close()
-    # print(data)
     return data
 
 

@@ -3,8 +3,6 @@ import scipy.stats as si
 import sympy as sy
 from options import greeks_calculator, data_insertion, option_greeks
 
-# import sympy.statistics as systats
-
 
 def euro_vanilla(spot, strike, time_to_maturity, int_rate, vol, option='call'):
     # S: spot price
@@ -27,23 +25,3 @@ def euro_vanilla(spot, strike, time_to_maturity, int_rate, vol, option='call'):
     else:
         result = None
     return result
-
-# def sym_euro_vanilla(S, K, T, r, sigma, option='call'):
-#     # S: spot price
-#     # K: strike price
-#     # T: time to maturity
-#     # r: interest rate
-#     # sigma: volatility of underlying asset
-#
-#     # N = systats.Normal(0.0, 1.0)
-#
-#     d1 = (sy.ln(S / K) + (r + 0.5 * sigma ** 2) * T) / (sigma * sy.sqrt(T))
-#     d2 = (sy.ln(S / K) + (r - 0.5 * sigma ** 2) * T) / (sigma * sy.sqrt(T))
-#
-#     if option == 'call':
-#         result = (S * N.cdf(d1) - K * sy.exp(-r * T) * N.cdf(d2))
-#     elif option == 'put':
-#         result = (K * sy.exp(-r * T) * N.cdf(-d2) - S * N.cdf(-d1))
-#     else:
-#         result = None
-#     return result

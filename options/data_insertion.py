@@ -15,9 +15,9 @@ delimiter = ','
 
 
 def _extract_files(path: str):
-    extract = path + extract_dir
-    if os.path.isdir(extract):
-        shutil.rmtree(extract)
+    extract_path = path + extract_dir
+    if os.path.isdir(extract_path):
+        shutil.rmtree(extract_path)
         print('Deleted %s' % extract_dir)
 
     dir_contents = os.walk(path)
@@ -31,7 +31,7 @@ def _extract_files(path: str):
         if zipfile.is_zipfile(file_path):
             zp = zipfile.ZipFile(file_path)
             print("Extracting: %s" % zip_file)
-            zp.extractall(extract)
+            zp.extractall(extract_path)
 
 
 def _read_data(path: str):
@@ -82,7 +82,6 @@ def _read_row(row):
         open_int = int(data_arr[12])
         chg_in_oi = int(data_arr[13])
         timestamp = (datetime.strptime(data_arr[14], "%d-%b-%Y")).strftime("%Y-%m-%d")
-        # timestamp = (datetime.strptime(data_arr[14], "%d-%b-%y")).strftime("%Y-%m-%d")
         trailer = "('%s','%s', '%s', %d,'%s', %f, %f, %f, %f, %f, %d, %f, %d, %d, '%s');" % (
             instrument, symbol, expiry, strike, option_typ, open_price, high, low, close, settle_pr, contracts,
             val, open_int, chg_in_oi, timestamp)
@@ -106,8 +105,6 @@ def insert_bulk_data(path: str = None, truncate: bool = True):
 
 
 def insert_bhavcopy(path: str, filename: str, ):
-    header = "INSERT INTO `%s`(`instrument`, `symbol`, `expiry`, `strike`, `option_typ`, `open`, `high`, `low`, " \
-             "`close`, `settle_pr`, `contracts`, `val`, `open_int`, `chg_in_oi`, `timestamp`) VALUES " % "fo_data2"
     zip_path = path + filename
     if zipfile.is_zipfile(zip_path):
         queries = []
