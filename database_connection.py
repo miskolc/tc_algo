@@ -12,7 +12,7 @@ user = 'root'
 password = ''
 
 db_name = 'fo'
-table_name = 'fo_data1'
+table_name = 'fo_data'
 
 
 # db = mysql.connector.connect(host=host, user=user, password=password)
@@ -127,7 +127,7 @@ def _get_fut_data(timestamp):
     data = {}
     db_conn = mysql.connector.connect(host=host, user=user, password=password, database=db_name)
     cursor = db_conn.cursor()
-    underlying_query = "SELECT * FROM %s WHERE instrument LIKE 'FUT%%' AND timestamp = '%s'" % ('fo_data2', timestamp)
+    underlying_query = "SELECT * FROM %s WHERE instrument LIKE 'FUT%%' AND timestamp = '%s'" % (table_name, timestamp)
     cursor.execute(underlying_query)
     fut_data = cursor.fetchall()
     for fut in fut_data:
@@ -145,6 +145,15 @@ def _get_fut_data(timestamp):
 def update_database_greeks(ts: date):
     db_conn = mysql.connector.connect(host=host, user=user, password=password, database=db_name)
     cursor = db_conn.cursor()
+    # if clear_columns:
+    #     print("Clearing the columns...")
+    #     columns = ["iv", "theta", "gamma", "delta", "vega"]
+    #     for col in columns:
+    #         query = "UPDATE %s SET %s=''" % (table_name, col)
+    #         cursor.execute(query)
+    #         cursor.fetchall()
+    #         # db_conn.commit()
+    #         print("Cleared: %s" % col)
     if ts is not None:
         timestamp_query = "SELECT distinct timestamp from %s where timestamp = '%s-%s-%s' ORDER BY timestamp ASC " % (
             table_name, ts.year, ts.month, ts.day)
@@ -156,7 +165,7 @@ def update_database_greeks(ts: date):
     for ts in x:
         date_time = time.time()
         data_date = ts[0]
-        print(data_date)
+        print("Updating options data for: %s" % data_date)
         fut_data = _get_fut_data(data_date)
         opt_query = "SELECT * FROM `%s` WHERE instrument LIKE 'OPT%%' AND timestamp='%s' ORDER BY id ASC " % (
             table_name, data_date)
