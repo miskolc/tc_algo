@@ -5,7 +5,7 @@ import time
 import zipfile
 from datetime import datetime, date
 
-import database_connection
+from options import database_connection
 
 extract_dir = 'extracted/'
 default_path = 'C:/Users/sb/Downloads/niftyoptionsdata/'
@@ -112,7 +112,7 @@ def insert_bhavcopy(path: str, filename: str, ):
         csv_name = zp.namelist()[0]
         csv_file = path + csv_name
         if not os.path.isfile(csv_file):
-            print("Extracting...")
+            print("Extracting...%s" % csv_file)
             zp.extractall(path)
         f = open(csv_file)
         csv_reader = csv.reader(f)
@@ -128,6 +128,7 @@ def insert_bhavcopy(path: str, filename: str, ):
 
 def update_option_greeks(timestamp: date = None):
     start_time = time.time()
-    database_connection.add_greeks_column()
+    if timestamp is None:
+        database_connection.add_greeks_column()
     database_connection.update_database_greeks(timestamp)
     print("Total Time Taken: %s" % (time.time() - start_time))

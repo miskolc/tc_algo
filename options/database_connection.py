@@ -184,3 +184,14 @@ def update_database_greeks(ts: date):
         insert_data(queries)
         print("Time taken: %s secs" % (time.time() - date_time))
     db_conn.close()
+
+
+def execute_simple_query(query):
+    start_time = time.time()
+    db_conn = mysql.connector.connect(host=host, user=user, password=password, database=db_name)
+    cursor = db_conn.cursor()
+    cursor.execute(query)
+    result = cursor.fetchall()
+    db_conn.close()
+    print("Query executed in: %s secs" % (time.time() - start_time))
+    return result

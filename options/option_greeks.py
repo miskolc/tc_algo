@@ -38,7 +38,7 @@ def get_greeks(spot_price, strike_price, expiry_date: date, option_type: str, op
     try:
         iv = european_option.impliedVolatility(targetValue=option_price, process=bs_process, minVol=0.001, maxVol=1000,
                                                maxEvaluations=1000000)
-        iv = iv * 100
+        # iv = iv * 100
         flat_vol_ts = BlackVolTermStructureHandle(BlackConstantVol(calculation_date, calendar, iv, day_count))
         bs_process = BlackScholesProcess(spot_handle, flat_ts, flat_vol_ts)
 
@@ -56,5 +56,4 @@ def get_greeks(spot_price, strike_price, expiry_date: date, option_type: str, op
         delta = "''"
         vega = "''"
 
-    return iv, theta, gamma, delta, vega
-
+    return iv * 100, theta, gamma, delta, vega
