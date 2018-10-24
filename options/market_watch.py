@@ -50,7 +50,7 @@
 #
 #
 # # download_url = 'https://www.nseindia.com/content/historical/DERIVATIVES/2018/OCT/fo23OCT2018bhav.csv.zip'
-#
+# browser, nseindia http refer
 #
 # if __name__ == '__main__':
 #     start_time = time.time()
@@ -92,6 +92,7 @@ import pandas as pd
 import plotly.graph_objs as go
 
 import options.database_connection as dbc
+from constants import Keys
 
 df = pd.DataFrame()
 
@@ -129,6 +130,7 @@ dash_app.layout = html.Div([
                 max_date_allowed=date.today(),
                 initial_visible_month=date(2017, 8, 5),
                 date=date.today(),
+                display_format="DD MMM YYYY"
             ), ),
             html.Td(
                 html.Button("Display", id='display')
@@ -169,7 +171,7 @@ def get_expiry_list(n_clicks):
     return expiry_list
 
 
-@dash_app.callback(Output('info', 'children'), [Input('display', 'n_clicks')],
+@dash_app.callback(Output('market_watch', 'children'), [Input('display', 'n_clicks')],
                    state=[State('expiry_list', 'value'), State('date_picker', 'date')])
 def display_watch(n_clicks, expiry_date, obs_date):
     global df
@@ -179,16 +181,90 @@ def display_watch(n_clicks, expiry_date, obs_date):
         timestamp = [datetime.strptime(obs_date, fmt).date()]
         # expiry = [date(2018, 10, 25)]
         # timestamp = [date(2018, 10, 23)]
-        print(type(expiry), expiry)
-        print(type(timestamp), timestamp)
+        # print(type(expiry), expiry)
+        # print(type(timestamp), timestamp)
         # print(n_clicks)
-        option_typ = ['CE']
+        option_call = [Keys.call]
+        option_put = [Keys.put]
         # print(df)
         # print(df.timestamp.unique())
-        data = df[df.expiry.isin(expiry) & df.timestamp.isin(timestamp) & df.option_typ.isin(option_typ)]
-        print(data)
+        call_data = df[df.expiry.isin(expiry) & df.timestamp.isin(timestamp) & df.option_typ.isin(option_call)]
+        put_data = df[df.expiry.isin(expiry) & df.timestamp.isin(timestamp) & df.option_typ.isin(option_put)]
+        # data = df[df.expiry.isin(expiry) & df.timestamp.isin(timestamp)]
+        # print(data)
         # return data
-        return obs_date
+        strikes = []
+        for row in call_data.itertuples():
+            strikes.append(row.strike)
+        #     # print(df[df['expiry'] == date(2018,10,25)])
+
+        data = []
+        for strike in strikes:
+            data_strike = []
+            # stk = [strike]
+            call = call_data[call_data.strike == strike]
+            put = put_data[put_data.strike == strike]
+            for ce in call.itertuples():
+                # call_theta = ce.theta
+                # call_gamma= ce.gamma
+                # call_delta = ce.delta
+                # call_vega = ce.vega
+                # call_iv = ce.iv
+                # call_price = ce.close
+                # call_contracts = ce.contracts
+                # call_chg_in_oi = ce.chg_in_oi
+                x = [ce.theta, ce.gamma, ce.delta, ce.vega, ce.iv, ce.close, ce.contracts, ce.chg_in_oi, strike]
+                data_strike += x
+
+            for pe in put.itertuples():
+                # put_theta =
+                # put_gamma =
+                # put_delta =
+                # put_vega =
+                # put_iv =
+                # put_price =
+                # put_contracts =
+                # put_chg_in_oi =
+                y = [pe.theta, pe.gamma, pe.delta, pe.vega, pe.iv, pe.close, pe.contracts, pe.chg_in_oi]
+                y.reverse()
+                data_strike += y
+            # print(data_strike)
+            data.append(data_strike)
+        # entry = data[0]
+        # row = html.Tr([
+        #     html.Td(entry[0]),
+        #     html.Td(entry[1]),
+        #     html.Td(entry[2]),
+        #     html.Td(entry[3]),
+        #     html.Td(entry[4]),
+        #     html.Td(entry[5]),
+        #     html.Td(entry[6]),
+        #     html.Td(entry[7]),
+        #     html.Td(entry[8]),
+        #     html.Td(entry[9]),
+        #     html.Td(entry[10]),
+        #     html.Td(entry[11]),
+        #     html.Td(entry[12]),
+        #     html.Td(entry[13]),
+        #     html.Td(entry[14]),
+        #     html.Td(entry[15]),
+        #     html.Td(entry[16]),
+        #
+        # ])
+        table_rows = []
+        v = ["Theta", "Gamma", "Vega", "IV", "Close", "Contracts", "Change in OI", ]
+        w = v
+        w.reverse()
+        table_header = v + ["Strike"] + w
+        header = html.Tr([html.Td(head) for head in table_header])
+        table_rows.append(header)
+        for entry in data:
+            row = html.Tr([html.Td(k) for k in entry], )
+            table_rows.append(row)
+
+        return table_rows
+
+        # return "%s" % data
 
 
 def symbol_data(symbol):
