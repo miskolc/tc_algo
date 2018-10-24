@@ -4,6 +4,7 @@ from datetime import date
 import mysql.connector
 
 from options import option_greeks
+from constants import DbIndex
 
 host = 'localhost'
 user = 'root'
@@ -121,10 +122,10 @@ def _get_fut_data(timestamp):
     cursor.execute(underlying_query)
     fut_data = cursor.fetchall()
     for fut in fut_data:
-        instrument = fut[instrument_id]
-        symbol = fut[symbol_id]
-        expiry = fut[expiry_id]
-        close = fut[close_id]
+        instrument = fut[DbIndex.instrument_id.value]
+        symbol = fut[DbIndex.symbol_id.value]
+        expiry = fut[DbIndex.expiry_id.value]
+        close = fut[DbIndex.close_id.value]
         key = "%s_%s_%s_%s" % (instrument[3:], symbol, expiry.month, expiry.year)
         data.update({key: close})
     db_conn.close()
@@ -162,14 +163,14 @@ def update_database_greeks(ts: date):
         opt_data = cursor.fetchall()
         queries = []
         for row in opt_data:
-            instrument = row[instrument_id]
-            index = row[index_id]
-            symbol = row[symbol_id]
-            strike = (row[strike_id])
-            expiry = row[expiry_id]
-            option_type = row[option_type_id]
-            price = row[close_id]
-            timestamp = row[timestamp_id]
+            instrument = row[DbIndex.instrument_id.value]
+            index = row[DbIndex.index_id.value]
+            symbol = row[DbIndex.symbol_id.value]
+            strike = (row[DbIndex.strike_id.value])
+            expiry = row[DbIndex.expiry_id.value]
+            option_type = row[DbIndex.option_type_id.value]
+            price = row[DbIndex.close_id.value]
+            timestamp = row[DbIndex.timestamp_id.value]
 
             key = "%s_%s_%s_%s" % (instrument[3:], symbol, expiry.month, expiry.year)
             try:
