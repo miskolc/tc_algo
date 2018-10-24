@@ -10,7 +10,7 @@ user = 'root'
 password = ''
 
 db_name = 'fo'
-table_name = 'fo_data'
+table_name = 'fo_data1'
 
 
 def _check_database():
@@ -90,22 +90,22 @@ def add_greeks_column():
     db_conn.close()
 
 
-index_id = 0
-instrument_id = 1
-symbol_id = 2
-expiry_id = 3
-strike_id = 4
-option_type_id = 5
-open_id = 6
-high_id = 7
-low_id = 8
-close_id = 9
-settle_id = 10
-contracts_id = 11
-val_id = 12
-open_int_id = 13
-chg_in_oi = 14
-timestamp_id = 15
+# index_id = 0
+# instrument_id = 1
+# symbol_id = 2
+# expiry_id = 3
+# strike_id = 4
+# option_type_id = 5
+# open_id = 6
+# high_id = 7
+# low_id = 8
+# close_id = 9
+# settle_id = 10
+# contracts_id = 11
+# val_id = 12
+# open_int_id = 13
+# chg_in_oi = 14
+# timestamp_id = 15
 
 interest = 0.0
 

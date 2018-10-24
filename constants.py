@@ -247,3 +247,25 @@ class Gateway(Enum):
     RTS = 4194304
     CTP = 8388608
     BSECD = 16777216
+
+
+class DbIndex(Enum):
+    index_id = 0
+    instrument_id = 1
+    symbol_id = 2
+    expiry_id = 3
+    strike_id = 4
+    option_type_id = 5
+    open_id = 6
+    high_id = 7
+    low_id = 8
+    close_id = 9
+    settle_id = 10
+    contracts_id = 11
+    val_id = 12
+    open_int_id = 13
+    chg_in_oi = 14
+    timestamp_id = 15
+
+    def __str__(self):
+        return self.value

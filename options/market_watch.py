@@ -19,18 +19,64 @@ def symbol_data(symbol, obs_date: str, expiry_date: str):
     return call_data
 
 
+def data_filter():
+    start_time = time.time()
+    data = symbol_data("NIFTY", "2018-10-22", "2018-10-25")
+    # x = df[df['expiry'] == date(2018,10,25)]
+    df = pd.DataFrame(data, columns=columns)
+    print(df.__len__())
+    # x = df[(df.expiry == date(2018, 10, 25))]
+    # print(x.__len__())
+    # x = x[x.timestamp == date(2018,10,22)]
+    # print(x.__len__())
+    # x = x[x.option_typ == 'CE']
+    # print(x.__len__())
+
+    expiry = [date(2018, 10, 25)]
+    timestamp = [date(2018, 10, 23)]
+    option_typ = ['CE']
+    y = df[df.expiry.isin(expiry) & df.timestamp.isin(timestamp) & df.option_typ.isin(option_typ)]
+    print(len(y))
+    # print(y['close'][0])
+    for row in y.itertuples():
+        print(row.strike)
+    # x = df.query("expiry == '2018-10-25'")
+    # print(x)
+    # print(df)
+    # print(df[df['expiry'] == date(2018,10,25)])
+    # print(df[df['timestamp'] == date(2018, 10, 22)])
+    # print(df[(df['option_typ'] == 'CE')])
+    print("Time: %s" % (time.time() - start_time))
+
+
 # download_url = 'https://www.nseindia.com/content/historical/DERIVATIVES/2018/OCT/fo23OCT2018bhav.csv.zip'
 
 
 if __name__ == '__main__':
     start_time = time.time()
     data = symbol_data("NIFTY", "2018-10-22", "2018-10-25")
+    # x = df[df['expiry'] == date(2018,10,25)]
     df = pd.DataFrame(data, columns=columns)
     print(df.__len__())
-    x = df.query("expiry == '2018-10-25'")
-    print(x)
+    # x = df[(df.expiry == date(2018, 10, 25))]
+    # print(x.__len__())
+    # x = x[x.timestamp == date(2018,10,22)]
+    # print(x.__len__())
+    # x = x[x.option_typ == 'CE']
+    # print(x.__len__())
+
+    expiry = [date(2018, 10, 25)]
+    timestamp = [date(2018, 10, 23)]
+    option_typ = ['CE']
+    y = df[df.expiry.isin(expiry) & df.timestamp.isin(timestamp) & df.option_typ.isin(option_typ)]
+    print(len(y))
+    # print(y['close'][0])
+    for row in y.itertuples():
+        print(row.strike)
+    # x = df.query("expiry == '2018-10-25'")
+    # print(x)
     # print(df)
-    # print(df[df['expiry'] == date(2018,10,23)])
+    # print(df[df['expiry'] == date(2018,10,25)])
     # print(df[df['timestamp'] == date(2018, 10, 22)])
     # print(df[(df['option_typ'] == 'CE')])
     print("Time: %s" % (time.time() - start_time))

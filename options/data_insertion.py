@@ -128,7 +128,8 @@ def insert_bhavcopy(path: str, filename: str, ):
 
 def update_option_greeks(timestamp: date = None):
     start_time = time.time()
-    if timestamp is None:
-        database_connection.add_greeks_column()
+    # if timestamp is None:
+    #     database_con/nection.add_greeks_column()
+    database_connection.add_greeks_column()
     database_connection.update_database_greeks(timestamp)
     print("Total Time Taken: %s" % (time.time() - start_time))
