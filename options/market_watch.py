@@ -98,7 +98,8 @@ df = pd.DataFrame()
 
 columns = ['id', 'instrument', 'symbol', 'expiry', 'strike', 'option_typ', 'open', 'high', 'low', 'close', 'settle_pr',
            'contracts', 'val', 'open_int', 'chg_in_oi', 'timestamp', 'iv', 'theta', 'gamma', 'delta', 'vega']
-
+header_style = {'color': "white", "background": "black"}
+# #FBF5CD
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
 dash_app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
@@ -149,6 +150,7 @@ dash_app.layout = html.Div([
 def fetch_data(n_clicks, scrip_name):
     global df
     if n_clicks is not None:
+        scrip_name = scrip_name.capitalize()
         data = symbol_data(scrip_name)
         df = pd.DataFrame(data, columns=columns)
         # print(len(df))
@@ -179,92 +181,59 @@ def display_watch(n_clicks, expiry_date, obs_date):
         fmt = "%Y-%m-%d"
         expiry = [datetime.strptime(expiry_date, fmt).date()]
         timestamp = [datetime.strptime(obs_date, fmt).date()]
-        # expiry = [date(2018, 10, 25)]
-        # timestamp = [date(2018, 10, 23)]
-        # print(type(expiry), expiry)
-        # print(type(timestamp), timestamp)
-        # print(n_clicks)
         option_call = [Keys.call]
         option_put = [Keys.put]
-        # print(df)
-        # print(df.timestamp.unique())
         call_data = df[df.expiry.isin(expiry) & df.timestamp.isin(timestamp) & df.option_typ.isin(option_call)]
         put_data = df[df.expiry.isin(expiry) & df.timestamp.isin(timestamp) & df.option_typ.isin(option_put)]
-        # data = df[df.expiry.isin(expiry) & df.timestamp.isin(timestamp)]
-        # print(data)
-        # return data
         strikes = []
         for row in call_data.itertuples():
             strikes.append(row.strike)
-        #     # print(df[df['expiry'] == date(2018,10,25)])
+
+        table_rows = []
+        v = ["Theta", "Gamma", "Delta", "Vega", "IV", "Close", "Contracts", "Change in OI", ]
+        w = v.copy()
+        w.reverse()
+        table_header = v + ["Strike"] + w
+        header = html.Tr([html.Td(head) for head in table_header], style=header_style)
 
         data = []
+        z = [header]
+
         for strike in strikes:
+            strike_row = []
             data_strike = []
-            # stk = [strike]
             call = call_data[call_data.strike == strike]
             put = put_data[put_data.strike == strike]
+
             for ce in call.itertuples():
-                # call_theta = ce.theta
-                # call_gamma= ce.gamma
-                # call_delta = ce.delta
-                # call_vega = ce.vega
-                # call_iv = ce.iv
-                # call_price = ce.close
-                # call_contracts = ce.contracts
-                # call_chg_in_oi = ce.chg_in_oi
-                x = [ce.theta, ce.gamma, ce.delta, ce.vega, ce.iv, ce.close, ce.contracts, ce.chg_in_oi, strike]
+                x = [ce.theta, ce.gamma, ce.delta, ce.vega, ce.iv, ce.close, ce.contracts, ce.chg_in_oi, ]
                 data_strike += x
+                call_row = [html.Td(k, style={"background": "#FFCCFF"}) for k in x]
+                strike_row.append(call_row)
+
+            data_strike += [strike]
+            strike_row[-1] += [html.Td(strike, style={"background": "#C2C2C2"})]
 
             for pe in put.itertuples():
-                # put_theta =
-                # put_gamma =
-                # put_delta =
-                # put_vega =
-                # put_iv =
-                # put_price =
-                # put_contracts =
-                # put_chg_in_oi =
                 y = [pe.theta, pe.gamma, pe.delta, pe.vega, pe.iv, pe.close, pe.contracts, pe.chg_in_oi]
                 y.reverse()
                 data_strike += y
-            # print(data_strike)
+                put_row = [html.Td(k, style={"background": "#CCECFF"}) for k in y]
+                strike_row[-1] += put_row
+
             data.append(data_strike)
-        # entry = data[0]
-        # row = html.Tr([
-        #     html.Td(entry[0]),
-        #     html.Td(entry[1]),
-        #     html.Td(entry[2]),
-        #     html.Td(entry[3]),
-        #     html.Td(entry[4]),
-        #     html.Td(entry[5]),
-        #     html.Td(entry[6]),
-        #     html.Td(entry[7]),
-        #     html.Td(entry[8]),
-        #     html.Td(entry[9]),
-        #     html.Td(entry[10]),
-        #     html.Td(entry[11]),
-        #     html.Td(entry[12]),
-        #     html.Td(entry[13]),
-        #     html.Td(entry[14]),
-        #     html.Td(entry[15]),
-        #     html.Td(entry[16]),
-        #
-        # ])
-        table_rows = []
-        v = ["Theta", "Gamma", "Vega", "IV", "Close", "Contracts", "Change in OI", ]
-        w = v
-        w.reverse()
-        table_header = v + ["Strike"] + w
-        header = html.Tr([html.Td(head) for head in table_header])
+            r = html.Tr(strike_row[0], style={"border": 2})
+            # print(r)
+            z.append(r)
+
         table_rows.append(header)
         for entry in data:
             row = html.Tr([html.Td(k) for k in entry], )
             table_rows.append(row)
-
-        return table_rows
-
-        # return "%s" % data
+            # print(row)
+        # print(table_rows)
+        # z = table_header + z
+        return z
 
 
 def symbol_data(symbol):
@@ -275,3 +244,5 @@ def symbol_data(symbol):
 
 if __name__ == '__main__':
     dash_app.run_server()
+    # fetch_data(1, "Nifty")
+    # display_watch(1, "2018-10-25", "2018-10-23")
