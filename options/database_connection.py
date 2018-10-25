@@ -11,7 +11,7 @@ user = 'root'
 password = ''
 
 db_name = 'fo'
-table_name = 'fo_data1'
+table_name = 'fo_data'
 
 
 def _check_database():
