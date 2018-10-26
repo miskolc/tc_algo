@@ -12,7 +12,20 @@ from options import option_greeks
 _logger = logging.getLogger("payoff_charts")
 
 
-def get_payoff_values(spot, strike: int, option_type: str, premium: float):
+def _get_payoff_values(spot, strike: int, option_type: str, premium: float):
+    """
+    It evaluates the payoff values of the option
+    :param spot: list
+            Underlying Values for which evaluation is required
+    :param strike: int
+            Strike of the option
+    :param option_type: str
+            Type of the option. Possible values: CE and PE
+    :param premium: float
+            Option premium price.
+    :return: list
+            Contains payoff values corresponding to the spot vales
+    """
     payoff = []
     for underlying in spot:
         value = (max(0, (underlying - strike) if option_type == Keys.call else (strike - underlying))) - premium
@@ -20,15 +33,31 @@ def get_payoff_values(spot, strike: int, option_type: str, premium: float):
     return payoff
 
 
-def get_greeks_payoff_values(spot, strike: int, expiry_date: date, calculation_date: date, option_type: str,
-                             option_price: float, volatility: float):
+def _get_greeks_payoff_values(spot, strike: int, expiry_date: date, calculation_date: date, option_type: str,
+                              volatility: float):
+    """
+    It evaluates the greeks payoff values of the option
+    :param spot: list
+            Underlying Values for which evaluation is required
+    :param strike: int
+            Strike of the option
+    :param expiry_date: date
+            Date of expiry of option
+    :param calculation_date: date
+            Observation date for the calculations
+    :param option_type: str
+            Type of the option. Possible values: CE and PE
+    :param volatility: float
+            Volatility for the option
+    :return: tuple(list, list, list, list, list)
+            Returns values for delta, gamma, theta, vega, rho for corresponding spot in list
+    """
     delta_list, gamma_list, theta_list, vega_list, rho_list = [], [], [], [], []
 
     for underlying in spot:
         # print(underlying)
         delta, gamma, theta, vega, rho = option_greeks.get_option_greeks(underlying, strike, expiry_date,
-                                                                         option_type,
-                                                                         option_price, calculation_date, volatility)
+                                                                         option_type, volatility, calculation_date, )
         delta_list.append(delta)
         gamma_list.append(gamma)
         theta_list.append(theta)
@@ -40,14 +69,33 @@ def get_greeks_payoff_values(spot, strike: int, expiry_date: date, calculation_d
 
 def payoff_charts(spot: list, strike: int, option_type: str, option_price: float, calculation_date: date,
                   expiry_date: date, volatility: float):
+    """
+    It is used to display the payoff charts for the input option data
+    :param spot: list
+            Underlying Values for which evaluation is required
+    :param strike: int
+            Strike of the option
+    :param option_type: str
+            Type of the option. Possible values: CE and PE
+    :param option_price: float
+            Option premium price.
+    :param calculation_date: date
+            Observation date for the calculations
+    :param expiry_date: date
+            Date of expiry of option
+    :param volatility: float
+            Volatility for the option
+    :return: None
+            Displays payoff charts in the browser.
+    """
     spot = numpy.arange(min(spot), max(spot), 100, dtype=numpy.int64).tolist()
 
     if option_type in [Keys.call, Keys.put]:
-        payoff_list = get_payoff_values(spot, strike, option_type, option_price)
-        delta_list, gamma_list, theta_list, vega_list, rho_list = get_greeks_payoff_values(spot, strike, expiry_date,
-                                                                                           calculation_date,
-                                                                                           option_type,
-                                                                                           option_price, volatility)
+        payoff_list = _get_payoff_values(spot, strike, option_type, option_price)
+        delta_list, gamma_list, theta_list, vega_list, rho_list = _get_greeks_payoff_values(spot, strike, expiry_date,
+                                                                                            calculation_date,
+                                                                                            option_type,
+                                                                                            option_price, volatility)
 
         fig = plt.figure()
 
@@ -89,12 +137,11 @@ def payoff_charts(spot: list, strike: int, option_type: str, option_price: float
         plotly_fig['layout']['height'] = 720
         plotly_fig['layout']['width'] = 1024
 
-        py.plot(plotly_fig, filename="name.html")
+        py.plot(plotly_fig, filename="%s.html" % name)
 
     else:
         _logger.warning("Option can be either CE or PE")
         _logger.info("Couldn't plot payoffs")
 
-
-if __name__ == '__main__':
-    payoff_charts([9000, 11100], 10000, Keys.put, 276., date(2018, 10, 26), date(2018, 11, 29), 20.95)
+# if __name__ == '__main__':
+#     payoff_charts([9000, 11100], 10000, Keys.put, 276., date(2018, 10, 26), date(2018, 11, 29), 20.95)

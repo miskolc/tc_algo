@@ -4,12 +4,33 @@ from QuantLib import *
 
 from constants import Keys
 
-success = 0
-failure = 0
+"""
+Definitions written in this file are based on the QuantLib library for greeks calculation.
+"""
 
 
-def get_greeks(spot_price, strike_price, expiry_date: date, option_type: str, option_price: float,
+def get_greeks(spot_price: float, strike_price: float, expiry_date: date, option_type: str, option_price: float,
                calculation_date: date = None, volatility: float = None):
+    """
+    It is used to find option greeks for the given inputs.
+    Results are based on the implied volatility found using option price.
+    :param spot_price: float
+            (S) Spot price
+    :param strike_price: float
+            (K) Strike price
+    :param expiry_date: date
+            (T) Time to maturity i.e. expiry date
+    :param option_type: str
+            Type of option. Possible values: CE, PE
+    :param option_price: float
+            Price of the option
+    :param calculation_date: date
+            Observation date. If None is given then present date is taken.
+    :param volatility: float
+            Annualised Volatility for underlying.
+    :return: tuple(float, float, float, float, float)
+            Returns implied volatility, theta, gamma, delta, vega for the option data entered
+    """
     maturity_date = Date(expiry_date.day, expiry_date.month, expiry_date.year)
     # volatility = 0.0  # the historical vols for a year
     # print(spot_price, strike_price, expiry_date, option_type, option_price, calculation_date)
@@ -62,8 +83,26 @@ def get_greeks(spot_price, strike_price, expiry_date: date, option_type: str, op
     return iv, theta, gamma, delta, vega,
 
 
-def get_option_greeks(spot_price, strike_price, expiry_date: date, option_type: str, option_price: float,
-                      calculation_date: date = None, volatility: float = None):
+def get_option_greeks(spot_price, strike_price, expiry_date: date, option_type: str, volatility: float,
+                      calculation_date: date = None, ):
+    """
+    It is used to find option greeks for the given inputs.
+    Results are based on the volatility and theoretical option price.
+    :param spot_price: float
+            (S) Spot price
+    :param strike_price: float
+            (K) Strike price
+    :param expiry_date: date
+            (T) Time to maturity i.e. expiry date
+    :param option_type: str
+            Type of option. Possible values: CE, PE
+    :param calculation_date: date
+            Observation date. If None is given then present date is taken.
+    :param volatility: float
+            Annualised Volatility for underlying.
+    :return: tuple(float, float, float, float, float)
+            Returns delta, gamma, theta, vega, rho for the option data entered
+    """
     maturity_date = Date(expiry_date.day, expiry_date.month, expiry_date.year)
     # volatility = 0.0  # the historical vols for a year
     # print(spot_price, strike_price, expiry_date, option_type, option_price, calculation_date)

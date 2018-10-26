@@ -250,6 +250,9 @@ class Gateway(Enum):
 
 
 class DbIndex(Enum):
+    """
+    This enums are used for the indexing the database columns for FO data
+    """
     index_id = 0
     instrument_id = 1
     symbol_id = 2

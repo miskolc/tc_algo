@@ -321,8 +321,38 @@ class Pattern(Enum):
 
 
 class GreekValues:
+    """
+    This class is used for the defining values of different option greeks.
+    """
     def __init__(self, callPrice, callDelta, callDelta2, callTheta, callRho, putPrice, putDelta, putDelta2, putTheta,
                  putRho, vega, gamma):
+        """
+        It initializes an instance which contains different greek values.
+        :param callPrice: float
+                Theoretical call price
+        :param callDelta: float
+                Call Delta
+        :param callDelta2: float
+                Call double delta
+        :param callTheta: float
+                Call Theta
+        :param callRho: float
+                Call Rho
+        :param putPrice: float
+                Theoretical put price
+        :param putDelta: float
+                Put Delta
+        :param putDelta2: float
+                Put double delta
+        :param putTheta: float
+                Put Theta
+        :param putRho: float
+                Put Rho
+        :param vega: float
+                Option vega
+        :param gamma: float
+                Option Gamma
+        """
         self.call = callPrice
         self.call_delta = callDelta
         self.call_dual_delta = callDelta2

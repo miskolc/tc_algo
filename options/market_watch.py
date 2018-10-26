@@ -6,6 +6,7 @@ import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output, State
 import pandas as pd
+import plotly.offline as py
 import plotly.graph_objs as go
 
 import options.database_connection as dbc
@@ -13,6 +14,10 @@ from constants import Keys
 
 fut_df = pd.DataFrame()
 opt_df = pd.DataFrame()
+
+strikes = []
+call_oi = []
+put_oi = []
 
 columns = ['id', 'instrument', 'symbol', 'expiry', 'strike', 'option_typ', 'open', 'high', 'low', 'close', 'settle_pr',
            'contracts', 'val', 'open_int', 'chg_in_oi', 'timestamp', 'iv', 'theta', 'gamma', 'delta', 'vega']
@@ -23,9 +28,9 @@ call_color = "#FFCCFF"
 put_color = "#CCECFF"
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
-dash_app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+market_watch_app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
-dash_app.layout = html.Div([
+market_watch_app.layout = html.Div([
     # dcc.Graph(id='graph-with-slider'),
     html.Table(children=[html.Tr(children=[
         html.Td(children=dcc.Input(
@@ -59,20 +64,32 @@ dash_app.layout = html.Div([
             ),
         ]),
     ]),
-    html.P(id='info'),
+    html.Br(),
+    html.Div(id='oi_container', children=[
+        html.Button("OI", id='oi'),
+        html.P(id='oi_status')
+    ]),
+    html.Br(),
     html.Table(id='market_watch')
-
 ])
 
 
-@dash_app.callback(
+@market_watch_app.callback(
     Output('status', 'children'),
     inputs=[Input('fetch', 'n_clicks')], state=[State('scrip', 'value')])
 def fetch_data(n_clicks, scrip_name):
+    """
+    It fetches the data initially when button is clicked
+    :param n_clicks: int
+            Button clicks for the button id fetch
+    :param scrip_name: str
+            Name of the scrip for which data is required.
+    :return: status of the data
+    """
     global fut_df, opt_df
     if n_clicks is not None:
         scrip_name = scrip_name.capitalize()
-        future_data, option_data = symbol_data(scrip_name)
+        future_data, option_data = _symbol_data(scrip_name)
         fut_df = pd.DataFrame(future_data, columns=columns)
         opt_df = pd.DataFrame(option_data, columns=columns)
         return "Ready"
@@ -80,8 +97,14 @@ def fetch_data(n_clicks, scrip_name):
         return "Not Ready"
 
 
-@dash_app.callback(Output('expiry_list', 'options'), [Input('get_expiry', 'n_clicks')])
+@market_watch_app.callback(Output('expiry_list', 'options'), [Input('get_expiry', 'n_clicks')])
 def get_expiry_list(n_clicks):
+    """
+    Gets the expiry list for the symbol
+    :param n_clicks: int
+            Button clicks for the button id get_expiry
+    :return: list of date of expiry
+    """
     global fut_df
     expiry_list = []
     if n_clicks is not None:
@@ -91,10 +114,20 @@ def get_expiry_list(n_clicks):
     return expiry_list
 
 
-@dash_app.callback(Output('market_watch', 'children'), [Input('display', 'n_clicks')],
-                   state=[State('expiry_list', 'value'), State('date_picker', 'date')])
+@market_watch_app.callback(Output('market_watch', 'children'), [Input('display', 'n_clicks')],
+                           state=[State('expiry_list', 'value'), State('date_picker', 'date')])
 def display_watch(n_clicks, expiry_date, obs_date):
-    global opt_df, fut_df
+    """
+    This is used to display match watch contents after selection of expiry and observation date.
+    :param n_clicks: int
+            Button clicks for the id 'display'
+    :param expiry_date: str
+            Expiry date
+    :param obs_date: str
+            Observation date
+    :return: table rows to be displayed to table id market_watch
+    """
+    global opt_df, fut_df, strikes, call_oi, put_oi
     if n_clicks is not None:
         fmt = "%Y-%m-%d"
         expiry = [datetime.strptime(expiry_date, fmt).date()]
@@ -118,6 +151,8 @@ def display_watch(n_clicks, expiry_date, obs_date):
         put_data = opt_df[
             opt_df.expiry.isin(expiry) & opt_df.timestamp.isin(timestamp) & opt_df.option_typ.isin(option_put)]
         strikes = []
+        call_oi = []
+        put_oi = []
         for row in call_data.itertuples():
             strikes.append(row.strike)
 
@@ -140,6 +175,7 @@ def display_watch(n_clicks, expiry_date, obs_date):
 
                 for ce in call.itertuples():
                     x = [ce.theta, ce.gamma, ce.delta, ce.vega, ce.iv, ce.close, ce.contracts, ce.chg_in_oi, ]
+                    call_oi.append(ce.open_int)
                     call_row = [html.Td(k, style={"background": itm_color if itm else call_color, }) for k in x]
                     strike_row.append(call_row)
 
@@ -147,6 +183,7 @@ def display_watch(n_clicks, expiry_date, obs_date):
 
                 for pe in put.itertuples():
                     y = [pe.theta, pe.gamma, pe.delta, pe.vega, pe.iv, pe.close, pe.contracts, pe.chg_in_oi]
+                    put_oi.append(pe.open_int)
                     y.reverse()
                     put_row = [html.Td(k, style={"background": put_color if itm else itm_color}) for k in y]
                     strike_row[-1] += put_row
@@ -157,7 +194,51 @@ def display_watch(n_clicks, expiry_date, obs_date):
         return table_rows
 
 
-def symbol_data(symbol):
+@market_watch_app.callback(
+    Output('oi_status', 'children'),
+    inputs=[Input('oi', 'n_clicks')], )
+def display_oi(n_clicks):
+    """
+    This used to display the oi bar chart for call and put using plotly.
+    :param n_clicks: int
+            Button clicks for id oi_status
+    :return: None
+    """
+    global strikes, call_oi, put_oi
+    if n_clicks is not None:
+        trace1 = go.Bar(
+            x=strikes,
+            y=call_oi,
+            name="Call OI",
+            textposition='outside',
+        )
+
+        trace2 = go.Bar(
+            x=strikes,
+            y=put_oi,
+            name="Put OI",
+            textposition='outside',
+        )
+
+        data = [trace1, trace2]
+        layout = go.Layout(
+            xaxis=dict(tickangle=-45),
+            barmode='group',
+        )
+        fig = go.Figure(data=data, layout=layout)
+
+        py.plot(fig, filename='oi_chart.html')
+        return "Displaying OI..."
+
+
+def _symbol_data(symbol):
+    """
+    It get the data for the given symbol
+    :param symbol: str
+            Symbol for which data is required. eg. NIFTY
+    :return: tuple(list, list)
+            Returns futures data and options data
+    """
     print("Fetching data...")
     option_query = "Select * from %s where symbol='%s' and instrument like 'OPT%%' " % (dbc.table_name, symbol,)
     option_data = dbc.execute_simple_query(option_query)
@@ -167,8 +248,15 @@ def symbol_data(symbol):
     return future_data, option_data
 
 
-if __name__ == '__main__':
-    dash_app.run_server()
+def get_market_watch_app():
+    """
+    It returns a dash app which can be run as market watch app.
+    :return: dash app
+            Dash app for market watch display
+    """
+    # dash_app.run_server()
     # fetch_data(1, "Nifty")
     # get_expiry_list(1)
     # display_watch(1, "2018-10-25", "2018-10-23")
+    # display_oi(1)
+    return market_watch_app

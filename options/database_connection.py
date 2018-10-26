@@ -12,9 +12,14 @@ password = ''
 
 db_name = 'fo'
 table_name = 'fo_data'
+interest = 0.0
 
 
 def _check_database():
+    """
+    This checks for the for the database present in the MySQL server. If not then it creates the database.
+    :return: None
+    """
     conn = mysql.connector.connect(host=host, user=user, password=password)
     cursor = conn.cursor()
     query = "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = '%s'" % db_name
@@ -33,6 +38,11 @@ def _check_database():
 
 
 def _check_table(truncate: bool):
+    """
+    This checks for the table in the database. If not present then it creates the table.
+    :param truncate:
+    :return: None
+    """
     db_conn = mysql.connector.connect(host=host, user=user, password=password, database=db_name)
     cursor = db_conn.cursor()
     # query = "SELECT table_name FROM information_schema.tables WHERE table_name = '%s'" % table_name
@@ -59,6 +69,12 @@ def _check_table(truncate: bool):
 
 
 def insert_data(queries):
+    """
+    This is used to enter multiple queries into the database.
+    :param queries: List[str]
+            It should the a list of queries in str format which can be inserted directly in database.
+    :return: None
+    """
     db_conn = mysql.connector.connect(host=host, user=user, password=password, database=db_name)
     cursor = db_conn.cursor()
     for query in queries:
@@ -71,11 +87,21 @@ def insert_data(queries):
 
 
 def bulk_entries(truncate: bool):
+    """
+    This is used to check resources before inserting bulk entries into the database
+    :param truncate: bool
+            If table is already present then truncate if True.
+    :return: None
+    """
     _check_database()
     _check_table(truncate)
 
 
 def add_greeks_column():
+    """
+    This checks and adds greeks columns to the database i.e. iv, theta, gamma, delta and vega.
+    :return: None
+    """
     db_conn = mysql.connector.connect(host=host, user=user, password=password, database=db_name)
     cursor = db_conn.cursor()
     check_query = "SELECT * FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = '%s' AND TABLE_NAME = '%s' AND COLUMN_NAME LIKE 'iv'" % (
@@ -91,30 +117,16 @@ def add_greeks_column():
     db_conn.close()
 
 
-# index_id = 0
-# instrument_id = 1
-# symbol_id = 2
-# expiry_id = 3
-# strike_id = 4
-# option_type_id = 5
-# open_id = 6
-# high_id = 7
-# low_id = 8
-# close_id = 9
-# settle_id = 10
-# contracts_id = 11
-# val_id = 12
-# open_int_id = 13
-# chg_in_oi = 14
-# timestamp_id = 15
-
-interest = 0.0
-
-
-# interest = 0.10 # For spot as per NSE
-
-
-def _get_fut_data(timestamp):
+def _get_fut_data(timestamp: str):
+    """
+    This returns the Futures data for the timestamp given as input.
+    :param timestamp: str
+            It is the timestamp for which futures data is required.
+            Format e.g. '2018-10-25'
+    :return: dict
+            Key is of the type 'instrument_symbol_month_year' e.g. 'IDX_NIFTY_10_18'.
+            Value is the close price of the future on the input timestamp.
+    """
     data = {}
     db_conn = mysql.connector.connect(host=host, user=user, password=password, database=db_name)
     cursor = db_conn.cursor()
@@ -133,6 +145,12 @@ def _get_fut_data(timestamp):
 
 
 def update_database_greeks(ts: date):
+    """
+    This updates the greeks for the given timestamp and insert them in database.
+    :param ts: date
+            Timestamp for which the greeks are to be updated
+    :return: None
+    """
     db_conn = mysql.connector.connect(host=host, user=user, password=password, database=db_name)
     cursor = db_conn.cursor()
     # if clear_columns:
@@ -152,9 +170,9 @@ def update_database_greeks(ts: date):
 
     cursor.execute(timestamp_query)
     x = cursor.fetchall()
-    for ts in x:
+    for obs_ts in x:
         date_time = time.time()
-        data_date = ts[0]
+        data_date = obs_ts[0]
         print("Updating options data for: %s" % data_date)
         fut_data = _get_fut_data(data_date)
         opt_query = "SELECT * FROM `%s` WHERE instrument LIKE 'OPT%%' AND timestamp='%s' ORDER BY id ASC " % (
@@ -188,6 +206,12 @@ def update_database_greeks(ts: date):
 
 
 def execute_simple_query(query):
+    """
+    This used to execute a MySQL query in the database.
+    :param query: str
+            MySQL query to be executed
+    :return: None
+    """
     start_time = time.time()
     db_conn = mysql.connector.connect(host=host, user=user, password=password, database=db_name)
     cursor = db_conn.cursor()

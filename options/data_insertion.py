@@ -15,6 +15,11 @@ delimiter = ','
 
 
 def _extract_files(path: str):
+    """
+    This is used to extract the zip files in a directory
+    :param path: Path to firectory with zip files
+    :return: None
+    """
     extract_path = path + extract_dir
     if os.path.isdir(extract_path):
         shutil.rmtree(extract_path)
@@ -35,6 +40,12 @@ def _extract_files(path: str):
 
 
 def _read_data(path: str):
+    """
+    This is used to read the csv file i.e. FO bhavcopy
+    :param path: str
+        Path to the csv file
+    :return: None
+    """
     extract = path + extract_dir
 
     csv_files = os.listdir(extract)
@@ -60,6 +71,13 @@ def _read_data(path: str):
 
 
 def _read_row(row):
+    """
+    It is used to read the row in the csv file for the database insertion
+    :param row: list
+            Values of the row in a list
+    :return: str
+            Values for the database query
+    """
     data_arr = row
     instrument = data_arr[0]
     if instrument != 'INSTRUMENT':
@@ -91,6 +109,14 @@ def _read_row(row):
 
 
 def insert_bulk_data(path: str = None, truncate: bool = True):
+    """
+    This used to insert bhavcopy in bulk into the database
+    :param path: str
+            Path to the folder containing all the bhavcopy zip files to be inserted into database
+    :param truncate: bool
+            If table is already present then truncate if True.
+    :return: None
+    """
     if path is not None:
         path = default_path
         start_time = time.time()
@@ -105,6 +131,14 @@ def insert_bulk_data(path: str = None, truncate: bool = True):
 
 
 def insert_bhavcopy(path: str, filename: str, ):
+    """
+    Used to insert the bhavcopy into the database
+    :param path: str
+            Path to the directory where file is located
+    :param filename: str
+            Name of the file i.e. bhavcopy zip file
+    :return: None
+    """
     zip_path = path + filename
     if zipfile.is_zipfile(zip_path):
         queries = []
@@ -127,6 +161,13 @@ def insert_bhavcopy(path: str, filename: str, ):
 
 
 def update_option_greeks(timestamp: date = None):
+    """
+    It is used to update the option greeks in the database.
+    :param timestamp: date
+            It is to update greeks for a particular date.
+            If None, greeks are updated for whole database
+    :return: None
+    """
     start_time = time.time()
     # if timestamp is None:
     #     database_con/nection.add_greeks_column()
