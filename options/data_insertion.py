@@ -108,7 +108,7 @@ def _read_row(row):
         return None
 
 
-def insert_bulk_data(path: str = None, truncate: bool = True):
+def insert_bulk_data(path: str = default_path, truncate: bool = True):
     """
     This used to insert bhavcopy in bulk into the database
     :param path: str
@@ -118,7 +118,6 @@ def insert_bulk_data(path: str = None, truncate: bool = True):
     :return: None
     """
     if path is not None:
-        path = default_path
         start_time = time.time()
         print("Bulk entries started...")
         _extract_files(path)

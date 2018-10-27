@@ -46,7 +46,7 @@ def option_price(underlying_price: float, strike_price: float, interest: float, 
                 (v) (sigma) Volatility of the option
     :param obs_date: date
                 Date of observation. By default present date.
-    :return:
+    :return: GreekValues
     """
     # BS([underlyingPrice, strikePrice, interestRate, daysToExpiration], volatility=x, callPrice=y, putPrice=z)
     days_to_exp = days_to_expiry(expiry_date, obs_date)
