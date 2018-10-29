@@ -1,7 +1,7 @@
 import numpy as np
 import scipy.stats as si
 import sympy as sy
-from options import greeks_calculator, data_insertion, option_greeks, database_connection
+from options import greeks_calculator, data_insertion, option_greeks, database_connection, market_watch, option_strategy
 
 
 def euro_vanilla(spot, strike, time_to_maturity, int_rate, vol, option='call'):

@@ -95,7 +95,7 @@ def payoff_charts(spot: list, strike: int, option_type: str, option_price: float
         delta_list, gamma_list, theta_list, vega_list, rho_list = _get_greeks_payoff_values(spot, strike, expiry_date,
                                                                                             calculation_date,
                                                                                             option_type,
-                                                                                            option_price, volatility)
+                                                                                            volatility)
 
         fig = plt.figure()
 
@@ -143,5 +143,6 @@ def payoff_charts(spot: list, strike: int, option_type: str, option_price: float
         _logger.warning("Option can be either CE or PE")
         _logger.info("Couldn't plot payoffs")
 
-# if __name__ == '__main__':
-#     payoff_charts([9000, 11100], 10000, Keys.put, 276., date(2018, 10, 26), date(2018, 11, 29), 20.95)
+
+if __name__ == '__main__':
+    payoff_charts([9000, 11100], 10000, Keys.put, 276., date(2018, 10, 26), date(2018, 11, 29), 20.95)

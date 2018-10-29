@@ -367,3 +367,10 @@ class GreekValues:
 
         self.vega = vega
         self.gamma = gamma
+
+
+class StrikeEntry:
+    def __init__(self, strike, option_type, signal):
+        self.strike = strike
+        self.option_type = option_type
+        self.signal = signal

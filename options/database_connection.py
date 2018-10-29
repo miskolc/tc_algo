@@ -14,6 +14,9 @@ db_name = 'fo'
 table_name = 'fo_data'
 interest = 0.0
 
+columns = ['id', 'instrument', 'symbol', 'expiry', 'strike', 'option_typ', 'open', 'high', 'low', 'close', 'settle_pr',
+           'contracts', 'val', 'open_int', 'chg_in_oi', 'timestamp', 'iv', 'theta', 'gamma', 'delta', 'vega']
+
 
 def _check_database():
     """

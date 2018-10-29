@@ -19,8 +19,6 @@ strikes = []
 call_oi = []
 put_oi = []
 
-columns = ['id', 'instrument', 'symbol', 'expiry', 'strike', 'option_typ', 'open', 'high', 'low', 'close', 'settle_pr',
-           'contracts', 'val', 'open_int', 'chg_in_oi', 'timestamp', 'iv', 'theta', 'gamma', 'delta', 'vega']
 header_style = {'color': "white", "background": "black"}
 border = "2px solid black"
 itm_color = '#FBF5CD'
@@ -90,8 +88,8 @@ def fetch_data(n_clicks, scrip_name):
     if n_clicks is not None:
         scrip_name = scrip_name.capitalize()
         future_data, option_data = _symbol_data(scrip_name)
-        fut_df = pd.DataFrame(future_data, columns=columns)
-        opt_df = pd.DataFrame(option_data, columns=columns)
+        fut_df = pd.DataFrame(future_data, columns=dbc.columns)
+        opt_df = pd.DataFrame(option_data, columns=dbc.columns)
         return "Ready"
     else:
         return "Not Ready"
