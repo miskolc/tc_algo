@@ -370,7 +370,11 @@ class GreekValues:
 
 
 class StrikeEntry:
-    def __init__(self, strike, option_type, signal):
+    def __init__(self, signal: str, strike: int, option_type: str, premium: float = None):
         self.strike = strike
         self.option_type = option_type
         self.signal = signal
+        self.premium = premium
+
+    def __str__(self) -> str:
+        return "%s %s%s" % (self.signal, self.strike, self.option_type)

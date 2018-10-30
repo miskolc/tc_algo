@@ -80,6 +80,8 @@ class Keys:
 
     call = "CE"
     put = "PE"
+    buy = "buy"
+    sell = "sell"
 
 
 class MsgType(Enum):

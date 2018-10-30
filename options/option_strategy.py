@@ -1,15 +1,19 @@
 from datetime import date
+
+import numpy
 import pandas as pd
 
 from plotly import tools
 import plotly.offline as py
 import plotly.graph_objs as go
 
+from constants import Keys
 from model import StrikeEntry
-from options import database_connection as dbc
+from options import database_connection as dbc, payoff_charts
 
 
 def options_strategy(symbol: str, strike_data: list, expiry_month: int, expiry_year: int, start_date: date,
+                     spot_range: list,
                      strategy_name: str = None):
     symbol = symbol.capitalize()
     fut_query = "Select * from %s where symbol='%s' and instrument like 'FUT%%' and MONTH(expiry)=%d and YEAR(expiry)=%d" % (
@@ -39,7 +43,7 @@ def options_strategy(symbol: str, strike_data: list, expiry_month: int, expiry_y
                 close = row.close
                 if timestamp >= start_date:
                     temp_pl = close - init_price
-                    pl = temp_pl if strikes.signal == "BUY" else (-1 * temp_pl)
+                    pl = temp_pl if strikes.signal == Keys.buy else (-1 * temp_pl)
                     payoff_data.append([timestamp, strikes.strike, strikes.option_type, pl])
         else:
             print("Couldn't find initial price for strike: %s%s and start date: %s" % (
@@ -47,17 +51,14 @@ def options_strategy(symbol: str, strike_data: list, expiry_month: int, expiry_y
 
     if len(payoff_data) > 0:
         payoff_df = pd.DataFrame(payoff_data, columns=['timestamp', 'strike', 'option_typ', 'pl'])
-        # print(payoff_df)
         timestamp_cum_pl = [[], []]
         payoff_timestamp = payoff_df.timestamp.unique()
-        # print(payoff_timestamp)
         for data_timestamp in payoff_timestamp:
             timestamp = [data_timestamp]
             timestamp_df = payoff_df[payoff_df.timestamp.isin(timestamp)]
             timestamp_pl = timestamp_df.pl.sum()
             timestamp_cum_pl[0].append(data_timestamp)
             timestamp_cum_pl[1].append(timestamp_pl)
-        # print(timestamp_cum_pl)
 
         strike_cum_pl = []
         for strikes in strike_data:
@@ -68,7 +69,6 @@ def options_strategy(symbol: str, strike_data: list, expiry_month: int, expiry_y
             for item in strike_payoff_df.itertuples():
                 strike_time_series[0].append(item.timestamp)
                 strike_time_series[1].append(item.pl)
-            # print(strike, option_type, strike_payoff_df.pl.sum())
             strike_info = dict(
                 strike=strikes.strike,
                 option_type=strikes.option_type,
@@ -77,14 +77,35 @@ def options_strategy(symbol: str, strike_data: list, expiry_month: int, expiry_y
                 df=strike_payoff_df,
             )
             strike_cum_pl.append(strike_info)
-        # print(strike_pl)
-
-        # print(timestamp_cum_pl)
-        # print(strike_cum_pl)
-        _plot_options_strategy_payoffs(symbol, fut_timeseries_data, timestamp_cum_pl, strike_cum_pl, strategy_name)
+        spot, theoretical_payoff = _get_theoretical_payoffs(spot_range, strike_data)
+        _plot_options_strategy_payoffs(symbol, fut_timeseries_data, timestamp_cum_pl, strike_cum_pl,
+                                       [spot, theoretical_payoff], strategy_name)
 
 
-def _plot_options_strategy_payoffs(symbol, fut_timeseries_data, timestamp_cum_pl, strike_cum_pl,
+def _get_theoretical_payoffs(spot: list, strike_data: list):
+    spot = numpy.arange(min(spot), max(spot), 100, dtype=numpy.int64).tolist()
+    payoff = []
+    for strike in strike_data:
+        if strike.premium:
+            payoff_list = payoff_charts._get_payoff_values(spot, strike.strike, strike.option_type, strike.premium)
+            # print(payoff_list)
+            payoff.append(payoff_list)
+        else:
+            print("Parameter premium is required for %s for theoretical payoffs" % strike)
+
+    while len(payoff) > 1:
+        one = payoff[0]
+        two = payoff[1]
+        for i in range(len(one)):
+            one[i] = one[i] + two[i]
+        payoff.pop(1)
+
+    if len(payoff) == 1:
+        payoff = payoff[0]
+    return spot, payoff
+
+
+def _plot_options_strategy_payoffs(symbol, fut_timeseries_data, timestamp_cum_pl, strike_cum_pl, theoretical_pl,
                                    strategy_name: str = None):
     titles = []
     traces = []
@@ -93,22 +114,29 @@ def _plot_options_strategy_payoffs(symbol, fut_timeseries_data, timestamp_cum_pl
 
     period = timestamp_cum_pl[0]
     values = timestamp_cum_pl[1]
-    # print(period, values)
 
-    trace_fut = None
+    spot = theoretical_pl[0]
+    payoff = theoretical_pl[1]
+
+    # trace_fut = None
     if fut_period:
         name = 'Underlying %s' % symbol
         trace_fut = go.Scatter(x=fut_period, y=fut_values, name=symbol)
-        # titles.append(name)
-        # traces.append(trace_fut)
+        titles.append(name)
+        traces.append(trace_fut)
 
-    trace_pl = None
+    if spot:
+        name = 'Theoretical Payoffs'
+        trace_payoff = go.Scatter(x=spot, y=payoff, name=name)
+        titles.append(name)
+        traces.append(trace_payoff)
+
+    # trace_pl = None
     if period:
         name = 'Cumulative P&L'
         trace_pl = go.Scatter(x=period, y=values, name=name)
-        # titles.append(name)
-        # traces.append(trace_pl)
-
+        titles.append(name)
+        traces.append(trace_pl)
     for strike_pl in strike_cum_pl:
         strike = strike_pl['strike']
         opt_type = strike_pl['option_type']
@@ -119,45 +147,33 @@ def _plot_options_strategy_payoffs(symbol, fut_timeseries_data, timestamp_cum_pl
         titles.append('%s %s' % (name, signal))
         traces.append(trace)
 
-    # print(titles)
-    # print(traces)
-    titles.append("Underlying vs Cum P&L")
+    # titles.append("Underlying vs Cum P&L")
 
     columns = 3
-    len_traces = len(traces) + 1
+    len_traces = len(traces)
+    # len_traces = len(traces) + 1
     rows = int(len_traces / columns) if len_traces % columns == 0 else (int(len_traces / columns) + 1)
-    # print(rows)
     fig = tools.make_subplots(rows=rows, cols=columns, subplot_titles=titles)
-    # fig = tools.make_subplots(rows=rows, cols=columns, )
-
-    # fig.append_trace(trace_fut, 1, 1)
-    # fig.append_trace(trace_pl, 1, 1)
-
-    # fig['data'][1].update(yaxis='y2')
-    # fig['layout']['yaxis1'].update(showgrid=True, title='Underlying')
-    # fig['layout']['yaxis2'] = dict(overlaying='y1', side='right', showgrid=False, title='CUM P&L')
 
     i = 0
     for row in range(rows):
         for col in range(columns):
-            if i < len_traces - 1:
+            if i < len_traces:
                 fig.append_trace(traces[i], row=row + 1, col=col + 1)
                 i += 1
 
-    under_row = int((len_traces / 3) + 1)
-    under_column = (len_traces % 3)
+    # under_row = (int(len_traces / 3) + 1)
+    # under_column = (len_traces % 3) + 1
     # print(under_row, under_column)
-    fig.append_trace(trace_fut, under_row, under_column)
-    fig.append_trace(trace_pl, under_row, under_column)
-
-    # fig['data'][-1].update(yaxis='y5')
-    # fig['layout']['yaxis4'].update(showgrid=True, title='Underlying')
-    # fig['layout']['yaxis5'] = dict(overlaying='y4', side='right', showgrid=False, title='CUM P&L')
-
-    fig['data'][-1].update(yaxis='y' + str(len_traces + 1))
-    fig['layout']['yaxis' + str(len_traces)].update(showgrid=True, title='Underlying')
-    fig['layout']['yaxis' + str(len_traces + 1)] = dict(overlaying='y' + str(len_traces), side='right', showgrid=False,
-                                                        title='CUM P&L')
+    # fig.append_trace(trace_fut, 2, 2)
+    # fig.append_trace(trace_pl, 2, 2)
+    # print(len_traces)
+    # # print(fig)
+    # fig['data'][-1].update(yaxis='y' + str(len_traces + 1))
+    # fig['layout']['yaxis' + str(len_traces)].update(showgrid=True, title='Underlying')
+    # fig['layout']['yaxis' + str(len_traces + 1)] = dict(overlaying='y' + str(len_traces), side='right', showgrid=False,
+    #                                                     title='CUM P&L')
+    # print(fig)
 
     title_name = '%s_payoffs' % (strategy_name if strategy_name else 'option_strategy')
     fig['layout'].update(title=title_name.capitalize())
@@ -167,9 +183,10 @@ def _plot_options_strategy_payoffs(symbol, fut_timeseries_data, timestamp_cum_pl
 
 if __name__ == '__main__':
     strike_data = [
-        StrikeEntry(10000, "CE", "BUY"),
-        StrikeEntry(10200, "PE", "BUY"),
-        StrikeEntry(10200, "CE", "SELL")
+        StrikeEntry(Keys.buy, 10000, Keys.call, 368),
+        StrikeEntry(Keys.buy, 10200, Keys.put, 222),
+        StrikeEntry(Keys.sell, 10200, Keys.call, 245),
+        # StrikeEntry(10300, "CE", "BUY"),
+        # StrikeEntry(10400, "CE", "SELL")
     ]
-    options_strategy("nifty", strike_data, 10, 2018, date(2018, 10, 23))
-    # _plot_options_strategy_payoffs([],[])
+    options_strategy("nifty", strike_data, 10, 2018, date(2018, 10, 23), spot_range=[9500, 11100])

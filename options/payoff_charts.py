@@ -100,30 +100,30 @@ def payoff_charts(spot: list, strike: int, option_type: str, option_price: float
         fig = plt.figure()
 
         if payoff_list is not None:
-            ax6 = fig.add_subplot(321)
-            ax6.plot(spot, payoff_list, )
-            ax6.set_title('Payoff')
+            ax1 = fig.add_subplot(321)
+            ax1.plot(spot, payoff_list, )
+            ax1.set_title('Payoff')
 
         if delta_list:
-            ax1 = fig.add_subplot(322)
-            ax1.plot(spot, delta_list, )
-            ax1.set_title('Delta')
+            ax2 = fig.add_subplot(322)
+            ax2.plot(spot, delta_list, )
+            ax2.set_title('Delta')
 
-            ax2 = fig.add_subplot(323)
-            ax2.plot(spot, gamma_list, )
-            ax2.set_title('Gamma')
+            ax3 = fig.add_subplot(323)
+            ax3.plot(spot, gamma_list, )
+            ax3.set_title('Gamma')
 
-            ax3 = fig.add_subplot(324)
-            ax3.plot(spot, theta_list, )
-            ax3.set_title('Theta')
+            ax4 = fig.add_subplot(324)
+            ax4.plot(spot, theta_list, )
+            ax4.set_title('Theta')
 
-            ax4 = fig.add_subplot(325)
-            ax4.plot(spot, vega_list, )
-            ax4.set_title('Vega')
+            ax5 = fig.add_subplot(325)
+            ax5.plot(spot, vega_list, )
+            ax5.set_title('Vega')
 
-            ax5 = fig.add_subplot(326)
-            ax5.plot(spot, rho_list, )
-            ax5.set_title('Rho')
+            ax6 = fig.add_subplot(326)
+            ax6.plot(spot, rho_list, )
+            ax6.set_title('Rho')
 
         plt.tight_layout()
         fig = plt.gcf()
