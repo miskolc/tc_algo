@@ -12,7 +12,7 @@ from options import option_greeks
 _logger = logging.getLogger("payoff_charts")
 
 
-def _get_payoff_values(spot, strike: int, option_type: str, premium: float):
+def _get_payoff_values(spot, strike: int, option_type: str, premium: float, signal: str = None):
     """
     It evaluates the payoff values of the option
     :param spot: list
@@ -29,6 +29,8 @@ def _get_payoff_values(spot, strike: int, option_type: str, premium: float):
     payoff = []
     for underlying in spot:
         value = (max(0, (underlying - strike) if option_type == Keys.call else (strike - underlying))) - premium
+        if signal == Keys.sell:
+            value *= -1
         payoff.append(value)
     return payoff
 

@@ -13,8 +13,7 @@ from options import database_connection as dbc, payoff_charts
 
 
 def options_strategy(symbol: str, strike_data: list, expiry_month: int, expiry_year: int, start_date: date,
-                     spot_range: list,
-                     strategy_name: str = None):
+                     spot_range: list, strategy_name: str = None):
     symbol = symbol.capitalize()
     fut_query = "Select * from %s where symbol='%s' and instrument like 'FUT%%' and MONTH(expiry)=%d and YEAR(expiry)=%d" % (
         dbc.table_name, symbol, expiry_month, expiry_year)
@@ -87,7 +86,8 @@ def _get_theoretical_payoffs(spot: list, strike_data: list):
     payoff = []
     for strike in strike_data:
         if strike.premium:
-            payoff_list = payoff_charts._get_payoff_values(spot, strike.strike, strike.option_type, strike.premium)
+            payoff_list = payoff_charts._get_payoff_values(spot, strike.strike, strike.option_type, strike.premium,
+                                                           signal=strike.signal)
             # print(payoff_list)
             payoff.append(payoff_list)
         else:
@@ -181,12 +181,107 @@ def _plot_options_strategy_payoffs(symbol, fut_timeseries_data, timestamp_cum_pl
     py.plot(fig, filename='%s.html' % title_name)
 
 
+def oi_analytics(symbol: str, expiry_month: int, expiry_year: int, ):
+    fut_query = "Select * from %s where symbol='%s' and instrument like 'FUT%%' and MONTH(expiry)=%d and YEAR(expiry)=%d" % (
+        dbc.table_name, symbol, expiry_month, expiry_year)
+    fut_data = dbc.execute_simple_query(fut_query)
+    fut_df = pd.DataFrame(data=fut_data, columns=dbc.columns)
+    start_date = date(expiry_year, expiry_month, 1)
+    x, y1, y2, y3 = [], [], [], []
+    for fut_row in fut_df.itertuples():
+        timestamp = fut_row.timestamp
+        if timestamp >= start_date:
+            # print(timestamp, fut_row.settle_pr, fut_row.open_int, fut_row.chg_in_oi)
+            x.append(timestamp)
+            y1.append(fut_row.open_int)
+            y2.append(fut_row.settle_pr)
+            y3.append(fut_row.chg_in_oi)
+    trace1 = go.Scatter(x=x, y=y1, name='OI', )
+    trace2 = go.Scatter(x=x, y=y2, name='settle_pr', yaxis='y2')
+    trace3 = go.Scatter(x=x, y=y3, name='chg_in_oi', yaxis='y3', fill='tozeroy')
+
+    data = [trace1, trace2, trace3]
+
+    layout = go.Layout(
+        title='OI Analytics',
+        yaxis=dict(title='Open Interest', ),
+        yaxis2=dict(
+            title='Settle Price',
+            anchor='free',
+            overlaying='y',
+            side='left',
+            position=0.05
+        ),
+        yaxis3=dict(
+            title='Change in OI',
+            anchor='x',
+            overlaying='y',
+            side='right',
+        ),
+    )
+    fig = go.Figure(data=data, layout=layout)
+    py.plot(fig, filename='oi_analytics.html')
+
+
+def put_call_ratio(symbol: str, expiry_month: int, expiry_year: int, ):
+    symbol = symbol.capitalize()
+    fut_query = "Select * from %s where symbol='%s' and instrument like 'FUT%%' and MONTH(expiry)=%d and YEAR(expiry)=%d" % (
+        dbc.table_name, symbol, expiry_month, expiry_year)
+    fut_data = dbc.execute_simple_query(fut_query)
+    fut_df = pd.DataFrame(data=fut_data, columns=dbc.columns)
+
+    option_query = "Select * from %s where symbol='%s' and instrument like 'OPT%%' and MONTH(expiry)=%d and YEAR(expiry)=%d" % (
+        dbc.table_name, symbol, expiry_month, expiry_year)
+    option_data = dbc.execute_simple_query(option_query)
+    option_df = pd.DataFrame(data=option_data, columns=dbc.columns)
+    start_date = date(expiry_year, expiry_month, 1)
+    option_expiry_df = option_df[option_df.timestamp >= start_date]
+    timestamp_arr = option_expiry_df.timestamp.unique()
+    call_option = [Keys.call]
+    put_option = [Keys.put]
+    x, y1, y2 = [], [], []
+    for timestamp in timestamp_arr:
+        day = [timestamp]
+        call_df = option_expiry_df[option_expiry_df.option_typ.isin(call_option) & option_expiry_df.timestamp.isin(day)]
+        put_df = option_expiry_df[option_expiry_df.option_typ.isin(put_option) & option_expiry_df.timestamp.isin(day)]
+        call_volume = call_df.open_int.sum()
+        put_volume = put_df.open_int.sum()
+        pcr = put_volume / call_volume
+        fut_price = fut_df[fut_df.timestamp.isin(day)].close.mean()
+        # print(timestamp, fut_price, pcr)
+        x.append(timestamp)
+        y1.append(fut_price)
+        y2.append(pcr)
+
+    trace1 = go.Scatter(x=x, y=y1, name=symbol, )
+    trace2 = go.Scatter(x=x, y=y2, name='PCR', yaxis='y2')
+    # trace3 = go.Scatter(x=x, y=y3, name='chg_in_oi', yaxis='y3', fill='tozeroy')
+
+    data = [trace1, trace2, ]
+
+    layout = go.Layout(
+        title='PCR Analytics',
+        yaxis=dict(title='Underlying', ),
+        yaxis2=dict(
+            title='PCR',
+            anchor='x',
+            overlaying='y',
+            side='right',
+            position=0.05
+        ),
+    )
+    fig = go.Figure(data=data, layout=layout)
+    py.plot(fig, filename='pcr_analytics.html')
+
+
 if __name__ == '__main__':
     strike_data = [
-        StrikeEntry(Keys.buy, 10000, Keys.call, 368),
-        StrikeEntry(Keys.buy, 10200, Keys.put, 222),
-        StrikeEntry(Keys.sell, 10200, Keys.call, 245),
+        StrikeEntry(Keys.buy, 10500, Keys.call, 368),
+        StrikeEntry(Keys.buy, 10500, Keys.put, 222),
+        # StrikeEntry(Keys.sell, 10200, Keys.call, 245),
         # StrikeEntry(10300, "CE", "BUY"),
         # StrikeEntry(10400, "CE", "SELL")
     ]
-    options_strategy("nifty", strike_data, 10, 2018, date(2018, 10, 23), spot_range=[9500, 11100])
+    options_strategy("nifty", strike_data, 10, 2018, date(2018, 10, 1), spot_range=[9500, 11500])
+    # oi_analytics("nifty", 10, 2018, )
+    # put_call_ratio("nifty", 10, 2018, )
