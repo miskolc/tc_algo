@@ -11,7 +11,7 @@ user = 'root'
 password = ''
 
 db_name = 'fo'
-table_name = 'fo_data'
+table_name = 'fo_data1'
 interest = 0.0
 
 columns = ['id', 'instrument', 'symbol', 'expiry', 'strike', 'option_typ', 'open', 'high', 'low', 'close', 'settle_pr',

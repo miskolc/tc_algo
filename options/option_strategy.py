@@ -95,11 +95,19 @@ def _plot_options_strategy_payoffs(symbol, fut_timeseries_data, timestamp_cum_pl
     values = timestamp_cum_pl[1]
     # print(period, values)
 
+    trace_fut = None
     if fut_period:
         name = 'Underlying %s' % symbol
-        trace = go.Scatter(x=fut_period, y=fut_values, name=symbol)
-        titles.append(name)
-        traces.append(trace)
+        trace_fut = go.Scatter(x=fut_period, y=fut_values, name=symbol)
+        # titles.append(name)
+        # traces.append(trace_fut)
+
+    trace_pl = None
+    if period:
+        name = 'Cumulative P&L'
+        trace_pl = go.Scatter(x=period, y=values, name=name)
+        # titles.append(name)
+        # traces.append(trace_pl)
 
     for strike_pl in strike_cum_pl:
         strike = strike_pl['strike']
@@ -111,27 +119,45 @@ def _plot_options_strategy_payoffs(symbol, fut_timeseries_data, timestamp_cum_pl
         titles.append('%s %s' % (name, signal))
         traces.append(trace)
 
-    if period:
-        name = 'Cumulative P&L'
-        trace = go.Scatter(x=period, y=values, name=name)
-        titles.append(name)
-        traces.append(trace)
-
     # print(titles)
     # print(traces)
+    titles.append("Underlying vs Cum P&L")
 
     columns = 3
-    len_traces = len(traces)
+    len_traces = len(traces) + 1
     rows = int(len_traces / columns) if len_traces % columns == 0 else (int(len_traces / columns) + 1)
     # print(rows)
     fig = tools.make_subplots(rows=rows, cols=columns, subplot_titles=titles)
+    # fig = tools.make_subplots(rows=rows, cols=columns, )
+
+    # fig.append_trace(trace_fut, 1, 1)
+    # fig.append_trace(trace_pl, 1, 1)
+
+    # fig['data'][1].update(yaxis='y2')
+    # fig['layout']['yaxis1'].update(showgrid=True, title='Underlying')
+    # fig['layout']['yaxis2'] = dict(overlaying='y1', side='right', showgrid=False, title='CUM P&L')
 
     i = 0
     for row in range(rows):
         for col in range(columns):
-            if i < len_traces:
+            if i < len_traces - 1:
                 fig.append_trace(traces[i], row=row + 1, col=col + 1)
                 i += 1
+
+    under_row = int((len_traces / 3) + 1)
+    under_column = (len_traces % 3)
+    # print(under_row, under_column)
+    fig.append_trace(trace_fut, under_row, under_column)
+    fig.append_trace(trace_pl, under_row, under_column)
+
+    # fig['data'][-1].update(yaxis='y5')
+    # fig['layout']['yaxis4'].update(showgrid=True, title='Underlying')
+    # fig['layout']['yaxis5'] = dict(overlaying='y4', side='right', showgrid=False, title='CUM P&L')
+
+    fig['data'][-1].update(yaxis='y' + str(len_traces + 1))
+    fig['layout']['yaxis' + str(len_traces)].update(showgrid=True, title='Underlying')
+    fig['layout']['yaxis' + str(len_traces + 1)] = dict(overlaying='y' + str(len_traces), side='right', showgrid=False,
+                                                        title='CUM P&L')
 
     title_name = '%s_payoffs' % (strategy_name if strategy_name else 'option_strategy')
     fig['layout'].update(title=title_name.capitalize())
@@ -145,5 +171,5 @@ if __name__ == '__main__':
         StrikeEntry(10200, "PE", "BUY"),
         StrikeEntry(10200, "CE", "SELL")
     ]
-    options_strategy("nifty", strike_data, 10, 2018, date(2018, 10, 1))
+    options_strategy("nifty", strike_data, 10, 2018, date(2018, 10, 23))
     # _plot_options_strategy_payoffs([],[])
