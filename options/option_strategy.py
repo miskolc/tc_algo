@@ -34,9 +34,9 @@ def options_strategy(symbol: str, strike_data: list, expiry_month: int, expiry_y
         strike = [strikes.strike]
         option_type = [strikes.option_type]
         strike_df = option_df[option_df.strike.isin(strike) & option_df.option_typ.isin(option_type)]
-        init_day = strike_df[strike_df.timestamp == start_date]
-        if len(init_day) > 0:
-            init_price = init_day.close.values[0]
+        init_day_entry = strike_df[strike_df.timestamp == start_date]
+        if (len(init_day_entry) > 0) & (strikes.signal in [Keys.buy, Keys.sell]):
+            init_price = init_day_entry.close.values[0]
             for row in strike_df.itertuples():
                 timestamp = row.timestamp
                 close = row.close
@@ -85,8 +85,9 @@ def _get_theoretical_payoffs(spot: list, strike_data: list):
     spot = numpy.arange(min(spot), max(spot), 100, dtype=numpy.int64).tolist()
     payoff = []
     for strike in strike_data:
-        if strike.premium:
-            payoff_list = payoff_charts._get_payoff_values(spot, strike.strike, strike.option_type, strike.premium,
+        premium = strike.premium if strike.premium else 100
+        if premium:
+            payoff_list = payoff_charts._get_payoff_values(spot, strike.strike, strike.option_type, premium,
                                                            signal=strike.signal)
             # print(payoff_list)
             payoff.append(payoff_list)
@@ -340,13 +341,13 @@ def put_call_ratio(symbol: str, ):
 
 if __name__ == '__main__':
     strike_data = [
-        StrikeEntry(Keys.buy, 10500, Keys.call, 368),
-        StrikeEntry(Keys.buy, 10500, Keys.put, 222),
+        StrikeEntry(Keys.buy, 10500, Keys.call),
+        StrikeEntry(Keys.buy, 10500, Keys.put),
         # StrikeEntry(Keys.sell, 10200, Keys.call, 245),
         # StrikeEntry(10300, "CE", "BUY"),
         # StrikeEntry(10400, "CE", "SELL")
     ]
-    # options_strategy("nifty", strike_data, 10, 2018, date(2018, 10, 1), spot_range=[9500, 11500])
+    options_strategy("nifty", strike_data, 10, 2018, date(2018, 10, 1), spot_range=[9500, 11500])
     # oi_analytics("nifty", 10, 2018, )
     # put_call_ratio_expiry("nifty", 10, 2018, )
-    put_call_ratio("nifty")
+    # put_call_ratio("nifty")

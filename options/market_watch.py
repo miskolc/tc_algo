@@ -18,6 +18,8 @@ opt_df = pd.DataFrame()
 strikes = []
 call_oi = []
 put_oi = []
+call_iv = []
+put_iv = []
 
 header_style = {'color': "white", "background": "black"}
 border = "2px solid black"
@@ -65,7 +67,9 @@ market_watch_app.layout = html.Div([
     html.Br(),
     html.Div(id='oi_container', children=[
         html.Button("OI", id='oi'),
-        html.P(id='oi_status')
+        html.P(id='oi_status'),
+        html.Button("IV", id='iv'),
+        html.P(id='iv_status')
     ]),
     html.Br(),
     html.Table(id='market_watch')
@@ -125,7 +129,7 @@ def display_watch(n_clicks, expiry_date, obs_date):
             Observation date
     :return: table rows to be displayed to table id market_watch
     """
-    global opt_df, fut_df, strikes, call_oi, put_oi
+    global opt_df, fut_df, strikes, call_oi, put_oi, call_iv, put_iv
     if n_clicks is not None:
         fmt = "%Y-%m-%d"
         expiry = [datetime.strptime(expiry_date, fmt).date()]
@@ -151,6 +155,8 @@ def display_watch(n_clicks, expiry_date, obs_date):
         strikes = []
         call_oi = []
         put_oi = []
+        call_iv = []
+        put_iv = []
         for row in call_data.itertuples():
             strikes.append(row.strike)
 
@@ -174,6 +180,7 @@ def display_watch(n_clicks, expiry_date, obs_date):
                 for ce in call.itertuples():
                     x = [ce.theta, ce.gamma, ce.delta, ce.vega, ce.iv, ce.close, ce.contracts, ce.chg_in_oi, ]
                     call_oi.append(ce.open_int)
+                    call_iv.append(ce.iv)
                     call_row = [html.Td(k, style={"background": itm_color if itm else call_color, }) for k in x]
                     strike_row.append(call_row)
 
@@ -182,6 +189,7 @@ def display_watch(n_clicks, expiry_date, obs_date):
                 for pe in put.itertuples():
                     y = [pe.theta, pe.gamma, pe.delta, pe.vega, pe.iv, pe.close, pe.contracts, pe.chg_in_oi]
                     put_oi.append(pe.open_int)
+                    put_iv.append(pe.iv)
                     y.reverse()
                     put_row = [html.Td(k, style={"background": put_color if itm else itm_color}) for k in y]
                     strike_row[-1] += put_row
@@ -220,6 +228,7 @@ def display_oi(n_clicks):
 
         data = [trace1, trace2]
         layout = go.Layout(
+            title='OI Analysis',
             xaxis=dict(tickangle=-45),
             barmode='group',
         )
@@ -227,6 +236,32 @@ def display_oi(n_clicks):
 
         py.plot(fig, filename='oi_chart.html')
         return "Displaying OI..."
+
+
+@market_watch_app.callback(
+    Output('iv_status', 'children'),
+    inputs=[Input('iv', 'n_clicks')], )
+def display_iv(n_clicks):
+    """
+    This used to display the oi bar chart for call and put using plotly.
+    :param n_clicks: int
+            Button clicks for id oi_status
+    :return: None
+    """
+    global strikes, call_iv, put_iv
+    if n_clicks is not None:
+        trace1 = go.Scatter(x=strikes, y=call_iv, name="Call IV")
+        trace2 = go.Scatter(x=strikes, y=put_iv, name="Put IV")
+
+        data = [trace1, trace2]
+        layout = go.Layout(
+            title='IV Graph',
+            xaxis=dict(tickangle=-45),
+        )
+        fig = go.Figure(data=data, layout=layout)
+
+        py.plot(fig, filename='iv_chart.html')
+        return "Displaying IV..."
 
 
 def _symbol_data(symbol):

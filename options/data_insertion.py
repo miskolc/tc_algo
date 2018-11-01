@@ -103,7 +103,10 @@ def _read_row(row):
         trailer = "('%s','%s', '%s', %d,'%s', %f, %f, %f, %f, %f, %d, %f, %d, %d, '%s');" % (
             instrument, symbol, expiry, strike, option_typ, open_price, high, low, close, settle_pr, contracts,
             val, open_int, chg_in_oi, timestamp)
-        return trailer
+        if (contracts == 0) & (open_int == 0):
+            return
+        else:
+            return trailer
     else:
         return None
 
