@@ -90,7 +90,7 @@ def fetch_data(n_clicks, scrip_name):
     """
     global fut_df, opt_df
     if n_clicks is not None:
-        scrip_name = scrip_name.capitalize()
+        scrip_name = scrip_name.upper()
         future_data, option_data = _symbol_data(scrip_name)
         fut_df = pd.DataFrame(future_data, columns=dbc.columns)
         opt_df = pd.DataFrame(option_data, columns=dbc.columns)

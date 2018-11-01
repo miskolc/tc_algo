@@ -1,4 +1,5 @@
 from datetime import date, timedelta
+from typing import List
 
 import numpy
 import pandas as pd
@@ -12,9 +13,9 @@ from model import StrikeEntry
 from options import database_connection as dbc, payoff_charts
 
 
-def options_strategy(symbol: str, strike_data: list, expiry_month: int, expiry_year: int, start_date: date,
+def options_strategy(symbol: str, strike_data: List[StrikeEntry], expiry_month: int, expiry_year: int, start_date: date,
                      spot_range: list, strategy_name: str = None):
-    symbol = symbol.capitalize()
+    symbol = symbol.upper()
     fut_query = "Select * from %s where symbol='%s' and instrument like 'FUT%%' and MONTH(expiry)=%d and YEAR(expiry)=%d" % (
         dbc.table_name, symbol, expiry_month, expiry_year)
     fut_data = dbc.execute_simple_query(fut_query)
@@ -31,22 +32,26 @@ def options_strategy(symbol: str, strike_data: list, expiry_month: int, expiry_y
     option_df = pd.DataFrame(data=option_data, columns=dbc.columns)
     payoff_data = []
     for strikes in strike_data:
-        strike = [strikes.strike]
-        option_type = [strikes.option_type]
-        strike_df = option_df[option_df.strike.isin(strike) & option_df.option_typ.isin(option_type)]
-        init_day_entry = strike_df[strike_df.timestamp == start_date]
-        if (len(init_day_entry) > 0) & (strikes.signal in [Keys.buy, Keys.sell]):
-            init_price = init_day_entry.close.values[0]
-            for row in strike_df.itertuples():
-                timestamp = row.timestamp
-                close = row.close
-                if timestamp >= start_date:
-                    temp_pl = close - init_price
-                    pl = temp_pl if strikes.signal == Keys.buy else (-1 * temp_pl)
-                    payoff_data.append([timestamp, strikes.strike, strikes.option_type, pl])
+        if type(strikes) == StrikeEntry:
+            strike = [strikes.strike]
+            option_type = [strikes.option_type]
+            strike_df = option_df[option_df.strike.isin(strike) & option_df.option_typ.isin(option_type)]
+            init_day_entry = strike_df[strike_df.timestamp == start_date]
+            if (len(init_day_entry) > 0) & (strikes.signal in [Keys.buy, Keys.sell]):
+                init_price = init_day_entry.close.values[0]
+                for row in strike_df.itertuples():
+                    timestamp = row.timestamp
+                    close = row.close
+                    if timestamp >= start_date:
+                        temp_pl = close - init_price
+                        pl = temp_pl if strikes.signal == Keys.buy else (-1 * temp_pl)
+                        payoff_data.append([timestamp, strikes.strike, strikes.option_type, pl])
+            else:
+                print("Couldn't find initial price for strike: %s%s and start date: %s" % (
+                    strikes.strike, strikes.option_type, start_date))
         else:
-            print("Couldn't find initial price for strike: %s%s and start date: %s" % (
-                strikes.strike, strikes.option_type, start_date))
+            print("Input can be only be of type %s given %s" % (StrikeEntry, type(strikes)))
+            return
 
     if len(payoff_data) > 0:
         payoff_df = pd.DataFrame(payoff_data, columns=['timestamp', 'strike', 'option_typ', 'pl'])
@@ -76,6 +81,7 @@ def options_strategy(symbol: str, strike_data: list, expiry_month: int, expiry_y
                 df=strike_payoff_df,
             )
             strike_cum_pl.append(strike_info)
+
         spot, theoretical_payoff = _get_theoretical_payoffs(spot_range, strike_data)
         _plot_options_strategy_payoffs(symbol, fut_timeseries_data, timestamp_cum_pl, strike_cum_pl,
                                        [spot, theoretical_payoff], strategy_name)
@@ -178,17 +184,17 @@ def _plot_options_strategy_payoffs(symbol, fut_timeseries_data, timestamp_cum_pl
     # print(fig)
 
     title_name = '%s_payoffs' % (strategy_name if strategy_name else 'option_strategy')
-    fig['layout'].update(title=title_name.capitalize())
+    fig['layout'].update(title=title_name.upper())
 
     py.plot(fig, filename='%s.html' % title_name)
 
 
-def oi_analytics(symbol: str, expiry_month: int, expiry_year: int, ):
+def oi_analytics(symbol: str, expiry_month: int, expiry_year: int, start_date: date = None):
     fut_query = "Select * from %s where symbol='%s' and instrument like 'FUT%%' and MONTH(expiry)=%d and YEAR(expiry)=%d" % (
         dbc.table_name, symbol, expiry_month, expiry_year)
     fut_data = dbc.execute_simple_query(fut_query)
     fut_df = pd.DataFrame(data=fut_data, columns=dbc.columns)
-    start_date = date(expiry_year, expiry_month, 1)
+    start_date = start_date if start_date else date(expiry_year, expiry_month, 1)
     x, y1, y2, y3 = [], [], [], []
     for fut_row in fut_df.itertuples():
         timestamp = fut_row.timestamp
@@ -225,8 +231,8 @@ def oi_analytics(symbol: str, expiry_month: int, expiry_year: int, ):
     py.plot(fig, filename='oi_analytics.html')
 
 
-def put_call_ratio_expiry(symbol: str, expiry_month: int, expiry_year: int, ):
-    symbol = symbol.capitalize()
+def put_call_ratio_expiry(symbol: str, expiry_month: int, expiry_year: int, start_date: date = None):
+    symbol = symbol.upper()
     fut_query = "Select * from %s where symbol='%s' and instrument like 'FUT%%' and MONTH(expiry)=%d and YEAR(expiry)=%d" % (
         dbc.table_name, symbol, expiry_month, expiry_year)
     fut_data = dbc.execute_simple_query(fut_query)
@@ -236,7 +242,7 @@ def put_call_ratio_expiry(symbol: str, expiry_month: int, expiry_year: int, ):
         dbc.table_name, symbol, expiry_month, expiry_year)
     option_data = dbc.execute_simple_query(option_query)
     option_df = pd.DataFrame(data=option_data, columns=dbc.columns)
-    start_date = date(expiry_year, expiry_month, 1)
+    start_date = start_date if start_date else date(expiry_year, expiry_month, 1)
     option_expiry_df = option_df[option_df.timestamp >= start_date]
     timestamp_arr = option_expiry_df.timestamp.unique()
     call_option = [Keys.call]
@@ -277,7 +283,7 @@ def put_call_ratio_expiry(symbol: str, expiry_month: int, expiry_year: int, ):
 
 
 def put_call_ratio(symbol: str, ):
-    symbol = symbol.capitalize()
+    symbol = symbol.upper()
 
     fut_query = "Select * from %s where symbol='%s' and instrument like 'FUT%%' order by timestamp asc" % (
         dbc.table_name, symbol)
@@ -341,11 +347,8 @@ def put_call_ratio(symbol: str, ):
 
 if __name__ == '__main__':
     strike_data = [
-        StrikeEntry(Keys.buy, 10500, Keys.call),
-        StrikeEntry(Keys.buy, 10500, Keys.put),
-        # StrikeEntry(Keys.sell, 10200, Keys.call, 245),
-        # StrikeEntry(10300, "CE", "BUY"),
-        # StrikeEntry(10400, "CE", "SELL")
+        StrikeEntry(10500, Keys.call, Keys.buy, ),
+        StrikeEntry(10500, Keys.put, Keys.buy, ),
     ]
     options_strategy("nifty", strike_data, 10, 2018, date(2018, 10, 1), spot_range=[9500, 11500])
     # oi_analytics("nifty", 10, 2018, )

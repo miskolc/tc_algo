@@ -35,7 +35,6 @@ def get_vix_nifty():
 
 if __name__ == '__main__':
     nifty, vix = get_vix_nifty()
-
     trace_nifty = go.Scatter(x=nifty['date'], y=nifty['close'], name="Nifty 50")
     trace_vix = go.Scatter(x=vix['date'], y=vix['close'], name="India VIX", yaxis='y2')
 
