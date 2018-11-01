@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, timedelta
 
 import numpy
 import pandas as pd
@@ -137,6 +137,7 @@ def _plot_options_strategy_payoffs(symbol, fut_timeseries_data, timestamp_cum_pl
         trace_pl = go.Scatter(x=period, y=values, name=name)
         titles.append(name)
         traces.append(trace_pl)
+
     for strike_pl in strike_cum_pl:
         strike = strike_pl['strike']
         opt_type = strike_pl['option_type']
@@ -223,7 +224,7 @@ def oi_analytics(symbol: str, expiry_month: int, expiry_year: int, ):
     py.plot(fig, filename='oi_analytics.html')
 
 
-def put_call_ratio(symbol: str, expiry_month: int, expiry_year: int, ):
+def put_call_ratio_expiry(symbol: str, expiry_month: int, expiry_year: int, ):
     symbol = symbol.capitalize()
     fut_query = "Select * from %s where symbol='%s' and instrument like 'FUT%%' and MONTH(expiry)=%d and YEAR(expiry)=%d" % (
         dbc.table_name, symbol, expiry_month, expiry_year)
@@ -271,6 +272,69 @@ def put_call_ratio(symbol: str, expiry_month: int, expiry_year: int, ):
         ),
     )
     fig = go.Figure(data=data, layout=layout)
+    py.plot(fig, filename='pcr_expiry_analytics.html')
+
+
+def put_call_ratio(symbol: str, ):
+    symbol = symbol.capitalize()
+
+    fut_query = "Select * from %s where symbol='%s' and instrument like 'FUT%%' order by timestamp asc" % (
+        dbc.table_name, symbol)
+    fut_data = dbc.execute_simple_query(fut_query)
+    fut_df = pd.DataFrame(data=fut_data, columns=dbc.columns)
+
+    option_query = "Select * from %s where symbol='%s' and instrument like 'OPT%%' order by timestamp asc" % (
+        dbc.table_name, symbol)
+    option_data = dbc.execute_simple_query(option_query)
+    option_df = pd.DataFrame(data=option_data, columns=dbc.columns)
+
+    expiry_dates = fut_df.sort_values('expiry').expiry.unique()
+    call_option = [Keys.call]
+    put_option = [Keys.put]
+    x, y1, y2 = [], [], []
+    init_expiry = None
+    for expiry in expiry_dates:
+        if init_expiry is None:
+            init_expiry = date(expiry.year, expiry.month, 1)
+        expiry_data = option_df[option_df.expiry == expiry]
+        month_expiry_data = expiry_data[
+            (expiry_data['timestamp'] >= init_expiry) & (expiry_data['timestamp'] <= expiry)]
+        monthly_timestamps = month_expiry_data.timestamp.unique()
+        for ts in monthly_timestamps:
+            day = [ts]
+            call_df = month_expiry_data[
+                month_expiry_data.option_typ.isin(call_option) & month_expiry_data.timestamp.isin(day)]
+            put_df = month_expiry_data[
+                month_expiry_data.option_typ.isin(put_option) & month_expiry_data.timestamp.isin(day)]
+            call_volume = call_df.open_int.sum()
+            put_volume = put_df.open_int.sum()
+            pcr = put_volume / call_volume
+            fut_price = fut_df[fut_df.timestamp.isin(day)].close.mean()
+            # print(ts, fut_price, pcr)
+            x.append(ts)
+            y1.append(fut_price)
+            y2.append(pcr)
+
+        # print(init_expiry, expiry)
+        init_expiry = expiry + timedelta(days=1)
+
+    trace1 = go.Scatter(x=x, y=y1, name=symbol, )
+    trace2 = go.Scatter(x=x, y=y2, name='PCR', yaxis='y2')
+
+    data = [trace1, trace2, ]
+
+    layout = go.Layout(
+        title='PCR Analytics',
+        yaxis=dict(title='Underlying', ),
+        yaxis2=dict(
+            title='PCR',
+            anchor='x',
+            overlaying='y',
+            side='right',
+            position=0.05
+        ),
+    )
+    fig = go.Figure(data=data, layout=layout)
     py.plot(fig, filename='pcr_analytics.html')
 
 
@@ -282,6 +346,7 @@ if __name__ == '__main__':
         # StrikeEntry(10300, "CE", "BUY"),
         # StrikeEntry(10400, "CE", "SELL")
     ]
-    options_strategy("nifty", strike_data, 10, 2018, date(2018, 10, 1), spot_range=[9500, 11500])
+    # options_strategy("nifty", strike_data, 10, 2018, date(2018, 10, 1), spot_range=[9500, 11500])
     # oi_analytics("nifty", 10, 2018, )
-    # put_call_ratio("nifty", 10, 2018, )
+    # put_call_ratio_expiry("nifty", 10, 2018, )
+    put_call_ratio("nifty")
