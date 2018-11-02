@@ -32,25 +32,33 @@ market_watch_app = dash.Dash(__name__, external_stylesheets=external_stylesheets
 
 market_watch_app.layout = html.Div([
     # dcc.Graph(id='graph-with-slider'),
-    html.Table(children=[html.Tr(children=[
-        html.Td(children=dcc.Input(
-            id='scrip',
-            placeholder='Enter the scrip...',
-            type='text',
-            value='NIFTY'
-        ), ),
-        html.Td(html.Button("Fetch", id="fetch"), ),
-        html.Td(html.P(children='Not Ready', id='status'), )
-    ]),
+    html.Table(children=[
+        html.Tr(children=[
+            html.Td(children=dcc.Input(
+                id='scrip',
+                placeholder='Enter the scrip...',
+                type='text',
+                value='NIFTY'
+            ), ),
+            html.Td(html.Button("Fetch", id="fetch"), ),
+            html.Td(html.P(children='Not Ready', id='status'), ),
+            # html.Td(dcc.Dropdown(
+            #     id='expiry_list',
+            #     placeholder='Expiry',
+            #     options=[],
+            # ), ),
+            # html.Td(html.Button("Get", id="get_expiry"), ),
+        ]),
         html.Tr(children=[
             html.Td(dcc.Dropdown(
                 id='expiry_list',
-                options=[
-                    # {'label': 'New York City', 'value': 'NYC'},
-                ],
                 placeholder='Expiry',
+                options=[],
             ), ),
             html.Td(html.Button("Get", id="get_expiry"), ),
+            html.Td(dcc.Input(id='start_strike', placeholder='Start Strike', type='number')),
+            html.Td(dcc.Input(id='end_strike', placeholder='End Strike', type='number')),
+            html.Td(dcc.Input(id='gap', placeholder='Gap', type='number')),
             html.Td(dcc.DatePickerSingle(
                 id='date_picker',
                 min_date_allowed=date(2018, 1, 2),
@@ -63,13 +71,10 @@ market_watch_app.layout = html.Div([
                 html.Button("Display", id='display')
             ),
         ]),
-    ]),
-    html.Br(),
-    html.Div(id='oi_container', children=[
-        html.Button("OI", id='oi'),
-        html.P(id='oi_status'),
-        html.Button("IV", id='iv'),
-        html.P(id='iv_status')
+        html.Tr(children=[
+            html.Td([html.Button("OI", id='oi'), html.P(id='oi_status')]),
+            html.Td([html.Button("IV", id='iv'), html.P(id='iv_status')]),
+        ]),
     ]),
     html.Br(),
     html.Table(id='market_watch')
@@ -117,8 +122,9 @@ def get_expiry_list(n_clicks):
 
 
 @market_watch_app.callback(Output('market_watch', 'children'), [Input('display', 'n_clicks')],
-                           state=[State('expiry_list', 'value'), State('date_picker', 'date')])
-def display_watch(n_clicks, expiry_date, obs_date):
+                           state=[State('expiry_list', 'value'), State('start_strike', 'value'),
+                                  State('end_strike', 'value'), State('gap', 'value'), State('date_picker', 'date')])
+def display_watch(n_clicks, expiry_date, start_strike, end_strike, gap, obs_date):
     """
     This is used to display match watch contents after selection of expiry and observation date.
     :param n_clicks: int
@@ -133,6 +139,8 @@ def display_watch(n_clicks, expiry_date, obs_date):
     if n_clicks is not None:
         fmt = "%Y-%m-%d"
         expiry = [datetime.strptime(expiry_date, fmt).date()]
+        start_strike = int(start_strike)
+        end_strike = int(end_strike)
         timestamp = [datetime.strptime(obs_date, fmt).date()]
         option_call = [Keys.call]
         option_put = [Keys.put]
@@ -158,7 +166,8 @@ def display_watch(n_clicks, expiry_date, obs_date):
         call_iv = []
         put_iv = []
         for row in call_data.itertuples():
-            strikes.append(row.strike)
+            if (start_strike <= row.strike <= end_strike) & (row.strike % gap == 0):
+                strikes.append(row.strike)
 
         v = ["Theta", "Gamma", "Delta", "Vega", "IV", "Close", "Contracts", "Change in OI", ]
         w = v.copy()
@@ -180,7 +189,7 @@ def display_watch(n_clicks, expiry_date, obs_date):
                 for ce in call.itertuples():
                     x = [ce.theta, ce.gamma, ce.delta, ce.vega, ce.iv, ce.close, ce.contracts, ce.chg_in_oi, ]
                     call_oi.append(ce.open_int)
-                    call_iv.append(ce.iv)
+                    call_iv.append(ce.iv if ce.iv != 0 else None)
                     call_row = [html.Td(k, style={"background": itm_color if itm else call_color, }) for k in x]
                     strike_row.append(call_row)
 
@@ -189,7 +198,7 @@ def display_watch(n_clicks, expiry_date, obs_date):
                 for pe in put.itertuples():
                     y = [pe.theta, pe.gamma, pe.delta, pe.vega, pe.iv, pe.close, pe.contracts, pe.chg_in_oi]
                     put_oi.append(pe.open_int)
-                    put_iv.append(pe.iv)
+                    put_iv.append(pe.iv if pe.iv != 0 else None)
                     y.reverse()
                     put_row = [html.Td(k, style={"background": put_color if itm else itm_color}) for k in y]
                     strike_row[-1] += put_row
