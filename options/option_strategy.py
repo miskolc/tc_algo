@@ -347,10 +347,13 @@ def put_call_ratio(symbol: str, ):
 
 if __name__ == '__main__':
     strike_data = [
-        StrikeEntry(10500, Keys.call, Keys.buy, ),
-        StrikeEntry(10500, Keys.put, Keys.buy, ),
+        StrikeEntry(26100, Keys.call, Keys.buy, ),
+        StrikeEntry(26100, Keys.put, Keys.buy, ),
+        StrikeEntry(26200, Keys.call, Keys.sell, ),
+        StrikeEntry(26200, Keys.put, Keys.sell, ),
+
     ]
-    options_strategy("nifty", strike_data, 10, 2018, date(2018, 10, 1), spot_range=[9500, 11500])
+    options_strategy("banknifty", strike_data, 10, 2018, date(2018, 10, 1), spot_range=[25000, 27000])
     # oi_analytics("nifty", 10, 2018, )
     # put_call_ratio_expiry("nifty", 10, 2018, )
     # put_call_ratio("nifty")

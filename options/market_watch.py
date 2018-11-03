@@ -131,6 +131,12 @@ def display_watch(n_clicks, expiry_date, start_strike, end_strike, gap, obs_date
             Button clicks for the id 'display'
     :param expiry_date: str
             Expiry date
+    :param start_strike: number
+            Start strike of the symbol
+    :param end_strike: number
+            End Strike of the symbol
+    :param gap: number
+            Gap between the strikes
     :param obs_date: str
             Observation date
     :return: table rows to be displayed to table id market_watch
@@ -139,8 +145,9 @@ def display_watch(n_clicks, expiry_date, start_strike, end_strike, gap, obs_date
     if n_clicks is not None:
         fmt = "%Y-%m-%d"
         expiry = [datetime.strptime(expiry_date, fmt).date()]
-        start_strike = int(start_strike)
-        end_strike = int(end_strike)
+        start_strike = int(start_strike) if start_strike is not None else None
+        end_strike = int(end_strike) if end_strike is not None else None
+        gap = int(gap) if gap is not None else None
         timestamp = [datetime.strptime(obs_date, fmt).date()]
         option_call = [Keys.call]
         option_put = [Keys.put]
@@ -166,9 +173,11 @@ def display_watch(n_clicks, expiry_date, start_strike, end_strike, gap, obs_date
         call_iv = []
         put_iv = []
         for row in call_data.itertuples():
-            if (start_strike <= row.strike <= end_strike) & (row.strike % gap == 0):
+            if start_strike or end_strike or gap:
+                if (start_strike <= row.strike <= end_strike) & (row.strike % gap == 0):
+                    strikes.append(row.strike)
+            else:
                 strikes.append(row.strike)
-
         v = ["Theta", "Gamma", "Delta", "Vega", "IV", "Close", "Contracts", "Change in OI", ]
         w = v.copy()
         w.reverse()

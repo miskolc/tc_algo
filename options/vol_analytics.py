@@ -140,10 +140,53 @@ def delta_vol_analysis(symbol: str, expiry_month: int, expiry_year: int, delta: 
     py.plot(fig, filename='delta_iv_analysis.html')
 
 
+def vol_surface_analysis(symbol, expiry_month, expiry_year, start_strike, end_strike, gap: int = None,
+                         start_date: date = None):
+    symbol = symbol.upper()
+    option_query = "Select * from %s where symbol='%s' and instrument like 'OPT%%' and MONTH(expiry)=%d and YEAR(expiry)=%d" % (
+        dbc.table_name, symbol, expiry_month, expiry_year)
+    option_data = dbc.execute_simple_query(option_query)
+    # future_query = "Select * from %s where symbol='%s' and instrument like 'FUT%%' and MONTH(expiry)=%d and YEAR(expiry)=%d" % (
+    #     dbc.table_name, symbol, expiry_month, expiry_year)
+    # future_data = dbc.execute_simple_query(future_query)
+    # fut_df = pd.DataFrame(future_data, columns=dbc.columns)
+    opt_df = pd.DataFrame(option_data, columns=dbc.columns)
+
+    start_strike = int(start_strike) if start_strike is not None else None
+    end_strike = int(end_strike) if end_strike is not None else None
+    # gap = int(gap) if gap is not None else None
+    start_date = start_date if start_date else date(expiry_year, expiry_month, 1)
+    option_call = [Keys.call]
+    option_put = [Keys.put]
+
+    opt_df = opt_df[(opt_df.strike >= start_strike) & (opt_df.strike <= end_strike) & (opt_df.timestamp >= start_date)]
+
+    x = opt_df['strike'].values
+    y = opt_df['timestamp'].values
+    z = opt_df['iv'].values
+    z[z == 0] = None
+    # colorscale -> ['Greys', 'YlGnBu', 'Greens', 'YlOrRd', 'Bluered', 'RdBu',
+    #  'Reds', 'Blues', 'Picnic', 'Rainbow', 'Portland', 'Jet',
+    #  'Hot', 'Blackbody', 'Earth', 'Electric', 'Viridis', 'Cividis']
+    trace = go.Scatter3d(x=x, y=y, z=z, marker=dict(
+        size=12,
+        color=z,
+        colorscale='Hot',
+        opacity=0.8
+    ))
+    data = [trace]
+    layout = go.Layout(
+        title='IV Surface',
+    )
+    fig = go.Figure(data=data, layout=layout)
+    py.plot(fig, filename='iv_surface.html')
+
+
 if __name__ == '__main__':
     strike_list = [StrikeEntry(10500, Keys.call),
                    StrikeEntry(10200, Keys.call),
                    StrikeEntry(10000, Keys.put),
                    StrikeEntry(11000, Keys.put)]
     # strike_vol_analysis("nifty", strike_list, 10, 2018, start_date=date(2018, 9, 27))
-    delta_vol_analysis("nifty", 10, 2018, 0.5)
+    # delta_vol_analysis("nifty", 10, 2018, 0.5)
+    vol_surface_analysis("nifty", 9, 2018, 9500, 11500)
