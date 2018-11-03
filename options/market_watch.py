@@ -31,7 +31,6 @@ external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 market_watch_app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
 market_watch_app.layout = html.Div([
-    # dcc.Graph(id='graph-with-slider'),
     html.Table(children=[
         html.Tr(children=[
             html.Td(children=dcc.Input(
@@ -42,12 +41,6 @@ market_watch_app.layout = html.Div([
             ), ),
             html.Td(html.Button("Fetch", id="fetch"), ),
             html.Td(html.P(children='Not Ready', id='status'), ),
-            # html.Td(dcc.Dropdown(
-            #     id='expiry_list',
-            #     placeholder='Expiry',
-            #     options=[],
-            # ), ),
-            # html.Td(html.Button("Get", id="get_expiry"), ),
         ]),
         html.Tr(children=[
             html.Td(dcc.Dropdown(
@@ -152,16 +145,9 @@ def display_watch(n_clicks, expiry_date, start_strike, end_strike, gap, obs_date
         option_call = [Keys.call]
         option_put = [Keys.put]
         fut_data = fut_df[fut_df.expiry.isin(expiry) & fut_df.timestamp.isin(timestamp)]
-        # print("Fut data: %s" % fut_data)
         underlying = None
-        try:
-            # underlying = fut_data.close[0]
-            # print(underlying)
-            for udrly in fut_data.itertuples():
-                underlying = udrly.close
-        except (KeyError, IndexError):
-            # print("Error")
-            pass
+        for udrly in fut_data.itertuples():
+            underlying = udrly.close
 
         call_data = opt_df[
             opt_df.expiry.isin(expiry) & opt_df.timestamp.isin(timestamp) & opt_df.option_typ.isin(option_call)]
@@ -186,7 +172,6 @@ def display_watch(n_clicks, expiry_date, start_strike, end_strike, gap, obs_date
 
         table_rows = [header]
 
-        # print(underlying)
         if underlying is not None:
             for strike in strikes:
                 strike_row = []
@@ -295,7 +280,6 @@ def _symbol_data(symbol):
     option_data = dbc.execute_simple_query(option_query)
     future_query = "Select * from %s where symbol='%s' and instrument like 'FUT%%' " % (dbc.table_name, symbol,)
     future_data = dbc.execute_simple_query(future_query)
-    # print(len(option_data), len(future_data))
     return future_data, option_data
 
 

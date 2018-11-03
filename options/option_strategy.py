@@ -125,7 +125,6 @@ def _plot_options_strategy_payoffs(symbol, fut_timeseries_data, timestamp_cum_pl
     spot = theoretical_pl[0]
     payoff = theoretical_pl[1]
 
-    # trace_fut = None
     if fut_period:
         name = 'Underlying %s' % symbol
         trace_fut = go.Scatter(x=fut_period, y=fut_values, name=symbol)
@@ -138,7 +137,6 @@ def _plot_options_strategy_payoffs(symbol, fut_timeseries_data, timestamp_cum_pl
         titles.append(name)
         traces.append(trace_payoff)
 
-    # trace_pl = None
     if period:
         name = 'Cumulative P&L'
         trace_pl = go.Scatter(x=period, y=values, name=name)
@@ -155,11 +153,8 @@ def _plot_options_strategy_payoffs(symbol, fut_timeseries_data, timestamp_cum_pl
         titles.append('%s %s' % (name, signal))
         traces.append(trace)
 
-    # titles.append("Underlying vs Cum P&L")
-
     columns = 3
     len_traces = len(traces)
-    # len_traces = len(traces) + 1
     rows = int(len_traces / columns) if len_traces % columns == 0 else (int(len_traces / columns) + 1)
     fig = tools.make_subplots(rows=rows, cols=columns, subplot_titles=titles)
 
@@ -169,19 +164,6 @@ def _plot_options_strategy_payoffs(symbol, fut_timeseries_data, timestamp_cum_pl
             if i < len_traces:
                 fig.append_trace(traces[i], row=row + 1, col=col + 1)
                 i += 1
-
-    # under_row = (int(len_traces / 3) + 1)
-    # under_column = (len_traces % 3) + 1
-    # print(under_row, under_column)
-    # fig.append_trace(trace_fut, 2, 2)
-    # fig.append_trace(trace_pl, 2, 2)
-    # print(len_traces)
-    # # print(fig)
-    # fig['data'][-1].update(yaxis='y' + str(len_traces + 1))
-    # fig['layout']['yaxis' + str(len_traces)].update(showgrid=True, title='Underlying')
-    # fig['layout']['yaxis' + str(len_traces + 1)] = dict(overlaying='y' + str(len_traces), side='right', showgrid=False,
-    #                                                     title='CUM P&L')
-    # print(fig)
 
     title_name = '%s_payoffs' % (strategy_name if strategy_name else 'option_strategy')
     fig['layout'].update(title=title_name.upper())
@@ -199,7 +181,6 @@ def oi_analytics(symbol: str, expiry_month: int, expiry_year: int, start_date: d
     for fut_row in fut_df.itertuples():
         timestamp = fut_row.timestamp
         if timestamp >= start_date:
-            # print(timestamp, fut_row.settle_pr, fut_row.open_int, fut_row.chg_in_oi)
             x.append(timestamp)
             y1.append(fut_row.open_int)
             y2.append(fut_row.settle_pr)
@@ -256,14 +237,12 @@ def put_call_ratio_expiry(symbol: str, expiry_month: int, expiry_year: int, star
         put_volume = put_df.open_int.sum()
         pcr = put_volume / call_volume
         fut_price = fut_df[fut_df.timestamp.isin(day)].close.mean()
-        # print(timestamp, fut_price, pcr)
         x.append(timestamp)
         y1.append(fut_price)
         y2.append(pcr)
 
     trace1 = go.Scatter(x=x, y=y1, name=symbol, )
     trace2 = go.Scatter(x=x, y=y2, name='PCR', yaxis='y2')
-    # trace3 = go.Scatter(x=x, y=y3, name='chg_in_oi', yaxis='y3', fill='tozeroy')
 
     data = [trace1, trace2, ]
 
@@ -317,12 +296,10 @@ def put_call_ratio(symbol: str, ):
             put_volume = put_df.open_int.sum()
             pcr = put_volume / call_volume
             fut_price = fut_df[fut_df.timestamp.isin(day)].close.mean()
-            # print(ts, fut_price, pcr)
             x.append(ts)
             y1.append(fut_price)
             y2.append(pcr)
 
-        # print(init_expiry, expiry)
         init_expiry = expiry + timedelta(days=1)
 
     trace1 = go.Scatter(x=x, y=y1, name=symbol, )

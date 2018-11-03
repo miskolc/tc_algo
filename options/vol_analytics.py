@@ -25,7 +25,6 @@ def strike_vol_analysis(symbol: str, strike_data: List[StrikeEntry], expiry_mont
 
     start_date = start_date if start_date else date(expiry_year, expiry_month, 1)
     traces = []
-    # option_data = []
     for strike_entry in strike_data:
         if type(strike_entry) == StrikeEntry:
             option_expiry_df = option_df[
@@ -82,10 +81,7 @@ def delta_vol_analysis(symbol: str, expiry_month: int, expiry_year: int, delta: 
     delta_lower = delta - delta_dev
     delta_upper = delta + delta_dev
 
-    # print(delta_lower, delta_upper)
-
     timestamps_list = fut_df.timestamp.unique()
-    # print(timestamps_list)
     fut_ts, fut_price = [], []
     call_ts, call_iv, call_text, = [], [], []
     put_ts, put_iv, put_text, = [], [], []
@@ -97,7 +93,6 @@ def delta_vol_analysis(symbol: str, expiry_month: int, expiry_year: int, delta: 
                                                                                                          ascending=True)
         put_data = put_df[(put_df.delta >= -1 * delta_upper) & (put_df.delta <= -1 * delta_lower)].sort_values('delta',
                                                                                                                ascending=False)
-        # print(len(call_data), len(put_data))
         if len(call_data) > 0:
             data = call_data.iloc[0]
             iv = data.iv
@@ -146,18 +141,11 @@ def vol_surface_analysis(symbol, expiry_month, expiry_year, start_strike, end_st
     option_query = "Select * from %s where symbol='%s' and instrument like 'OPT%%' and MONTH(expiry)=%d and YEAR(expiry)=%d" % (
         dbc.table_name, symbol, expiry_month, expiry_year)
     option_data = dbc.execute_simple_query(option_query)
-    # future_query = "Select * from %s where symbol='%s' and instrument like 'FUT%%' and MONTH(expiry)=%d and YEAR(expiry)=%d" % (
-    #     dbc.table_name, symbol, expiry_month, expiry_year)
-    # future_data = dbc.execute_simple_query(future_query)
-    # fut_df = pd.DataFrame(future_data, columns=dbc.columns)
     opt_df = pd.DataFrame(option_data, columns=dbc.columns)
 
     start_strike = int(start_strike) if start_strike is not None else None
     end_strike = int(end_strike) if end_strike is not None else None
-    # gap = int(gap) if gap is not None else None
     start_date = start_date if start_date else date(expiry_year, expiry_month, 1)
-    option_call = [Keys.call]
-    option_put = [Keys.put]
 
     opt_df = opt_df[(opt_df.strike >= start_strike) & (opt_df.strike <= end_strike) & (opt_df.timestamp >= start_date)]
 

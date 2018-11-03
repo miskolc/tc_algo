@@ -28,7 +28,6 @@ def _check_database():
     query = "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = '%s'" % db_name
     cursor.execute(query)
     result = cursor.fetchall()
-    # print(result)
     if len(result) == 0:
         query = "CREATE DATABASE IF NOT EXISTS %s" % db_name
         cursor.execute(query)
@@ -48,7 +47,6 @@ def _check_table(truncate: bool):
     """
     db_conn = mysql.connector.connect(host=host, user=user, password=password, database=db_name)
     cursor = db_conn.cursor()
-    # query = "SELECT table_name FROM information_schema.tables WHERE table_name = '%s'" % table_name
     query = "SELECT table_name FROM information_schema.tables WHERE table_name = '%s'" % table_name
     cursor.execute(query)
     result = cursor.fetchall()
@@ -81,9 +79,7 @@ def insert_data(queries):
     db_conn = mysql.connector.connect(host=host, user=user, password=password, database=db_name)
     cursor = db_conn.cursor()
     for query in queries:
-        # print(query)
         cursor.execute(query)
-    # result = cursor.fetchall()
     db_conn.commit()
     cursor.close()
     db_conn.close()
@@ -156,15 +152,6 @@ def update_database_greeks(ts: date):
     """
     db_conn = mysql.connector.connect(host=host, user=user, password=password, database=db_name)
     cursor = db_conn.cursor()
-    # if clear_columns:
-    #     print("Clearing the columns...")
-    #     columns = ["iv", "theta", "gamma", "delta", "vega"]
-    #     for col in columns:
-    #         query = "UPDATE %s SET %s=''" % (table_name, col)
-    #         cursor.execute(query)
-    #         cursor.fetchall()
-    #         # db_conn.commit()
-    #         print("Cleared: %s" % col)
     if ts is not None:
         timestamp_query = "SELECT distinct timestamp from %s where timestamp = '%s-%s-%s' ORDER BY timestamp ASC " % (
             table_name, ts.year, ts.month, ts.day)

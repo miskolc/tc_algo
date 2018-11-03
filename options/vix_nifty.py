@@ -1,7 +1,6 @@
 import mysql.connector
 import pandas as pd
 
-# from plotly import tools
 import plotly.offline as py
 import plotly.graph_objs as go
 
@@ -15,11 +14,6 @@ table_name = 'eod_data'
 NIFTY = 'Nifty 50'
 VIX = 'India VIX'
 
-
-# user l7oowjtp_abhish
-# pass Bk7K=g+?ukBX
-# database l7oowjtp_tradingcampus2018
-# host mysql7002.site4now.net
 
 def get_vix_nifty():
     db_conn = mysql.connector.connect(host=host, user=user, password=password, database=db_name)

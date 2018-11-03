@@ -32,8 +32,6 @@ def get_greeks(spot_price: float, strike_price: float, expiry_date: date, option
             Returns implied volatility, theta, gamma, delta, vega for the option data entered
     """
     maturity_date = Date(expiry_date.day, expiry_date.month, expiry_date.year)
-    # volatility = 0.0  # the historical vols for a year
-    # print(spot_price, strike_price, expiry_date, option_type, option_price, calculation_date)
 
     option = Option.Call
     if option_type == Keys.call:
@@ -104,8 +102,6 @@ def get_option_greeks(spot_price, strike_price, expiry_date: date, option_type: 
             Returns delta, gamma, theta, vega, rho for the option data entered
     """
     maturity_date = Date(expiry_date.day, expiry_date.month, expiry_date.year)
-    # volatility = 0.0  # the historical vols for a year
-    # print(spot_price, strike_price, expiry_date, option_type, option_price, calculation_date)
 
     volatility = volatility / 100
     option = Option.Call
@@ -131,12 +127,10 @@ def get_option_greeks(spot_price, strike_price, expiry_date: date, option_type: 
 
     european_option.setPricingEngine(AnalyticEuropeanEngine(bs_process))
 
-    # price = european_option.NPV()
     delta = european_option.delta()
     gamma = european_option.gamma()
     theta = european_option.thetaPerDay()
     vega = european_option.vega()
     rho = european_option.rho()
 
-    # print(price, delta, )
     return delta, gamma, theta, vega, rho

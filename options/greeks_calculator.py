@@ -48,7 +48,6 @@ def option_price(underlying_price: float, strike_price: float, interest: float, 
                 Date of observation. By default present date.
     :return: GreekValues
     """
-    # BS([underlyingPrice, strikePrice, interestRate, daysToExpiration], volatility=x, callPrice=y, putPrice=z)
     days_to_exp = days_to_expiry(expiry_date, obs_date)
     if days_to_exp > 0:
         c = mibian.BS([underlying_price, strike_price, interest, days_to_exp], volatility=volatility)

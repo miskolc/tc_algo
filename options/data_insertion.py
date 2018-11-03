@@ -53,8 +53,6 @@ def _read_data(path: str):
         queries = []
         csv_path = extract + csv_file_name
         print("Reading: %s" % csv_path)
-        # f = open(csv_path, newline='')
-        # csv_reader = csv.reader(f, delimiter=' ', quotechar="|")
         f = open(csv_path)
         csv_reader = csv.reader(f)
         file_start_time = time.time()
@@ -82,7 +80,6 @@ def _read_row(row):
     instrument = data_arr[0]
     if instrument != 'INSTRUMENT':
         symbol = data_arr[1]
-        # expiry = data_arr[2]
         expiry = (datetime.strptime(data_arr[2], "%d-%b-%Y")).strftime("%Y-%m-%d")
         strike = data_arr[3]
         if strike == 'XX':
@@ -171,8 +168,6 @@ def update_option_greeks(timestamp: date = None):
     :return: None
     """
     start_time = time.time()
-    # if timestamp is None:
-    #     database_con/nection.add_greeks_column()
     database_connection.add_greeks_column()
     database_connection.update_database_greeks(timestamp)
     print("Total Time Taken: %s" % (time.time() - start_time))
