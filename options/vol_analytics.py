@@ -147,7 +147,10 @@ def vol_surface_analysis(symbol, expiry_month, expiry_year, start_strike, end_st
     end_strike = int(end_strike) if end_strike is not None else None
     start_date = start_date if start_date else date(expiry_year, expiry_month, 1)
 
-    opt_df = opt_df[(opt_df.strike >= start_strike) & (opt_df.strike <= end_strike) & (opt_df.timestamp >= start_date)]
+    opt_df = opt_df[
+        (opt_df.strike >= start_strike) & (opt_df.strike <= end_strike) & (opt_df.timestamp >= start_date) & (
+                opt_df.iv <= 35.0)]
+    # opt_df = opt_df[(opt_df.strike >= start_strike) & (opt_df.strike <= end_strike) & (opt_df.timestamp >= start_date)]
 
     x = opt_df['strike'].values
     y = opt_df['timestamp'].values
@@ -156,15 +159,29 @@ def vol_surface_analysis(symbol, expiry_month, expiry_year, start_strike, end_st
     # colorscale -> ['Greys', 'YlGnBu', 'Greens', 'YlOrRd', 'Bluered', 'RdBu',
     #  'Reds', 'Blues', 'Picnic', 'Rainbow', 'Portland', 'Jet',
     #  'Hot', 'Blackbody', 'Earth', 'Electric', 'Viridis', 'Cividis']
-    trace = go.Scatter3d(x=x, y=y, z=z, marker=dict(
-        size=12,
-        color=z,
-        colorscale='Hot',
-        opacity=0.8
-    ))
+    trace = go.Scatter3d(x=x, y=y, z=z,
+                         marker=dict(
+                             size=2,
+                             color=z,
+                             colorscale='Hot',
+                             opacity=0.8
+                         ))
     data = [trace]
     layout = go.Layout(
         title='IV Surface',
+        scene=dict(
+            aspectmode="manual",
+            # aspectratio=dict(x=10, y=4, z=5),
+            xaxis=dict(
+                title='Strike'
+            ),
+            yaxis=dict(
+                title='Timestamp'
+            ),
+            zaxis=dict(
+                title='IV',
+                range=[0, 100],
+            ), )
     )
     fig = go.Figure(data=data, layout=layout)
     py.plot(fig, filename='iv_surface.html')

@@ -322,6 +322,110 @@ def put_call_ratio(symbol: str, ):
     py.plot(fig, filename='pcr_analytics.html')
 
 
+def max_pain(symbol: str, expiry_month: int, expiry_year: int, start_strike: int, end_strike: int, gap: int = None,
+             start_date: date = None, last_date: date = None, timestamp: date = None):
+    symbol = symbol.upper()
+
+    fut_query = "Select * from %s where symbol='%s' and instrument like 'FUT%%' and MONTH(expiry)=%d and YEAR(expiry)=%d order by timestamp asc" % (
+        dbc.table_name, symbol, expiry_month, expiry_year)
+    fut_data = dbc.execute_simple_query(fut_query)
+    fut_df = pd.DataFrame(data=fut_data, columns=dbc.columns)
+
+    option_query = "Select * from %s where symbol='%s' and instrument like 'OPT%%' and MONTH(expiry)=%d and YEAR(expiry)=%d order by timestamp asc" % (
+        dbc.table_name, symbol, expiry_month, expiry_year)
+    option_data = dbc.execute_simple_query(option_query)
+    option_df = pd.DataFrame(data=option_data, columns=dbc.columns)
+
+    start_date = start_date if start_date else date(expiry_year, expiry_month, 1)
+    fut_df = fut_df[fut_df.timestamp >= start_date]
+    option_df = option_df[
+        (option_df.timestamp >= start_date) & (option_df.strike >= start_strike) & (option_df.strike <= end_strike)]
+
+    if last_date is not None:
+        fut_df = fut_df[fut_df.timestamp <= last_date]
+        option_df = option_df[option_df.timestamp <= last_date]
+
+    if gap is not None:
+        option_df = option_df[option_df.strike % gap == 0]
+
+    if timestamp is not None:
+        fut_df = fut_df[fut_df.timestamp == timestamp]
+        option_df = option_df[option_df.timestamp == timestamp]
+
+    days_arr = fut_df.timestamp.unique()
+    timestamp_values = []
+    table_ts, table_underlying, table_max_pain_strikes = [], [], []
+    for ts in days_arr:
+        call_df = option_df[(option_df.timestamp == ts) & (option_df.option_typ == Keys.call)]
+        put_df = option_df[(option_df.timestamp == ts) & (option_df.option_typ == Keys.put)]
+        call_strikes = call_df.strike.unique()
+        put_strikes = put_df.strike.unique()
+        strikes = list(set(call_strikes).intersection(set(put_strikes)))
+        strikes.sort()
+
+        if strikes is not None:
+            diff_call = []
+            for strike in strikes:
+                diff_call.append(strike - strikes[0])
+            diff_put = diff_call.copy()
+            diff_put.reverse()
+
+            timestamp_values = []
+            for i in range(len(strikes)):
+                strike = strikes[i]
+                call_oi = call_df[call_df.strike == strike].open_int.values[0]
+                call_money = diff_call[i] * call_oi
+                put_oi = put_df[put_df.strike == strike].open_int.values[0]
+                put_money = diff_put[i] * put_oi
+                strike_money = call_money + put_money
+                timestamp_values.append([strike, strike_money])
+            values = timestamp_values.copy()
+            values.sort(key=lambda x: x[1])
+            values = values[:5]
+            max_pain_strikes = [item[0] for item in values]
+            underlying = fut_df[fut_df.timestamp == ts].close.values[0]
+            # print(ts, underlying, max_pain_strikes)
+            table_ts.append(ts)
+            table_underlying.append(underlying)
+            table_max_pain_strikes.append(max_pain_strikes)
+
+    x, y = [], []
+    for value in timestamp_values:
+        x.append(value[0])
+        y.append(value[1])
+    if timestamp is not None:
+        if len(x) > 0:
+            trace = go.Bar(x=x, y=y)
+            data = [trace]
+            layout = go.Layout(
+                title="%s Max Pain for %s" % (symbol, timestamp),
+
+            )
+            fig = go.Figure(data, layout=layout)
+            py.plot(fig, filename='max_pain.html')
+        else:
+            print("No data for plotting for %s" % timestamp)
+
+    table_header = ['Timestamp', 'Underlying', 'Strikes with max pain']
+    table_trace = go.Table(
+        header=dict(values=table_header,
+                    line=dict(color='#7D7F80'),
+                    fill=dict(color='#a1c3d1'),
+                    ),
+        cells=dict(values=[table_ts, table_underlying, table_max_pain_strikes],
+                   line=dict(color='#7D7F80'),
+                   fill=dict(color='#EDFAFF'),
+                   )
+    )
+
+    data_table = [table_trace]
+    layout_table = go.Layout(
+        title="%s Max Pain for %s,%s" % (symbol, expiry_month, expiry_year),
+    )
+    fig = dict(data=data_table, layout=layout_table)
+    py.plot(fig, filename="max_pain_report.html")
+
+
 if __name__ == '__main__':
     strike_data = [
         StrikeEntry(26100, Keys.call, Keys.buy, ),
@@ -330,7 +434,12 @@ if __name__ == '__main__':
         StrikeEntry(26200, Keys.put, Keys.sell, ),
 
     ]
-    options_strategy("banknifty", strike_data, 10, 2018, date(2018, 10, 1), spot_range=[25000, 27000])
+    # options_strategy("banknifty", strike_data, 10, 2018, date(2018, 10, 1), spot_range=[25000, 27000])
     # oi_analytics("nifty", 10, 2018, )
     # put_call_ratio_expiry("nifty", 10, 2018, )
     # put_call_ratio("nifty")
+    # max_pain("nifty", 10, 2018, )
+    # max_pain(symbol="nifty", expiry_month=10, expiry_year=2018, start_strike=9500, end_strike=11500, gap=100, )
+    # max_pain(symbol="nifty", expiry_month=10, expiry_year=2018, start_strike=9500, end_strike=11500, gap=100, timestamp=date(2018, 10, 22))
+    max_pain(symbol="nifty", expiry_month=10, expiry_year=2018, start_strike=9500, end_strike=11500, gap=100,
+             start_date=date(2018, 9, 15), last_date=date(2018, 10, 15))
