@@ -38,7 +38,7 @@ def indicator_info(indicator=""):
         _logger.info(Function(indicator).info)
 
 
-def rsi(array=None, period=14) -> list:
+def rsi(array: list = None, period=14) -> list:
     """
     Calculates Relative Strength Index.
     :param array: list[numeric]
@@ -63,7 +63,8 @@ def rsi(array=None, period=14) -> list:
     return result
 
 
-def stoch(high=None, low=None, close=None, fastk_period=5, fastd_period=3, fastd_matype=MA_Type.SMA) -> dict:
+def stoch(high: list = None, low: list = None, close: list = None, fastk_period=5, fastd_period=3,
+          fastd_matype=MA_Type.SMA) -> dict:
     """
     Calculates Stochastic Oscillator.
     :param high: list[numeric]
@@ -101,7 +102,7 @@ def stoch(high=None, low=None, close=None, fastk_period=5, fastd_period=3, fastd
     return result
 
 
-def sma(array=None, period=30) -> list:
+def sma(array: list = None, period=30) -> list:
     """
     Calculates Simple Moving Average.
     :param array: list[numeric]
@@ -126,7 +127,7 @@ def sma(array=None, period=30) -> list:
     return result
 
 
-def ema(array=None, period=30) -> list:
+def ema(array: list = None, period=30) -> list:
     """
     Calculates Exponential Moving Average.
     :param array: list[numeric]
@@ -151,7 +152,7 @@ def ema(array=None, period=30) -> list:
     return result
 
 
-def macd(array=None, fastperiod=12, slowperiod=26, signalperiod=9) -> dict:
+def macd(array: list = None, fastperiod=12, slowperiod=26, signalperiod=9) -> dict:
     """
     Calculates Moving Average Convergence/Divergence.
     :param array: list[numeric]
@@ -182,7 +183,7 @@ def macd(array=None, fastperiod=12, slowperiod=26, signalperiod=9) -> dict:
     return result
 
 
-def bollinger_bands(array=None, timeperiod=5, nbdevup=2, nbdevdn=2, matype=MA_Type.SMA) -> dict:
+def bollinger_bands(array: list = None, timeperiod=5, nbdevup=2, nbdevdn=2, matype=MA_Type.SMA) -> dict:
     """
     Calculates Bollinger Bands for array.
     :param array: list[numeric]
