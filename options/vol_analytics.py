@@ -12,6 +12,24 @@ import plotly.graph_objs as go
 
 def strike_vol_analysis(symbol: str, strike_data: List[StrikeEntry], expiry_month: int, expiry_year: int,
                         start_date: date = None):
+    """
+    It is used to analyse IV for a given list of strikes over the expiry.
+    If a start date is not given then first day of the expiry month is taken.
+    :param symbol: str
+                Symbol for which analysis is to be done.
+    :param strike_data: list[StrikeEntry]
+                List of strikes for the analysis.
+    :param expiry_month: int
+                Expiry month for which back testing is to be done.
+                For e.g. For month of 'October', 10 is input.
+    :param expiry_year: int
+                Year of the expiry month. This is included in case if database expands over multiple years.
+                For e.g. 2018
+    :param start_date: date
+                Start date for the back testing. If none given, first of month is taken.
+    :return: None
+                Plots the underlying and strikes IV for the expiry.
+    """
     symbol = symbol.upper()
     fut_query = "Select * from %s where symbol='%s' and instrument like 'FUT%%' and MONTH(expiry)=%d and YEAR(expiry)=%d" % (
         dbc.table_name, symbol, expiry_month, expiry_year)
@@ -61,8 +79,29 @@ def strike_vol_analysis(symbol: str, strike_data: List[StrikeEntry], expiry_mont
     py.plot(fig, filename='strike_iv_analysis.html')
 
 
-def delta_vol_analysis(symbol: str, expiry_month: int, expiry_year: int, delta: float, delta_dev: float = 0.05,
-                       start_date: date = None):
+def delta_iv_analysis(symbol: str, expiry_month: int, expiry_year: int, delta: float, delta_dev: float = 0.05,
+                      start_date: date = None):
+    """
+    Used in the delta IV analysis of a symbol options for the expiry.
+    :param symbol: str
+                Symbol for which analysis is to be done.
+    :param expiry_month: int
+                Expiry month for which back testing is to be done.
+                For e.g. For month of 'October', 10 is input.
+    :param expiry_year: int
+                Year of the expiry month. This is included in case if database expands over multiple years.
+                For e.g. 2018
+    :param delta: float
+                Delta of the options for which IV is required to be plotted.
+                Ranges from 0 to 1. For eg. 0.5
+    :param delta_dev: float
+                Deviation from the delta value given. Range is taken as (delta - delta_dev) and (delta + delta_dev)
+                Defaults to 0.05
+    :param start_date: date
+                Start date for the analysis. If none given, first of month is taken.
+    :return: None
+                Plots the graph between IV and Timestamp at constant delta.
+    """
     symbol = symbol.upper()
     fut_query = "Select * from %s where symbol='%s' and instrument like 'FUT%%' and MONTH(expiry)=%d and YEAR(expiry)=%d" % (
         dbc.table_name, symbol, expiry_month, expiry_year)
@@ -135,8 +174,29 @@ def delta_vol_analysis(symbol: str, expiry_month: int, expiry_year: int, delta: 
     py.plot(fig, filename='delta_iv_analysis.html')
 
 
-def vol_surface_analysis(symbol, expiry_month, expiry_year, start_strike, end_strike, gap: int = None,
-                         start_date: date = None):
+def iv_surface_analysis(symbol, expiry_month, expiry_year, start_strike, end_strike, gap: int = None,
+                        start_date: date = None):
+    """
+    IV surface for the expiry for the given symbol.
+    :param symbol: str
+                Symbol for which analysis is to be done.
+    :param expiry_month: int
+                Expiry month for which back testing is to be done.
+                For e.g. For month of 'October', 10 is input.
+    :param expiry_year: int
+                Year of the expiry month. This is included in case if database expands over multiple years.
+                For e.g. 2018
+    :param start_strike: int
+                Starting strike for the Analysis
+    :param end_strike: int
+                Last strike for the Analysis
+    :param gap: int
+                Gap between the strikes to be taken.
+    :param start_date: date
+                Start date for the analysis. If none given, first of month is taken.
+    :return: None
+                Plots a 3D surface for the IV vs Strike vs Timestamp
+    """
     symbol = symbol.upper()
     option_query = "Select * from %s where symbol='%s' and instrument like 'OPT%%' and MONTH(expiry)=%d and YEAR(expiry)=%d" % (
         dbc.table_name, symbol, expiry_month, expiry_year)
@@ -149,8 +209,11 @@ def vol_surface_analysis(symbol, expiry_month, expiry_year, start_strike, end_st
 
     opt_df = opt_df[
         (opt_df.strike >= start_strike) & (opt_df.strike <= end_strike) & (opt_df.timestamp >= start_date) & (
-                opt_df.iv <= 35.0)]
+                    opt_df.iv <= 35.0)]
     # opt_df = opt_df[(opt_df.strike >= start_strike) & (opt_df.strike <= end_strike) & (opt_df.timestamp >= start_date)]
+
+    if gap is not None:
+        opt_df = opt_df[opt_df.strike % gap == 0]
 
     x = opt_df['strike'].values
     y = opt_df['timestamp'].values
@@ -192,6 +255,6 @@ if __name__ == '__main__':
                    StrikeEntry(10200, Keys.call),
                    StrikeEntry(10000, Keys.put),
                    StrikeEntry(11000, Keys.put)]
-    # strike_vol_analysis("nifty", strike_list, 10, 2018, start_date=date(2018, 9, 27))
-    # delta_vol_analysis("nifty", 10, 2018, 0.5)
-    vol_surface_analysis("nifty", 9, 2018, 9500, 11500)
+    strike_vol_analysis("nifty", strike_list, 10, 2018, start_date=date(2018, 9, 27))
+    # delta_iv_analysis("nifty", 10, 2018, 0.5)
+    # iv_surface_analysis("nifty", 9, 2018, 9500, 11500)

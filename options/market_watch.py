@@ -246,9 +246,9 @@ def display_oi(n_clicks):
     inputs=[Input('iv', 'n_clicks')], )
 def display_iv(n_clicks):
     """
-    This used to display the oi bar chart for call and put using plotly.
+    This used to display the iv line chart for call and put using plotly.
     :param n_clicks: int
-            Button clicks for id oi_status
+            Button clicks for id iv_status
     :return: None
     """
     global strikes, call_iv, put_iv

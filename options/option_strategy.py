@@ -15,6 +15,29 @@ from options import database_connection as dbc, payoff_charts
 
 def options_strategy(symbol: str, strike_data: List[StrikeEntry], expiry_month: int, expiry_year: int, start_date: date,
                      spot_range: list, strategy_name: str = None):
+    """
+    Used for the analysis and back testing of the strikes for the period of the expiry.
+    It plots theoretical payoffs along with the individual payoff for each strike over the time of expiry.
+    If a start date is not given then first day of the expiry month is taken.
+    :param symbol: str
+                Symbol for which analysis is to be done.
+    :param strike_data: list[StrikeEntry]
+                List of strikes for the analysis.
+    :param expiry_month: int
+                Expiry month for which back testing is to be done.
+                For e.g. For month of 'October', 10 is input.
+    :param expiry_year: int
+                Year of the expiry month. This is included in case if database expands over multiple years.
+                For e.g. 2018
+    :param start_date: date
+                Start date for the back testing. If none given, first of month is taken.
+    :param spot_range: list
+                Values required for the calculating theoretical payoffs. for eg. [9500, 11000]
+    :param strategy_name: str
+                Name of the strategy
+    :return: None
+                Plots the different payoffs for the strategy inputs.
+    """
     symbol = symbol.upper()
     fut_query = "Select * from %s where symbol='%s' and instrument like 'FUT%%' and MONTH(expiry)=%d and YEAR(expiry)=%d" % (
         dbc.table_name, symbol, expiry_month, expiry_year)
@@ -88,6 +111,15 @@ def options_strategy(symbol: str, strike_data: List[StrikeEntry], expiry_month: 
 
 
 def _get_theoretical_payoffs(spot: list, strike_data: list):
+    """
+    Helper function for getting theoretical payoffs
+    :param spot: list
+            Range of Spot values
+    :param strike_data: list[StrikeEntry]
+            Strike entry for the theoretical payoffs
+    :return: tuple(list, list)
+            Returns spot values and corresponding payoffs
+    """
     spot = numpy.arange(min(spot), max(spot), 100, dtype=numpy.int64).tolist()
     payoff = []
     for strike in strike_data:
@@ -114,6 +146,23 @@ def _get_theoretical_payoffs(spot: list, strike_data: list):
 
 def _plot_options_strategy_payoffs(symbol, fut_timeseries_data, timestamp_cum_pl, strike_cum_pl, theoretical_pl,
                                    strategy_name: str = None):
+    """
+    Helper function for plotting payoff diagrams in option strategy
+    :param symbol: str
+                Symbol under analysis
+    :param fut_timeseries_data: list
+                Data for plotting underlying future price
+    :param timestamp_cum_pl: list
+                Data for plotting cumulative profit and loss
+    :param strike_cum_pl: list
+                Data for plotting individual strike profit and loss
+    :param theoretical_pl: list
+                Data for plotting theoretical payoffs
+    :param strategy_name: str
+                Name of the strategy
+    :return: None
+                Plots the input data
+    """
     titles = []
     traces = []
     fut_period = fut_timeseries_data[0]
@@ -172,6 +221,21 @@ def _plot_options_strategy_payoffs(symbol, fut_timeseries_data, timestamp_cum_pl
 
 
 def oi_analytics(symbol: str, expiry_month: int, expiry_year: int, start_date: date = None):
+    """
+    Used for the OI Analytics of the symbol over the period of expiry
+    :param symbol: str
+                Symbol for which analysis is to be done.
+    :param expiry_month: int
+                Expiry month for which back testing is to be done.
+                For e.g. For month of 'October', 10 is input.
+    :param expiry_year: int
+                Year of the expiry month. This is included in case if database expands over multiple years.
+                For e.g. 2018
+    :param start_date: date
+                Start date for the back testing. If none given, first of month is taken.
+    :return: None
+                Plots the graph for oi analysis. Underlying, OI and Change in OI.
+    """
     fut_query = "Select * from %s where symbol='%s' and instrument like 'FUT%%' and MONTH(expiry)=%d and YEAR(expiry)=%d" % (
         dbc.table_name, symbol, expiry_month, expiry_year)
     fut_data = dbc.execute_simple_query(fut_query)
@@ -213,6 +277,21 @@ def oi_analytics(symbol: str, expiry_month: int, expiry_year: int, start_date: d
 
 
 def put_call_ratio_expiry(symbol: str, expiry_month: int, expiry_year: int, start_date: date = None):
+    """
+    Used for the PCR Analytics of the symbol over the period of expiry
+    :param symbol: str
+                Symbol for which analysis is to be done.
+    :param expiry_month: int
+                Expiry month for which back testing is to be done.
+                For e.g. For month of 'October', 10 is input.
+    :param expiry_year: int
+                Year of the expiry month. This is included in case if database expands over multiple years.
+                For e.g. 2018
+    :param start_date: date
+                Start date for the back testing. If none given, first of month is taken.
+    :return: None
+                Plots the graph for PCR analysis. Underlying, and PCR are plotted.
+    """
     symbol = symbol.upper()
     fut_query = "Select * from %s where symbol='%s' and instrument like 'FUT%%' and MONTH(expiry)=%d and YEAR(expiry)=%d" % (
         dbc.table_name, symbol, expiry_month, expiry_year)
@@ -262,6 +341,13 @@ def put_call_ratio_expiry(symbol: str, expiry_month: int, expiry_year: int, star
 
 
 def put_call_ratio(symbol: str, ):
+    """
+    Used for plotting the PCR ratio fot the symbol for all the expiry available in the database
+    :param symbol: str
+                Symbol for which PCR is required.
+    :return: None
+                Plots the PCR graph for the symbol along with underlying
+    """
     symbol = symbol.upper()
 
     fut_query = "Select * from %s where symbol='%s' and instrument like 'FUT%%' order by timestamp asc" % (
@@ -324,6 +410,33 @@ def put_call_ratio(symbol: str, ):
 
 def max_pain(symbol: str, expiry_month: int, expiry_year: int, start_strike: int, end_strike: int, gap: int = None,
              start_date: date = None, last_date: date = None, timestamp: date = None):
+    """
+    It is used to analyse the max pain for either a day or few days.
+    If start date, last date and timestamp are given then timestamp is given preference.
+    :param symbol: str
+                Symbol for which analysis is to be done.
+    :param expiry_month: int
+                Expiry month for which back testing is to be done.
+                For e.g. For month of 'October', 10 is input.
+    :param expiry_year: int
+                Year of the expiry month. This is included in case if database expands over multiple years.
+                For e.g. 2018
+    :param start_strike: int
+                Starting strike for the Analysis
+    :param end_strike: int
+                Last strike for the Analysis
+    :param gap: int
+                Gap between the strikes to be taken.
+    :param start_date: date
+                Start date for the back testing. If none given, first of month is taken.
+    :param last_date: date
+                Last date of the observation. if none is given then expiry day is taken.
+    :param timestamp: date
+                Day for which Max Pain is to be observed.
+    :return: None
+                Table is displayed showing Max pain strikes along with underlying
+                Plots a bar chart if timestamp is given.
+    """
     symbol = symbol.upper()
 
     fut_query = "Select * from %s where symbol='%s' and instrument like 'FUT%%' and MONTH(expiry)=%d and YEAR(expiry)=%d order by timestamp asc" % (
