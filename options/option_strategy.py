@@ -303,7 +303,7 @@ def put_call_ratio_expiry(symbol: str, expiry_month: int, expiry_year: int, star
     option_data = dbc.execute_simple_query(option_query)
     option_df = pd.DataFrame(data=option_data, columns=dbc.columns)
     start_date = start_date if start_date else date(expiry_year, expiry_month, 1)
-    option_expiry_df = option_df[option_df.timestamp >= start_date]
+    option_expiry_df = option_df[option_df.timestamp >= start_date].sort_values('timestamp')
     timestamp_arr = option_expiry_df.timestamp.unique()
     call_option = [Keys.call]
     put_option = [Keys.put]

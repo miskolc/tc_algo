@@ -324,6 +324,7 @@ class GreekValues:
     """
     This class is used for the defining values of different option greeks.
     """
+
     def __init__(self, callPrice, callDelta, callDelta2, callTheta, callRho, putPrice, putDelta, putDelta2, putTheta,
                  putRho, vega, gamma):
         """
@@ -370,7 +371,22 @@ class GreekValues:
 
 
 class StrikeEntry:
+    """
+    This is used to make a option's entry for analysis
+    """
+
     def __init__(self, strike: int, option_type: str, signal: str = None, premium: float = None):
+        """
+        It creates an instance which refers to different properties of the option.
+        :param strike: int
+                    Strike price of the option
+        :param option_type: str
+                    Type of the option. Possible values CE and PE.
+        :param signal: str
+                    Signal for the option. Either 'buy' or 'sell'
+        :param premium: float
+                    Premium paid or received for the option.
+        """
         self.strike = strike
         self.option_type = option_type
         self.signal = signal

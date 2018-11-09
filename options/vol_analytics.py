@@ -50,6 +50,7 @@ def strike_vol_analysis(symbol: str, strike_data: List[StrikeEntry], expiry_mont
                         option_df.option_typ == strike_entry.option_type)].sort_values('timestamp')
             ts_list = option_expiry_df.timestamp.values
             iv_list = option_expiry_df.iv.values
+            iv_list[iv_list == 0] = None
             name = "%s%s" % (strike_entry.strike, strike_entry.option_type)
             trace = go.Scatter(x=ts_list, y=iv_list, name=name)
             traces.append(trace)
