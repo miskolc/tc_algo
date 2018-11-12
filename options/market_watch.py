@@ -24,8 +24,10 @@ put_iv = []
 header_style = {'color': "white", "background": "black"}
 border = "2px solid black"
 itm_color = '#FBF5CD'
-call_color = "#FFCCFF"
-put_color = "#CCECFF"
+otm_color = "#FFFFFF"
+# call_color = "#FFCCFF"
+# put_color = "#CCECFF"
+call_color = put_color = otm_color
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
 market_watch_app = dash.Dash(__name__, external_stylesheets=external_stylesheets)

@@ -3,6 +3,7 @@ from typing import List
 
 import numpy
 import pandas as pd
+from dateutil.relativedelta import relativedelta
 
 from plotly import tools
 import plotly.offline as py
@@ -239,23 +240,79 @@ def oi_analytics(symbol: str, expiry_month: int, expiry_year: int, start_date: d
     fut_query = "Select * from %s where symbol='%s' and instrument like 'FUT%%' and MONTH(expiry)=%d and YEAR(expiry)=%d" % (
         dbc.table_name, symbol, expiry_month, expiry_year)
     fut_data = dbc.execute_simple_query(fut_query)
-    fut_df = pd.DataFrame(data=fut_data, columns=dbc.columns)
+    fut_df_current = pd.DataFrame(data=fut_data, columns=dbc.columns)
     start_date = start_date if start_date else date(expiry_year, expiry_month, 1)
-    x, y1, y2, y3 = [], [], [], []
-    for fut_row in fut_df.itertuples():
+
+    timestamp_current, oi_current, settle_pr_current, chg_oi_current = [], [], [], []
+    for fut_row in fut_df_current.itertuples():
         timestamp = fut_row.timestamp
         if timestamp >= start_date:
-            x.append(timestamp)
-            y1.append(fut_row.open_int)
-            y2.append(fut_row.settle_pr)
-            y3.append(fut_row.chg_in_oi)
-    trace1 = go.Scatter(x=x, y=y1, name='OI', )
-    trace2 = go.Scatter(x=x, y=y2, name='settle_pr', yaxis='y2')
-    trace3 = go.Scatter(x=x, y=y3, name='chg_in_oi', yaxis='y3', fill='tozeroy')
+            timestamp_current.append(timestamp)
+            oi_current.append(fut_row.open_int)
+            settle_pr_current.append(fut_row.settle_pr)
+            chg_oi_current.append(fut_row.chg_in_oi)
 
-    data = [trace1, trace2, trace3]
+    pre_date = start_date - relativedelta(months=1)
+    fut_query1 = "Select * from %s where symbol='%s' and instrument like 'FUT%%' and MONTH(expiry)=%d and YEAR(expiry)=%d" % (
+        dbc.table_name, symbol, pre_date.month, pre_date.year)
+    fut_data_pre = dbc.execute_simple_query(fut_query1)
+    fut_df_pre = pd.DataFrame(data=fut_data_pre, columns=dbc.columns)
 
-    layout = go.Layout(
+    timestamp_pre, oi_pre, settle_pr_pre, chg_oi_pre = [], [], [], []
+    for fut_row in fut_df_pre.itertuples():
+        timestamp = fut_row.timestamp
+        if timestamp >= pre_date:
+            timestamp_pre.append(timestamp)
+            oi_pre.append(fut_row.open_int)
+            settle_pr_pre.append(fut_row.settle_pr)
+            chg_oi_pre.append(fut_row.chg_in_oi)
+
+    trace1 = go.Scatter(x=timestamp_current, y=oi_current, name='OI', yaxis='y')
+    trace2 = go.Scatter(x=timestamp_current, y=settle_pr_current, name='settle_pr', yaxis='y2')
+    trace3 = go.Scatter(x=timestamp_current, y=chg_oi_current, name='chg_in_oi', yaxis='y3', fill='tozeroy')
+    data1 = [trace1, trace2, trace3]
+
+    trace4 = go.Scatter(x=timestamp_pre, y=oi_pre, name='OI', yaxis='y')
+    trace5 = go.Scatter(x=timestamp_pre, y=settle_pr_pre, name='settle_pr', yaxis='y2')
+    trace6 = go.Scatter(x=timestamp_pre, y=chg_oi_pre, name='chg_in_oi', yaxis='y3', fill='tozeroy')
+    data2 = [trace4, trace5, trace6]
+
+    # fig = tools.make_subplots(rows=2, cols=1, subplot_titles=["Expiry", "Previous Expiry"])
+    # fig.append_trace(trace1, 1, 1)
+    # fig.append_trace(trace2, 1, 1)
+    # # fig.append_trace(trace3, 1, 1)
+    # fig.append_trace(trace4, 2, 1)
+    # fig.append_trace(trace5, 2, 1)
+    # # fig.append_trace(trace6, 2, 1)
+    #
+    # fig['data'][1].update(yaxis='y2')
+    # # fig['data'][4].update(yaxis='y3')
+    # fig['data'][2].update(yaxis='y3')
+    # fig['data'][3].update(yaxis='y4')
+    # # fig['data'][4].update(yaxis='y6')
+    #
+    # fig['layout'].update(title='OI Analytics')
+    # fig['layout']['yaxis'].update(title='Open Interest', )
+    # fig['layout']['yaxis2'].update(title='Settle Price',
+    #                                anchor='free',
+    #                                overlaying='y',
+    #                                side='left',
+    #                                position=0.05)
+    # # fig['layout']['yaxis3'].update(title='Change in OI',
+    # #                                anchor='x',
+    # #                                overlaying='y',
+    # #                                side='right', )
+    # fig['layout']['yaxis3'].update(title='Open Interest', )
+    # fig['layout']['yaxis4'].update(title='Settle Price',
+    #                                anchor='free',
+    #                                overlaying='y3',
+    #                                side='left',
+    #                                position=0.05)
+    # # fig['layout']['yaxis6'].update(title='Change in OI',
+    # #                                anchor='x',
+    # #                                overlaying='y',
+    # #                                side='right', )
+    layout1 = go.Layout(
         title='OI Analytics',
         yaxis=dict(title='Open Interest', ),
         yaxis2=dict(
@@ -272,8 +329,28 @@ def oi_analytics(symbol: str, expiry_month: int, expiry_year: int, start_date: d
             side='right',
         ),
     )
-    fig = go.Figure(data=data, layout=layout)
-    py.plot(fig, filename='oi_analytics.html')
+    fig1 = go.Figure(data=data1, layout=layout1)
+    py.plot(fig1, filename='oi_analytics.html')
+
+    layout2 = go.Layout(
+        title='OI Analytics Previous',
+        yaxis=dict(title='Open Interest', ),
+        yaxis2=dict(
+            title='Settle Price',
+            anchor='free',
+            overlaying='y',
+            side='left',
+            position=0.05
+        ),
+        yaxis3=dict(
+            title='Change in OI',
+            anchor='x',
+            overlaying='y',
+            side='right',
+        ),
+    )
+    fig2 = go.Figure(data=data2, layout=layout2)
+    py.plot(fig2, filename='oi_analytics_pre.html')
 
 
 def put_call_ratio_expiry(symbol: str, expiry_month: int, expiry_year: int, start_date: date = None):
@@ -354,6 +431,8 @@ def put_call_ratio(symbol: str, ):
         dbc.table_name, symbol)
     fut_data = dbc.execute_simple_query(fut_query)
     fut_df = pd.DataFrame(data=fut_data, columns=dbc.columns)
+    high = fut_df.close.max()
+    high = high * 1.25
 
     option_query = "Select * from %s where symbol='%s' and instrument like 'OPT%%' order by timestamp asc" % (
         dbc.table_name, symbol)
@@ -365,6 +444,7 @@ def put_call_ratio(symbol: str, ):
     put_option = [Keys.put]
     x, y1, y2 = [], [], []
     init_expiry = None
+    shapes = []
     for expiry in expiry_dates:
         if init_expiry is None:
             init_expiry = date(expiry.year, expiry.month, 1)
@@ -387,7 +467,17 @@ def put_call_ratio(symbol: str, ):
             y2.append(pcr)
 
         init_expiry = expiry + timedelta(days=1)
-
+        shapes.append({
+            'type': 'line',
+            'x0': expiry,
+            'y0': 0,
+            'x1': expiry,
+            'y1': high,
+            'line': {
+                'color': 'rgb(55, 128, 191)',
+                'width': 1,
+            },
+        }, )
     trace1 = go.Scatter(x=x, y=y1, name=symbol, )
     trace2 = go.Scatter(x=x, y=y2, name='PCR', yaxis='y2')
 
@@ -395,14 +485,16 @@ def put_call_ratio(symbol: str, ):
 
     layout = go.Layout(
         title='PCR Analytics',
-        yaxis=dict(title='Underlying', ),
+        yaxis=dict(title='Underlying', showgrid=False, ),
         yaxis2=dict(
             title='PCR',
             anchor='x',
             overlaying='y',
             side='right',
-            position=0.05
+            position=0.05,
+            showgrid=False,
         ),
+        shapes=shapes,
     )
     fig = go.Figure(data=data, layout=layout)
     py.plot(fig, filename='pcr_analytics.html')
@@ -550,9 +642,9 @@ if __name__ == '__main__':
     # options_strategy("banknifty", strike_data, 10, 2018, date(2018, 10, 1), spot_range=[25000, 27000])
     # oi_analytics("nifty", 10, 2018, )
     # put_call_ratio_expiry("nifty", 10, 2018, )
-    # put_call_ratio("nifty")
+    put_call_ratio("nifty")
     # max_pain("nifty", 10, 2018, )
     # max_pain(symbol="nifty", expiry_month=10, expiry_year=2018, start_strike=9500, end_strike=11500, gap=100, )
     # max_pain(symbol="nifty", expiry_month=10, expiry_year=2018, start_strike=9500, end_strike=11500, gap=100, timestamp=date(2018, 10, 22))
-    max_pain(symbol="nifty", expiry_month=10, expiry_year=2018, start_strike=9500, end_strike=11500, gap=100,
-             start_date=date(2018, 9, 15), last_date=date(2018, 10, 15))
+    # max_pain(symbol="nifty", expiry_month=10, expiry_year=2018, start_strike=9500, end_strike=11500, gap=100,
+    #          start_date=date(2018, 9, 15), last_date=date(2018, 10, 15))

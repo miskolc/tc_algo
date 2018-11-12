@@ -39,20 +39,40 @@ def vix_nifty_plot():
             Plots a chart for nifty and vix
     """
     nifty, vix = get_vix_nifty_data()
-    trace_nifty = go.Scatter(x=nifty['date'], y=nifty['close'], name="Nifty 50")
-    trace_vix = go.Scatter(x=vix['date'], y=vix['close'], name="India VIX", yaxis='y2')
+    trace_vix = go.Scatter(x=vix['date'], y=vix['close'], name="India VIX")
+    trace_nifty = go.Scatter(x=nifty['date'], y=nifty['close'], name="Nifty 50", yaxis='y2')
 
-    data = [trace_nifty, trace_vix]
+    dates = nifty['date'].values
+    date_begin = dates[0]
+    date_end = dates[-1]
+    avg_vix = vix.close.mean()
+    data = [trace_vix, trace_nifty]
 
     layout = go.Layout(
-        title='Nifty50 vs India VIX',
-        yaxis=dict(title='Nifty50', ),
+        title='India VIX vs Nifty',
+        yaxis=dict(title='India VIX', showgrid=False),
         yaxis2=dict(
-            title='India VIX',
+            title='Nifty50',
             anchor='x',
             overlaying='y',
             side='right',
+            showgrid=False,
         ),
+        shapes=[{
+            'type': 'line',
+            'x0': date_begin,
+            'y0': avg_vix,
+            'x1': date_end,
+            'y1': avg_vix,
+            'line': {
+                'color': 'rgb(50, 171, 96)',
+                'width': 2,
+                'dash': 'dashdot',
+            },
+        }, ]
     )
     fig = go.Figure(data=data, layout=layout)
-    py.plot(fig, filename='nifty_vs_vix.html')
+    py.plot(fig, filename='vix_vs_nifty.html')
+
+
+vix_nifty_plot()

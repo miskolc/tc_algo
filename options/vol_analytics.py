@@ -227,8 +227,8 @@ def iv_surface_analysis(symbol, expiry_month, expiry_year, start_strike, end_str
                          marker=dict(
                              size=2,
                              color=z,
-                             colorscale='Hot',
-                             opacity=0.8
+                             colorscale='Viridis',
+                             opacity=1
                          ))
     data = [trace]
     layout = go.Layout(
@@ -256,6 +256,6 @@ if __name__ == '__main__':
                    StrikeEntry(10200, Keys.call),
                    StrikeEntry(10000, Keys.put),
                    StrikeEntry(11000, Keys.put)]
-    strike_vol_analysis("nifty", strike_list, 10, 2018, start_date=date(2018, 9, 27))
+    # strike_vol_analysis("nifty", strike_list, 10, 2018, start_date=date(2018, 9, 27))
     # delta_iv_analysis("nifty", 10, 2018, 0.5)
-    # iv_surface_analysis("nifty", 9, 2018, 9500, 11500)
+    iv_surface_analysis("nifty", 9, 2018, 9500, 11500)
