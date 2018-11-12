@@ -417,7 +417,7 @@ def put_call_ratio_expiry(symbol: str, expiry_month: int, expiry_year: int, star
     py.plot(fig, filename='pcr_expiry_analytics.html')
 
 
-def put_call_ratio(symbol: str, ):
+def put_call_ratio(symbol: str, data_only: bool = False):
     """
     Used for plotting the PCR ratio fot the symbol for all the expiry available in the database
     :param symbol: str
@@ -478,26 +478,30 @@ def put_call_ratio(symbol: str, ):
                 'width': 1,
             },
         }, )
-    trace1 = go.Scatter(x=x, y=y1, name=symbol, )
-    trace2 = go.Scatter(x=x, y=y2, name='PCR', yaxis='y2')
 
-    data = [trace1, trace2, ]
+    if data_only:
+        return x, y2
+    else:
+        trace1 = go.Scatter(x=x, y=y1, name=symbol, )
+        trace2 = go.Scatter(x=x, y=y2, name='PCR', yaxis='y2')
 
-    layout = go.Layout(
-        title='PCR Analytics',
-        yaxis=dict(title='Underlying', showgrid=False, ),
-        yaxis2=dict(
-            title='PCR',
-            anchor='x',
-            overlaying='y',
-            side='right',
-            position=0.05,
-            showgrid=False,
-        ),
-        shapes=shapes,
-    )
-    fig = go.Figure(data=data, layout=layout)
-    py.plot(fig, filename='pcr_analytics.html')
+        data = [trace1, trace2, ]
+
+        layout = go.Layout(
+            title='PCR Analytics',
+            yaxis=dict(title='Underlying', showgrid=False, ),
+            yaxis2=dict(
+                title='PCR',
+                anchor='x',
+                overlaying='y',
+                side='right',
+                position=0.05,
+                showgrid=False,
+            ),
+            shapes=shapes,
+        )
+        fig = go.Figure(data=data, layout=layout)
+        py.plot(fig, filename='pcr_analytics.html')
 
 
 def max_pain(symbol: str, expiry_month: int, expiry_year: int, start_strike: int, end_strike: int, gap: int = None,

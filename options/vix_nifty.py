@@ -4,6 +4,8 @@ import pandas as pd
 import plotly.offline as py
 import plotly.graph_objs as go
 
+from options import option_strategy
+
 host = 'mysql7002.site4now.net'
 user = 'l7oowjtp_abhish'
 password = 'Bk7K=g+?ukBX'
@@ -75,4 +77,55 @@ def vix_nifty_plot():
     py.plot(fig, filename='vix_vs_nifty.html')
 
 
-vix_nifty_plot()
+def vix_nifty_pcr_plot():
+    """
+    It is used to plot the data for Nifty and India VIX
+    :return: None
+            Plots a chart for nifty and vix
+    """
+    nifty, vix = get_vix_nifty_data()
+    trace_vix = go.Scatter(x=vix['date'], y=vix['close'], name="India VIX")
+    trace_nifty = go.Scatter(x=nifty['date'], y=nifty['close'], name="Nifty 50", yaxis='y2')
+
+    dates = nifty['date'].values
+    date_begin = dates[0]
+    date_end = dates[-1]
+    avg_vix = vix.close.mean()
+
+    pcr_timestamps, pcr_data = option_strategy.put_call_ratio('nifty', data_only=True)
+    # print(pcr_timestamps[0], pcr_timestamps[-1], len(pcr_data))
+    trace_pcr = go.Scatter(x=pcr_timestamps, y=pcr_data, name='PCR', yaxis='y3')
+    data = [trace_vix, trace_nifty, trace_pcr]
+
+    layout = go.Layout(
+        title='India VIX vs Nifty',
+        yaxis=dict(title='India VIX', showgrid=False),
+        yaxis2=dict(
+            title='Nifty50',
+            anchor='x',
+            overlaying='y',
+            side='right',
+            showgrid=False,
+        ),
+        yaxis3=dict(
+            title='PCR',
+            anchor='x',
+            overlaying='y',
+            side='right',
+            position=0.25,
+        ),
+        shapes=[{
+            'type': 'line',
+            'x0': date_begin,
+            'y0': avg_vix,
+            'x1': date_end,
+            'y1': avg_vix,
+            'line': {
+                'color': 'rgb(255, 35, 35)',
+                'width': 2,
+                'dash': 'dashdot',
+            },
+        }, ]
+    )
+    fig = go.Figure(data=data, layout=layout)
+    py.plot(fig, filename='vix_vs_nifty_vs_pcr.html')
