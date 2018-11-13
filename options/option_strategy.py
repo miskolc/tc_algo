@@ -353,7 +353,8 @@ def oi_analytics(symbol: str, expiry_month: int, expiry_year: int, start_date: d
     py.plot(fig2, filename='oi_analytics_pre.html')
 
 
-def put_call_ratio_expiry(symbol: str, expiry_month: int, expiry_year: int, start_date: date = None):
+def put_call_ratio_expiry(symbol: str, expiry_month: int, expiry_year: int, start_date: date = None,
+                          otm_pcr: bool = False):
     """
     Used for the PCR Analytics of the symbol over the period of expiry
     :param symbol: str
@@ -366,6 +367,8 @@ def put_call_ratio_expiry(symbol: str, expiry_month: int, expiry_year: int, star
                 For e.g. 2018
     :param start_date: date
                 Start date for the back testing. If none given, first of month is taken.
+    :param otm_pcr: bool
+                If True, only Out of Money Option's PCR is plotted
     :return: None
                 Plots the graph for PCR analysis. Underlying, and PCR are plotted.
     """
@@ -387,12 +390,16 @@ def put_call_ratio_expiry(symbol: str, expiry_month: int, expiry_year: int, star
     x, y1, y2 = [], [], []
     for timestamp in timestamp_arr:
         day = [timestamp]
+        fut_price = fut_df[fut_df.timestamp == timestamp].close.values[0]
         call_df = option_expiry_df[option_expiry_df.option_typ.isin(call_option) & option_expiry_df.timestamp.isin(day)]
         put_df = option_expiry_df[option_expiry_df.option_typ.isin(put_option) & option_expiry_df.timestamp.isin(day)]
+        if otm_pcr:
+            call_df = call_df[call_df.strike >= fut_price]
+            put_df = put_df[put_df.strike <= fut_price]
+        # print(len(call_df), len(put_df))
         call_volume = call_df.open_int.sum()
         put_volume = put_df.open_int.sum()
         pcr = put_volume / call_volume
-        fut_price = fut_df[fut_df.timestamp.isin(day)].close.mean()
         x.append(timestamp)
         y1.append(fut_price)
         y2.append(pcr)
@@ -417,13 +424,15 @@ def put_call_ratio_expiry(symbol: str, expiry_month: int, expiry_year: int, star
     py.plot(fig, filename='pcr_expiry_analytics.html')
 
 
-def put_call_ratio(symbol: str, data_only: bool = False):
+def put_call_ratio(symbol: str, data_only: bool = False, otm_pcr: bool = False):
     """
     Used for plotting the PCR ratio fot the symbol for all the expiry available in the database
     :param symbol: str
                 Symbol for which PCR is required.
+    :param data_only: bool
+                If True, only data is returned for PCR
     :return: None
-                Plots the PCR graph for the symbol along with underlying
+                Either Plots the PCR graph for the symbol along with underlying or returns data
     """
     symbol = symbol.upper()
 
@@ -454,14 +463,18 @@ def put_call_ratio(symbol: str, data_only: bool = False):
         monthly_timestamps = month_expiry_data.timestamp.unique()
         for ts in monthly_timestamps:
             day = [ts]
+            fut_price = fut_df[fut_df.timestamp == ts].close.values[0]
             call_df = month_expiry_data[
                 month_expiry_data.option_typ.isin(call_option) & month_expiry_data.timestamp.isin(day)]
             put_df = month_expiry_data[
                 month_expiry_data.option_typ.isin(put_option) & month_expiry_data.timestamp.isin(day)]
+            if otm_pcr:
+                call_df = call_df[call_df.strike >= fut_price]
+                put_df = put_df[put_df.strike <= fut_price]
             call_volume = call_df.open_int.sum()
             put_volume = put_df.open_int.sum()
             pcr = put_volume / call_volume
-            fut_price = fut_df[fut_df.timestamp.isin(day)].close.mean()
+            # fut_price = fut_df[fut_df.timestamp.isin(day)].close.mean()
             x.append(ts)
             y1.append(fut_price)
             y2.append(pcr)
@@ -646,7 +659,9 @@ if __name__ == '__main__':
     # options_strategy("banknifty", strike_data, 10, 2018, date(2018, 10, 1), spot_range=[25000, 27000])
     # oi_analytics("nifty", 10, 2018, )
     # put_call_ratio_expiry("nifty", 10, 2018, )
-    put_call_ratio("nifty")
+    put_call_ratio_expiry("nifty", 10, 2018, otm_pcr=True)
+    # put_call_ratio("nifty")
+    # put_call_ratio("nifty", otm_pcr=True)
     # max_pain("nifty", 10, 2018, )
     # max_pain(symbol="nifty", expiry_month=10, expiry_year=2018, start_strike=9500, end_strike=11500, gap=100, )
     # max_pain(symbol="nifty", expiry_month=10, expiry_year=2018, start_strike=9500, end_strike=11500, gap=100, timestamp=date(2018, 10, 22))
