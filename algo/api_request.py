@@ -61,58 +61,88 @@ def place_order(scrip: Scrip, buy_sell: str, qty: int, order_type: str, validity
                 data.update({k.book_type: order_type})
         data.update({k.validity: validity})
     response = send_request(order_func, data)
-    pprint(response)
+    reader.read_order_response(response)
 
 
-# Requires Modification
-def order_status():
-    unique_id, ref_no = config_manager.get_api_credentials()
-    data = {k.unique_id: unique_id, k.ref_no: ref_no}
+def order_status(order_id: int):
+    unique_id, ref_no, modified = config_manager.get_api_credentials()
+    data = {k.unique_id: unique_id, k.ref_no: ref_no, k.order_no: order_id}
     response = send_request(order_status_func, data)
-    print(response)
+    reader.read_order_status_response(order_id, response)
 
 
-# Requires Modification
-def modify_order():
-    unique_id, ref_no = config_manager.get_api_credentials()
-    data = {k.unique_id: unique_id, k.ref_no: ref_no}
+# {
+#     "UniqueId": 97,
+#     "RefNo": "gCgz2mRI1kiYLrnRbq1JQ6rGoJgCNlT1",
+#     "IntOrdNo": 2,
+#     "qty": 1000,
+#     "price": 0,
+#     "Booktype": "RL",
+#     "validity": "DAY"
+# }
+def modify_order(order_id: int, price: float, qty: int, validity: str, order_type, trigger_price: float = None, ):
+    unique_id, ref_no, modified = config_manager.get_api_credentials()
+    data = {k.unique_id: unique_id, k.ref_no: ref_no, k.order_no: order_id}
+    data.update({k.price: price, k.qty: qty})
+    if order_type in [o.RL, o.SL]:
+        if order_type == o.SL:
+            if trigger_price is not None:
+                data.update({k.trigger_price: trigger_price, k.book_type: order_type})
+            else:
+                _logger.warning("Trigger price is required for SL order")
+        if order_type == o.RL:
+            data.update({k.book_type: order_type})
+    data.update({k.validity: validity})
     response = send_request(modify_order_func, data)
-    print(response)
+    # print(response)
+    reader.read_order_modify_response(response)
 
 
-# Requires Modification
-def cancel_order():
-    unique_id, ref_no = config_manager.get_api_credentials()
-    data = {k.unique_id: unique_id, k.ref_no: ref_no}
+def cancel_order(order_id: int):
+    unique_id, ref_no, modified = config_manager.get_api_credentials()
+    data = {k.unique_id: unique_id, k.ref_no: ref_no, k.order_no: order_id}
     response = send_request(cancel_order_func, data)
-    print(response)
+    reader.read_order_cancel_response(response)
 
 
-# Requires Checking
-def trade_book_request():
-    unique_id, ref_no = config_manager.get_api_credentials()
+def trade_book_request(order_id: int = None, scrip: Scrip = None):
+    unique_id, ref_no, modified = config_manager.get_api_credentials()
     data = {k.unique_id: unique_id, k.ref_no: ref_no}
+    if order_id:
+        data.update({k.order_no: order_id})
+    if scrip:
+        data.update({k.token_no: scrip.token_no})
     response = send_request(trade_book_func, data)
-    print(response)
+    reader.read_trade_book_response(response)
 
 
-# Requires Checking
-def position_book_request():
-    unique_id, ref_no = config_manager.get_api_credentials()
+def position_book_request(scrip: Scrip = None):
+    unique_id, ref_no, modified = config_manager.get_api_credentials()
     data = {k.unique_id: unique_id, k.ref_no: ref_no}
+    if scrip:
+        data.update({k.token_no: scrip.token_no})
     response = send_request(position_book_func, data)
-    print(response)
+    reader.read_position_book_response(response)
 
 
-# Requires Checking
-def order_book_request():
-    unique_id, ref_no = config_manager.get_api_credentials()
+def order_book_request(order_id: int = None, scrip: Scrip = None):
+    unique_id, ref_no, modified = config_manager.get_api_credentials()
     data = {k.unique_id: unique_id, k.ref_no: ref_no}
+    if order_id:
+        data.update({k.order_no: order_id})
+    if scrip:
+        data.update({k.token_no: scrip.token_no})
     response = send_request(order_book_func, data)
-    print(response)
+    reader.read_order_book_response(response)
 
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
     # login_request()
-    place_order(NSECM._HDFCBANK_1333, o.BUY, 10, o.SL, o.DAY, price=1800, trigger_price=1750)
+    # place_order(NSECM._HDFCBANK_1333, o.BUY, 10, o.SL, o.DAY, price=1800, trigger_price=1750)
+    # modify_order(3, 1800, 50, o.DAY, o.RL)
+    # order_status(5)
+    # cancel_order(4)
+    # trade_book_request(order_id=5, scrip=NSECM._HDFCBANK_1333)
+    # position_book_request(scrip=NSECM._HDFCAMC_4244)
+    # order_book_request(scrip=NSECM._HDFCAMC_4244)
