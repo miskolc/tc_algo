@@ -65,7 +65,7 @@ def _read_data(path: str):
         db_start_time = time.time()
         database_connection.insert_data(queries)
         print("Queries executed: %s" % len(queries))
-        print("Time taken to  execute queries: %s seconds" % (time.time() - db_start_time))
+        print("Time taken to execute queries: %s seconds" % (time.time() - db_start_time))
 
 
 def _read_row(row):
