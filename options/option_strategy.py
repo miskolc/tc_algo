@@ -448,6 +448,7 @@ def put_call_ratio(symbol: str, start_date: date = None, data_only: bool = False
             call_volume = call_df.open_int.sum()
             put_volume = put_df.open_int.sum()
             pcr = put_volume / call_volume
+            pcr = pcr if pcr < 1.7 else (y2[-1] if len(y2) > 0 else None)
             x.append(ts)
             y1.append(fut_price)
             y2.append(pcr)
@@ -555,7 +556,7 @@ def max_pain(symbol: str, expiry_month: int, expiry_year: int, start_strike: int
 
     days_arr = fut_df.timestamp.unique()
     timestamp_values = []
-    table_ts, table_underlying, table_max_pain_strikes = [], [], []
+    table_ts, table_underlying, table_max_pain_strikes, table_strikes_avg = [], [], [], []
     for ts in days_arr:
         call_df = option_df[(option_df.timestamp == ts) & (option_df.option_typ == Keys.call)]
         put_df = option_df[(option_df.timestamp == ts) & (option_df.option_typ == Keys.put)]
@@ -584,10 +585,13 @@ def max_pain(symbol: str, expiry_month: int, expiry_year: int, start_strike: int
             values.sort(key=lambda x: x[1])
             values = values[:5]
             max_pain_strikes = [item[0] for item in values]
+            max_pain_strikes.sort()
             underlying = fut_df[fut_df.timestamp == ts].close.values[0]
+            average = int(sum(max_pain_strikes) / len(max_pain_strikes))
             table_ts.append(ts)
             table_underlying.append(underlying)
             table_max_pain_strikes.append(max_pain_strikes)
+            table_strikes_avg.append(average)
 
     x, y = [], []
     for value in timestamp_values:
@@ -608,13 +612,13 @@ def max_pain(symbol: str, expiry_month: int, expiry_year: int, start_strike: int
         else:
             print("No data for plotting for %s" % timestamp)
 
-    table_header = ['Timestamp', 'Underlying', 'Strikes with Max Pain']
+    table_header = ['Timestamp', 'Underlying', 'Strikes with Max Pain', 'Average']
     table_trace = go.Table(
         header=dict(values=table_header,
                     line=dict(color='#7D7F80'),
                     fill=dict(color='#a1c3d1'),
                     ),
-        cells=dict(values=[table_ts, table_underlying, table_max_pain_strikes],
+        cells=dict(values=[table_ts, table_underlying, table_max_pain_strikes, table_strikes_avg],
                    line=dict(color='#7D7F80'),
                    fill=dict(color='#EDFAFF'),
                    )
@@ -639,12 +643,12 @@ if __name__ == '__main__':
     # oi_analytics("nifty", 10, 2018, )
     # put_call_ratio_expiry("nifty", 10, 2018, )
     # put_call_ratio_expiry("nifty", 10, 2018, otm_pcr=True)
-    # put_call_ratio("nifty",)
+    put_call_ratio("nifty", )
     # put_call_ratio("nifty", otm_pcr=True)
     # max_pain("nifty", 10, 2018,)
     # max_pain(symbol="nifty", expiry_month=10, expiry_year=2018, start_strike=9500, end_strike=11500, gap=100, )
     # max_pain(symbol="nifty", expiry_month=10, expiry_year=2018, gap=100, timestamp=date(2018, 10, 22))
-    max_pain(symbol="nifty", expiry_month=10, expiry_year=2018, start_strike=9500, end_strike=11500, gap=100,
-             timestamp=date(2018, 10, 22))
+    # max_pain(symbol="nifty", expiry_month=10, expiry_year=2018, start_strike=9500, end_strike=11500, gap=100,
+    #          timestamp=date(2018, 10, 22))
     # max_pain(symbol="nifty", expiry_month=10, expiry_year=2018, start_strike=9500, end_strike=11500, gap=100,
     #          start_date=date(2018, 9, 15), last_date=date(2018, 10, 15))

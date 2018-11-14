@@ -79,9 +79,9 @@ def vix_nifty_plot():
 
 def vix_nifty_pcr_plot():
     """
-    It is used to plot the data for Nifty and India VIX
+    It is used to plot the data for Nifty and India VIX and PCR
     :return: None
-            Plots a chart for nifty and vix
+            Plots a chart for nifty and vix and PCR
     """
     nifty, vix = get_vix_nifty_data()
     trace_vix = go.Scatter(x=vix['date'], y=vix['close'], name="India VIX")
