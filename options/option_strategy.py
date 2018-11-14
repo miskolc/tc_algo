@@ -408,9 +408,9 @@ def put_call_ratio_expiry(symbol: str, expiry_month: int, expiry_year: int, star
     trace2 = go.Scatter(x=x, y=y2, name='PCR', yaxis='y2')
 
     data = [trace1, trace2, ]
-
+    title = "PCR Analytics"
     layout = go.Layout(
-        title='PCR Analytics',
+        title=title + " OTM Options" if otm_pcr else title + " All Options Strikes",
         yaxis=dict(title='Underlying', ),
         yaxis2=dict(
             title='PCR',
@@ -440,8 +440,10 @@ def put_call_ratio(symbol: str, data_only: bool = False, otm_pcr: bool = False):
         dbc.table_name, symbol)
     fut_data = dbc.execute_simple_query(fut_query)
     fut_df = pd.DataFrame(data=fut_data, columns=dbc.columns)
+    low = fut_df.close.min()
+    low = low * 0.95
     high = fut_df.close.max()
-    high = high * 1.25
+    high = high * 1.05
 
     option_query = "Select * from %s where symbol='%s' and instrument like 'OPT%%' order by timestamp asc" % (
         dbc.table_name, symbol)
@@ -483,7 +485,7 @@ def put_call_ratio(symbol: str, data_only: bool = False, otm_pcr: bool = False):
         shapes.append({
             'type': 'line',
             'x0': expiry,
-            'y0': 0,
+            'y0': low,
             'x1': expiry,
             'y1': high,
             'line': {
@@ -499,9 +501,9 @@ def put_call_ratio(symbol: str, data_only: bool = False, otm_pcr: bool = False):
         trace2 = go.Scatter(x=x, y=y2, name='PCR', yaxis='y2')
 
         data = [trace1, trace2, ]
-
+        title = "PCR Analytics"
         layout = go.Layout(
-            title='PCR Analytics',
+            title=title + " OTM Options" if otm_pcr else title + " All Options Strikes",
             yaxis=dict(title='Underlying', showgrid=False, ),
             yaxis2=dict(
                 title='PCR',
@@ -586,21 +588,41 @@ def max_pain(symbol: str, expiry_month: int, expiry_year: int, start_strike: int
         strikes.sort()
 
         if strikes is not None:
-            diff_call = []
-            for strike in strikes:
-                diff_call.append(strike - strikes[0])
-            diff_put = diff_call.copy()
-            diff_put.reverse()
-
             timestamp_values = []
             for i in range(len(strikes)):
-                strike = strikes[i]
-                call_oi = call_df[call_df.strike == strike].open_int.values[0]
-                call_money = diff_call[i] * call_oi
-                put_oi = put_df[put_df.strike == strike].open_int.values[0]
-                put_money = diff_put[i] * put_oi
-                strike_money = call_money + put_money
-                timestamp_values.append([strike, strike_money])
+                diff_call, diff_put = [], []
+                for strike in strikes:
+                    call_loss = strikes[i] - strike
+                    diff_call.append(call_loss if call_loss > 0 else 0)
+                    put_loss = strike - strikes[i]
+                    diff_put.append(put_loss if put_loss > 0 else 0)
+                # diff_put = diff_call.copy()
+                # diff_put.reverse()
+                call_oi = call_df.open_int.values
+                put_oi = put_df.open_int.values
+                # print("Call diff:", diff_call)
+                # print("call oi: ", call_oi)
+                call_money = sum([value for value in (map(lambda x, y: x * y, diff_call, call_oi))])
+                # print("money:", call_money)
+                # print("Put diff:", diff_put)
+                # print("put oi: ", put_oi)
+                put_money = sum([value for value in (map(lambda x, y: x * y, diff_put, put_oi))])
+                # print("money:", put_money)
+                total_money = call_money + put_money
+                # print(total_money)
+                timestamp_values.append([strikes[i], total_money])
+                # call_money, put_money = [], []
+                # for j in range(len(strikes)):
+                #     call_oi = call_df[call_df.strike == strikes[j]].open_int.values[0]
+                #     put_oi = put_df[put_df.strike == strikes[j]].open_int.values[0]
+                #     print(strikes[j], call_oi, put_oi)
+            #     strike = strikes[i]
+            #     call_oi = call_df[call_df.strike == strike].open_int.values[0]
+            #     call_money = diff_call[i] * call_oi
+            #     put_oi = put_df[put_df.strike == strike].open_int.values[0]
+            #     put_money = diff_put[i] * put_oi
+            #     strike_money = call_money + put_money
+            #     timestamp_values.append([strike, strike_money])
             values = timestamp_values.copy()
             values.sort(key=lambda x: x[1])
             values = values[:5]
@@ -639,10 +661,10 @@ def max_pain(symbol: str, expiry_month: int, expiry_year: int, start_strike: int
                    fill=dict(color='#EDFAFF'),
                    )
     )
-
+    title = "%s Max Pain for " % symbol
     data_table = [table_trace]
     layout_table = go.Layout(
-        title="%s Max Pain for %s,%s" % (symbol, expiry_month, expiry_year),
+        title=title + str(timestamp) if timestamp else title + "%s,%s" % (expiry_month, expiry_year),
     )
     fig = dict(data=data_table, layout=layout_table)
     py.plot(fig, filename="max_pain_report.html")
@@ -659,11 +681,12 @@ if __name__ == '__main__':
     # options_strategy("banknifty", strike_data, 10, 2018, date(2018, 10, 1), spot_range=[25000, 27000])
     # oi_analytics("nifty", 10, 2018, )
     # put_call_ratio_expiry("nifty", 10, 2018, )
-    put_call_ratio_expiry("nifty", 10, 2018, otm_pcr=True)
+    # put_call_ratio_expiry("nifty", 10, 2018, otm_pcr=True)
     # put_call_ratio("nifty")
     # put_call_ratio("nifty", otm_pcr=True)
     # max_pain("nifty", 10, 2018, )
-    # max_pain(symbol="nifty", expiry_month=10, expiry_year=2018, start_strike=9500, end_strike=11500, gap=100, )
-    # max_pain(symbol="nifty", expiry_month=10, expiry_year=2018, start_strike=9500, end_strike=11500, gap=100, timestamp=date(2018, 10, 22))
+    max_pain(symbol="nifty", expiry_month=10, expiry_year=2018, start_strike=9500, end_strike=11500, gap=100, )
+    max_pain(symbol="nifty", expiry_month=10, expiry_year=2018, start_strike=9500, end_strike=11500, gap=100,
+             timestamp=date(2018, 10, 22))
     # max_pain(symbol="nifty", expiry_month=10, expiry_year=2018, start_strike=9500, end_strike=11500, gap=100,
     #          start_date=date(2018, 9, 15), last_date=date(2018, 10, 15))
