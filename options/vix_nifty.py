@@ -1,8 +1,12 @@
+import json
+from datetime import datetime
+
 import mysql.connector
 import pandas as pd
 
 import plotly.offline as py
 import plotly.graph_objs as go
+import requests
 
 from options import option_strategy
 
@@ -12,10 +16,27 @@ password = 'Bk7K=g+?ukBX'
 
 db_name = 'l7oowjtp_tradingcampus2018'
 table_name = 'eod_data'
-
 NIFTY = 'Nifty 50'
 VIX = 'India VIX'
+data_url = "http://l7oowjtp-site.gtempurl.com/python_data/nifty_vix.php"
 
+
+# def get_vix_nifty_data():
+#     """
+#     This function is used to fetch data from the server for India VIX and Nifty
+#     :return: Tuple(DataFrame, DataFrame)
+#             Nifty DataFrame, VIX DataFrame
+#     """
+#     db_conn = mysql.connector.connect(host=host, user=user, password=password, database=db_name)
+#     cursor = db_conn.cursor()
+#     query = "SELECT  date, symbol, close FROM `eod_data` WHERE (symbol='India VIX' OR symbol='NIFTY 50') order by date asc"
+#     cursor.execute(query)
+#     result = cursor.fetchall()
+#     df = pd.DataFrame(result, columns=['date', 'symbol', 'close'])
+#     nifty_df = df[df.symbol == NIFTY]
+#     vix_df = df[df.symbol == VIX]
+#     db_conn.close()
+#     return nifty_df, vix_df
 
 def get_vix_nifty_data():
     """
@@ -23,12 +44,14 @@ def get_vix_nifty_data():
     :return: Tuple(DataFrame, DataFrame)
             Nifty DataFrame, VIX DataFrame
     """
-    db_conn = mysql.connector.connect(host=host, user=user, password=password, database=db_name)
-    cursor = db_conn.cursor()
-    query = "SELECT  date, symbol, close FROM `eod_data` WHERE (symbol='India VIX' OR symbol='NIFTY 50') order by date asc"
-    cursor.execute(query)
-    result = cursor.fetchall()
-    df = pd.DataFrame(result, columns=['date', 'symbol', 'close'])
+    result1 = requests.get(data_url)
+    content = json.loads(result1.content)
+    data = []
+    for element in content:
+        date_value = datetime.strptime(element[0], "%Y-%m-%d").date()
+        close = float(element[2])
+        data.append((date_value, element[1], close))
+    df = pd.DataFrame(data, columns=['date', 'symbol', 'close'])
     nifty_df = df[df.symbol == NIFTY]
     vix_df = df[df.symbol == VIX]
     return nifty_df, vix_df
