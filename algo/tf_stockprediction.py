@@ -5,6 +5,9 @@ import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
 import matplotlib.pyplot as plt
 
+# TODO: 2. Tensorflow Program on Neural Network
+# We are using 4 Hidden Neuron Layers for analysis.
+
 # Import data
 data = pd.read_csv('data_stocks.csv')
 
