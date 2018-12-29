@@ -1,6 +1,6 @@
-# Python Technical Modules
+# Python Stock Market based modules Modules
 
-All technical modules are updated in this repository.
+All technical, options and algo modules are updated in this repository.
 
 Use `requirements.txt` to install required packages for this project.
 
