@@ -1,4 +1,4 @@
-# Python Stock Market based modules 
+## Stock Market based modules in Python
 
 All technical, options and algo modules are updated in this repository.
 
