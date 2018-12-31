@@ -1,6 +1,9 @@
 import json
+import time
 
 import requests
+
+import scrips
 from model import Scrip, ct
 
 scrip = Scrip(symbol="NIFTY 50", exchange="NSECM", gateway_id=2, token_no=0, instrument="INDEX", symbol_desc="NIFTY 50",
@@ -8,7 +11,7 @@ scrip = Scrip(symbol="NIFTY 50", exchange="NSECM", gateway_id=2, token_no=0, ins
 
 
 def get_historical_data(login_id: str, gateway: ct.Gateway = ct.Gateway.NSECM, symbol: Scrip = scrip,
-                        start_time: str = "01/01/2018 9:15am", end_time: str = "07/09/2018 3:15pm", minute: int = 5):
+                        start_time: str = "25/11/2018 9:15am", end_time: str = "06/12/2018 3:15pm", minute: int = 15):
     # defining the api-endpoint
     API_ENDPOINT = "http://115.112.230.27:8004/api/TCService/GetDateWiseSymbolData"
 
@@ -49,5 +52,12 @@ def get_date_wise_symbol_data(login_id: str, gateway: ct.Gateway = ct.Gateway.NS
     print(content)
 
 
-# get_historical_data("SUJIT")
-get_date_wise_symbol_data("SUJIT")
+if __name__ == '__main__':
+    fo_scrips = scrips.get_fo_scrip_tokens()
+    # print(fo_scrips)
+    start_time = time.time()
+    for scrip in fo_scrips:
+        print("Data for %s" % scrip.symbol)
+        get_historical_data("SUJIT", symbol=scrip)
+    print("Total: %s" % (time.time() - start_time))
+# get_date_wise_symbol_data("SUJIT")

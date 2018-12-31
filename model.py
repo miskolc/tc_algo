@@ -47,8 +47,8 @@ class Scrip:
 
 class ScripData:
 
-    def __init__(self, token: int, open: float, high: float, low: float, close: float, ltp: float, volume: int,
-                 turnover: float, year_high: float, year_low: float, time: str, per_change: float):
+    def __init__(self, token: Union[int, str], open: float, high: float, low: float, close: float, ltp: float,
+                 volume: int, turnover: float, year_high: float, year_low: float, time: str, per_change: float):
         self.token = token
         self.open = open
         self.high = high

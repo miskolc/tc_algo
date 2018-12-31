@@ -26,6 +26,9 @@ MEGA_TRADER = os.path.join(ROOT_DIR, "mega_trader/")
 MEGA_TRADER_LOG = os.path.join(MEGA_TRADER, "log")
 CLIENT_CONFIG = os.path.join(MEGA_TRADER, 'client.cfg')
 
+ALGO = os.path.join(ROOT_DIR, "algo/")
+ALGO_CONFIG = os.path.join(ALGO, "config.xml")
+
 directories = [LOG, CONTRACTS, REPORTS, MEGA_TRADER_LOG]
 
 for directory in directories:

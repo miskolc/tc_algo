@@ -274,3 +274,38 @@ class DbIndex(Enum):
 
     def __str__(self):
         return self.value
+
+
+class ApiKeys:
+    key_config = 'config'
+    key_credentials = 'credentials'
+    key_login_id = 'LoginId'
+    key_password = 'Password'
+    key_api = 'api'
+    key_unique_id = 'UniqueId'
+    key_ref_no = 'RefNo'
+    key_modified = "Modified"
+    unique_id = 'UniqueId'
+    ref_no = 'RefNo'
+    gateway = "gateway"
+    exchange = "Exchange"
+    token_no = "Tokenno"
+    client_code = "clientcode"
+    buy_sell = "Buysell"
+    qty = "qty"
+    price = "price"
+    trigger_price = "Triggerprice"
+    book_type = "Booktype"
+    validity = "validity"
+    order_no = 'IntOrdNo'
+    error = 'Error'
+
+
+class OrderKeys:
+    BUY = "BUY"
+    SELL = "SELL"
+    RL = "RL"
+    SL = "SL"
+    DAY = "DAY"
+    IOC = "IOC"
+    FOK = "FOK"

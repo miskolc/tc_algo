@@ -161,41 +161,53 @@ def read_app_msg(message):
             _parser_logger.debug("Unwanted message not parsed")
             return None
         elif msg_type == ct.MsgType.INDEX_BROADCAST:
-            return None
+            # return None
             # print("Index Broadcast")
             # No. of Records, 1828
-            # noIndexRecords = int(message.getField(1828))
-            # if noIndexRecords > 0:
+            noIndexRecords = int(message.getField(1828))
+            if noIndexRecords > 1:
+                return None
             #     group = fix.Group(1828, 1826, )
-            #     #     # group = fix.Group(1828, 1827, [1826,1815,1816,1817,1818,1819,1820,1821,1822,1823,1824,1825,1827])
+            #        group = fix.Group(1828, 1827, [1826,1815,1816,1817,1818,1819,1820,1821,1822,1823,1824,1825,1827])
             #     message.getGroup(num=1, group=group)
             #
-            # # Index Name, 1826
-            # message.getField(1826)
-            # # Open Index, 1815
-            # message.getField(1815)
-            # # High Index, 1816
-            # message.getField(1816)
-            # # Low Index, 1817
-            # message.getField(1817)
-            # # Close Index, 1818
-            # message.getField(1818)
-            # # Index Value, 1819
-            # message.getField(1819)
-            # # Market Capitalization, 1820
-            # message.getField(1820)
-            # # No. of Down Moves, 1821
-            # message.getField(1821)
-            # # No. of Up Moves, 1822
-            # message.getField(1822)
-            # # Percentage Change, 1823
-            # message.getField(1823)
-            # # Yearly High, 1824
-            # message.getField(1824)
-            # # Yearly Low, 1825
-            # message.getField(1825)
-            # # Net Change Indicator, 1827
-            # message.getField(1827)
+            else:
+                # Index Name, 1826
+                # name = str(message.getField(1826))
+                name = str(read_tag(message, 1826))
+                # Open Index, 1815
+                index_open = float(read_tag(message, 1815))
+                # High Index, 1816
+                index_high = float(read_tag(message, 1816))
+                # Low Index, 1817
+                index_low = float(read_tag(message, 1817))
+                # Close Index, 1818
+                index_close = float(read_tag(message, 1818))
+                # Index Value, 1819
+                ltp = float(read_tag(message, 1819))
+                # Market Capitalization, 1820
+                capital = read_tag(message, 1820)
+                # No. of Down Moves, 1821
+                down_moves = read_tag(message, 1821)
+                # No. of Up Moves, 1822
+                up_moves = read_tag(message, 1822)
+                # Percentage Change, 1823
+                per_change = float(read_tag(message, 1823))
+                # Yearly High, 1824
+                year_high = float(read_tag(message, 1824))
+                # Yearly Low, 1825
+                year_low = float(read_tag(message, 1825))
+                # Net Change Indicator, 1827
+                indicator = message.getField(1827)
+                # print(name, index_open, index_high, index_low, index_close, ltp)
+                # print(name, capital, down_moves, up_moves, per_change, year_high, year_low, indicator)
+                data = ScripData(token=name, open=index_open, high=index_high, low=index_low, close=index_close,
+                                 ltp=ltp, time=str('null'), turnover=capital, volume=int(0), per_change=per_change,
+                                 year_high=year_high, year_low=year_low)
+                _parser_logger.debug(data)
+                print(data)
+                return None
+                # return data
         elif msg_type == ct.MsgType.MARKET_PICTURE:
             # Token No.
             token_no = int(read_tag(message, TOKEN_NO))

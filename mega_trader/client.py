@@ -1,5 +1,6 @@
 import logging.handlers
 import socket
+import time
 
 import quickfix as fix
 
@@ -41,10 +42,14 @@ response = 0
 
 
 def client_logon(sender: str, target: str, username: str, scrips: list = None, response_id: int = None):
+    ntwk_id = None
+
     # noinspection PyArgumentList
     def logon_msg(sender_comp_id, target_comp_id, username_client, response_id_network):
         if response_id_network is None:
             response_id_network = int((numpy.random.random()) * 100000)
+        global ntwk_id
+        ntwk_id = response_id_network
         _message_logger.info("Logon with response id: %s" % response_id_network)
         _message_logger.debug("Building logon message")
         logon_req = fix.Message()
@@ -64,6 +69,20 @@ def client_logon(sender: str, target: str, username: str, scrips: list = None, r
         logon_req = bytes(logon_req.toString(), encoding="UTF-8")
         _message_logger.debug("Logon message built")
         return logon_req
+
+    # noinspection PyArgumentList
+    def logout_msg(sender_comp_id, target_comp_id, username_client, ):
+        global ntwk_id
+        logout_req = fix.Message()
+        logout_req.getHeader().setField(fix.BeginString(fix.BeginString_FIXT11))
+        logout_req.getHeader().setField(fix.MsgType(fix.MsgType_Logout))
+        logout_req.setField(fix.SenderCompID(sender_comp_id))
+        logout_req.setField(fix.TargetCompID(target_comp_id))
+        logout_req.setField(fix.MsgSeqNum(5))
+        logout_req.setField(fix.Username(username_client))
+        logout_req.setField(fix.NetworkResponseID("%s" % ntwk_id))
+        logout_req = bytes(logout_req.toString(), encoding="UTF-8")
+        return logout_req
 
     # noinspection PyArgumentList
     def scrip_msg(scrip_element: Scrip):
@@ -104,6 +123,9 @@ def client_logon(sender: str, target: str, username: str, scrips: list = None, r
     s.connect(address)
     logon = logon_msg(sender, target, username, response_id)
     send(logon)
+    # time.sleep(5)
+    # logout = logout_msg(sender, target, username,)
+    # send(logout)
 
     if scrips is not None:
         for scrip in scrips:
@@ -111,6 +133,7 @@ def client_logon(sender: str, target: str, username: str, scrips: list = None, r
             token = scrip_msg(scrip)
             s.sendto(token, address)
             _message_logger.debug("Send %s" % scrip)
+            _message_logger.info("Script Subscribed: %s" % scrip.symbol_desc)
 
     try:
         while True:
