@@ -1,6 +1,9 @@
 ## Stock Market based modules in Python
 
-All technical, options and algo modules are updated in this repository.
+This branch is to restructure the current codes and make them more optimized.
+Don't work in branch until merged with master.
+
+All technical, options and Algo modules are updated in this repository.
 
 Use `requirements.txt` to install required packages for this project.
 

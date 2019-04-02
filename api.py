@@ -5,7 +5,6 @@ For complete list of symbols visit: https://www.quandl.com/data/NSE-National-Sto
 from model import Symbol
 
 quandl_api_key = "y4jybLNT_iLmo_jJMfae"
-link = "https://www.quandl.com/api/v3/datasets/NSE/CNX_NIFTY.json?api_key=y4jybLNT_iLmo_jJMfae"
 
 min_date = "03-07-1990"
 
@@ -15,4 +14,4 @@ class NSECM:
 
 
 class NSEFO:
-    NIFTY50 = Symbol("NIFTY50", "NSE/CNX_NIFTY", 75)
+    NIFTY50 = Symbol("NIFTY 50", "NSE/CNX_NIFTY", 75)

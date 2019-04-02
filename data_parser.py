@@ -1,6 +1,6 @@
 import calendar
 import logging
-from datetime import *
+from datetime import date, datetime, timedelta
 
 import quandl
 from dateutil.relativedelta import relativedelta
@@ -45,7 +45,7 @@ def get_date_ohlc(symbol: Symbol = NSEFO.NIFTY50, start_date: str = api.min_date
 
 
 def get_data(symbol: Symbol = NSEFO.NIFTY50, start_date: str = api.min_date, end_date: str = "",
-             interval: str = Keys.daily):
+             interval: str = Keys.daily, index: bool = True):
     """
     This is base function which extracts data from Quandl in a DataObject
     :param symbol: Symbol
@@ -57,17 +57,40 @@ def get_data(symbol: Symbol = NSEFO.NIFTY50, start_date: str = api.min_date, end
     :param interval: str
                 Data Interval for the scrip.
                 Currently supports daily, weekly, monthly and yearly formats.
+    :param index: bool
+                Whether the
     :return: tuple
             data_properties: dict
                         Contains info about the data fetched from Quandl API. Such as scrip, start date etc.
             data: list[DataObject]
     """
     data = []
-    quandl.ApiConfig.api_key = api.quandl_api_key
-    response = quandl.get(symbol.api_key, returns="numpy", start_date=start_date, end_date=end_date)
-    for i in range(len(response)):
-        item = response[i]
-        data.append(DataObject(item))
+    date_fmt = '%Y-%m-%d'
+    # quandl.ApiConfig.api_key = api.quandl_api_key
+    # response = quandl.get(symbol.api_key, returns="numpy", start_date=start_date, end_date=end_date)
+    # for i in range(len(response)):
+    #     item = response[i]
+    #     data.append(DataObject(item))
+
+    from nsepy import get_history
+    import numpy as np
+
+    start = datetime.strptime(start_date, date_fmt).date()
+    end = datetime.strptime(end_date, date_fmt).date() if end_date else datetime.now().date()
+    response = get_history(symbol=symbol.scrip, start=start, end=end, index=index)
+
+    dates = [np.datetime64(_date) for _date in response.index.values]
+    open_data = response['Open'].values
+    high = response['High'].values
+    low = response['Low'].values
+    close = response['Close'].values
+    volume = response['Volume'].values
+    turnover = response['Turnover'].values
+
+    for _data in zip(dates, open_data, high, low, close, volume, turnover):
+        # noinspection PyTypeChecker
+        data.append(DataObject(_data))
+
     data_properties = {Keys.scrip: symbol.scrip,
                        Keys.start_date: start_date,
                        Keys.end_date: end_date,
