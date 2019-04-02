@@ -14,4 +14,4 @@ class NSECM:
 
 
 class NSEFO:
-    NIFTY50 = Symbol("NIFTY50", "NSE/CNX_NIFTY", 75)
+    NIFTY50 = Symbol("NIFTY 50", "NSE/CNX_NIFTY", 75)

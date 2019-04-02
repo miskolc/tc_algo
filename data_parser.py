@@ -1,6 +1,6 @@
 import calendar
 import logging
-from datetime import *
+from datetime import date, datetime, timedelta
 
 import quandl
 from dateutil.relativedelta import relativedelta
@@ -65,6 +65,7 @@ def get_data(symbol: Symbol = NSEFO.NIFTY50, start_date: str = api.min_date, end
             data: list[DataObject]
     """
     data = []
+    date_fmt = '%Y-%m-%d'
     # quandl.ApiConfig.api_key = api.quandl_api_key
     # response = quandl.get(symbol.api_key, returns="numpy", start_date=start_date, end_date=end_date)
     # for i in range(len(response)):
@@ -74,9 +75,9 @@ def get_data(symbol: Symbol = NSEFO.NIFTY50, start_date: str = api.min_date, end
     from nsepy import get_history
     import numpy as np
 
-    start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
-    end_date = datetime.strptime(end_date, '%Y-%m-%d').date() if end_date else datetime.now().date()
-    response = get_history(symbol=symbol.scrip, start=start_date, end=end_date, index=index)
+    start = datetime.strptime(start_date, date_fmt).date()
+    end = datetime.strptime(end_date, date_fmt).date() if end_date else datetime.now().date()
+    response = get_history(symbol=symbol.scrip, start=start, end=end, index=index)
 
     dates = [np.datetime64(_date) for _date in response.index.values]
     open_data = response['Open'].values
